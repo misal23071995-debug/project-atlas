@@ -5,6 +5,7 @@ export type Ticket = {
   id: string;
   subject: string;
   customerName: string;
+  channel: string;
   status: TicketStatus;
   priority: TicketPriority;
   assignedAgent: string;
