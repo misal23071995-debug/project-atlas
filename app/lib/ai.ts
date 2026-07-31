@@ -108,6 +108,11 @@ export function analyzeMessage(message: string): AIAnalysis {
       ? message.substring(0, 120) + "..."
       : message;
 
+
+  const articles =
+  knowledgeBase[intent as keyof typeof knowledgeBase] ??
+  knowledgeBase["General Support"];
+
   return {
     summary,
     intent,
@@ -118,9 +123,6 @@ export function analyzeMessage(message: string): AIAnalysis {
 
     suggestedReply,
 
-    relatedArticles:
-  knowledgeBase[intent as keyof typeof knowledgeBase].map(
-    (article) => article.title
-  ),
-  };
+   relatedArticles: articles.map((article) => article.title),
+};
 }

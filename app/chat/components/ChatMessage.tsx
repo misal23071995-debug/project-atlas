@@ -13,8 +13,9 @@ export default function ChatMessage({ message }: Props) {
     : confidence >= 60
     ? "bg-yellow-500/20 text-yellow-400"
     : "bg-red-500/20 text-red-400";
+  const needsEscalation = confidence < 60;
 
-  return (
+    return (
     <div className={isUser ? "flex justify-end" : "flex justify-start"}>
       <div
         className={
@@ -52,7 +53,17 @@ export default function ChatMessage({ message }: Props) {
                 </span>
               </div>
             </div>
+            {needsEscalation && (
+              <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
+                <p className="text-sm font-semibold text-red-400">
+                  ⚠ AI recommends human escalation
+                </p>
 
+                <p className="mt-1 text-xs text-red-300">
+                  Confidence is low. Review this conversation before sending a reply.
+                </p>
+              </div>
+            )}
             <div className="mt-4">
               <h4 className="mb-2 font-medium">Helpful Articles</h4>
 
