@@ -7,17 +7,6 @@ type AICopilotProps = {
   onUseReply: (reply: string) => void;
 };
 
-const suggestedReply = `Hi Rahul,
-
-I'm sorry you're facing this issue.
-
-Please reinstall the Ultrahuman app, reconnect your Ring, and make sure Bluetooth permissions are enabled.
-
-If the issue still persists, we'll collect diagnostic logs and escalate the issue to our engineering team.
-
-Thank you,
-Ultrahuman Support`;
-
 export default function AICopilot({
   customerMessage,
   onUseReply,

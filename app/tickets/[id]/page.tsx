@@ -14,11 +14,37 @@ import AICopilot from "@/app/components/ui/AICopilot";
 
 export default function TicketDetailsPage() {
   const { id } = useParams();
-  const ticketData = tickets.find(
+
+const ticketData = tickets.find(
   (ticket) => ticket.id === id
-  );
-  if (!ticketData) {
-  return (
+);
+
+// Reply
+const [reply, setReply] = useState("");
+
+// Ticket
+const [ticket, setTicket] = useState({
+  status: "Open",
+  priority: "High",
+  assignedTo: "Sarah K.",
+});
+
+// Conversation
+const [conversation, setConversation] = useState(
+  ticketData?.conversation ?? []
+);
+
+// Activities
+const [activities, setActivities] = useState([
+  {
+    title: "Ticket Created",
+    time: "Today • 9:42 AM",
+    color: "bg-green-500",
+  },
+]);
+
+if (!ticketData) {
+  return ( 
     <DashboardLayout>
       <div className="p-10 text-center">
         <h1 className="text-2xl font-bold">
@@ -33,26 +59,7 @@ export default function TicketDetailsPage() {
   );
 }
 
-  // Reply shared between AI Copilot and Reply Editor
-  const [reply, setReply] = useState("");
 
-  // Ticket State
-  const [ticket, setTicket] = useState({
-    status: "Open",
-    priority: "High",
-    assignedTo: "Sarah K.",
-  });
-  const [conversation, setConversation] = useState(
-  ticketData.conversation
-);
-  // Activity Timeline
-  const [activities, setActivities] = useState([
-    {
-      title: "Ticket Created",
-      time: "Today • 9:42 AM",
-      color: "bg-green-500",
-    },
-  ]);
 
   function addActivity(title: string, color: string) {
     setActivities((prev) => [
