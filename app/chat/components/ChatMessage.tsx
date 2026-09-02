@@ -1,10 +1,11 @@
-import type { ChatMessage as ChatMessageType } from "../types";
+import type { ChatMessage } from "../types";
 
 type Props = {
-  message: ChatMessageType;
+  message: ChatMessage;
+  onCreateTicket?: (message: ChatMessage) => void;
 };
 
-export default function ChatMessage({ message }: Props) {
+export default function ChatMessage({ message, onCreateTicket }: Props) {
   const isUser = message.role === "user";
   const confidence = message.analysis?.confidence ?? 0;
   const confidenceColor =
@@ -73,6 +74,16 @@ export default function ChatMessage({ message }: Props) {
                 ))}
               </ul>
             </div>
+            {message.role === "assistant" && onCreateTicket && (
+              <div className="mt-4">
+                <button
+                  onClick={() => onCreateTicket(message)}
+                  className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium hover:bg-blue-700 transition"
+                >
+                  Create Support Ticket
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

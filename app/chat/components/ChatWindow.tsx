@@ -5,10 +5,15 @@ import type { ChatMessage as ChatMessageType } from "../types";
 type Props = {
   messages: ChatMessageType[];
   isThinking: boolean;
+  onCreateTicket: (message: ChatMessageType) => void;
 };
 
 
-export default function ChatWindow({ messages, isThinking }: Props) {
+export default function ChatWindow({
+  messages,
+  isThinking,
+  onCreateTicket,
+}: Props) {
  const bottomRef = useRef<HTMLDivElement | null>(null);
  useEffect(() => {
   bottomRef.current?.scrollIntoView({
@@ -28,6 +33,7 @@ return (
             <ChatMessage
               key={index}
               message={message}
+              onCreateTicket={onCreateTicket}
             />
           ))}
           {isThinking && (
