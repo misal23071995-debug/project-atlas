@@ -1,6 +1,8 @@
 "use client";
 
-import { analyzeMessage } from "@/app/lib/ai";
+import { useEffect, useState } from "react";
+import type { AIAnalysis } from "@/app/lib/ai";
+import { fetchAnalysis } from "@/app/lib/ai/client";
 
 type AICopilotProps = {
   customerMessage: string;
@@ -11,7 +13,37 @@ export default function AICopilot({
   customerMessage,
   onUseReply,
 }: AICopilotProps) {
-  const analysis = analyzeMessage(customerMessage);
+  const [result, setResult] = useState<{
+    message: string;
+    analysis: AIAnalysis;
+  } | null>(null);
+
+  // Stale until the result for the current message arrives
+  const analysis =
+    result?.message === customerMessage ? result.analysis : null;
+
+  useEffect(() => {
+    let cancelled = false;
+
+    fetchAnalysis(customerMessage).then((analysis) => {
+      if (!cancelled) setResult({ message: customerMessage, analysis });
+    });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [customerMessage]);
+
+  if (!analysis) {
+    return (
+      <div className="rounded-xl border border-indigo-900 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6">
+        <p className="animate-pulse text-zinc-400">
+          ✨ Atlas AI is analyzing this ticket...
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="rounded-xl border border-indigo-900 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6">
       <div className="mb-6 flex items-center gap-3">

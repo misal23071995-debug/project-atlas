@@ -1,6 +1,6 @@
 "use client";
 
-import { analyzeMessage } from "@/app/lib/ai";
+import { fetchAnalysis } from "@/app/lib/ai/client";
 import { useState } from "react";
 import type { ChatMessage } from "./types";
 import ChatInput from "./components/ChatInput";
@@ -31,10 +31,7 @@ const handleSend = async () => {
   setMessage("");
   setIsThinking(true);
 
-  // Simulate AI thinking
-  await new Promise((resolve) => setTimeout(resolve, 700));
-
-  const result = analyzeMessage(userMessage);
+  const result = await fetchAnalysis(userMessage);
 
   setMessages((prev) => [
     ...prev,
