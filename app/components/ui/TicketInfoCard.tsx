@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import { TICKET_PRIORITIES, TICKET_STATUSES } from "@/app/lib/tickets";
 
 type Props = {
   status: string;
@@ -46,11 +47,9 @@ export default function TicketInfoCard({
             onChange={(e) => onStatusChange(e.target.value)}
             className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1"
           >
-            <option>Open</option>
-            <option>Pending</option>
-            <option>Waiting on Customer</option>
-            <option>Escalated</option>
-            <option>Resolved</option>
+            {TICKET_STATUSES.map((value) => (
+              <option key={value}>{value}</option>
+            ))}
           </select>
         </div>
 
@@ -62,10 +61,9 @@ export default function TicketInfoCard({
             onChange={(e) => onPriorityChange(e.target.value)}
             className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1"
           >
-            <option>Urgent</option>
-            <option>High</option>
-            <option>Medium</option>
-            <option>Low</option>
+            {[...TICKET_PRIORITIES].reverse().map((value) => (
+              <option key={value}>{value}</option>
+            ))}
           </select>
         </div>
 
@@ -92,6 +90,7 @@ export default function TicketInfoCard({
             onChange={(e) => onAssignedChange(e.target.value)}
             className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1"
           >
+            <option>Unassigned</option>
             <option>Sarah K.</option>
             <option>James L.</option>
             <option>Maria R.</option>

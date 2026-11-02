@@ -6,8 +6,7 @@ import type { ChatMessage } from "./types";
 import ChatInput from "./components/ChatInput";
 import ChatWindow from "./components/ChatWindow";
 import QuickActions from "./components/QuickActions";
-import { createTicket } from "@/app/lib/ticketStore";
-import type { Ticket } from "@/app/lib/tickets";
+import { createTicketAction } from "@/app/tickets/actions";
 import { useRouter } from "next/navigation";
 
 export default function ChatPage() {
@@ -44,58 +43,45 @@ const handleSend = async () => {
 
   setIsThinking(false);
 };
-function handleCreateTicket(message: ChatMessage) {
+async function handleCreateTicket(message: ChatMessage) {
   if (!message.analysis) return;
 
-  const ticket: Ticket = {
-  id: Date.now().toString(),
+  const analysis = message.analysis;
 
-  subject: message.analysis.intent,
+  // The customer's own words, not the AI reply
+  const index = messages.indexOf(message);
+  const customerMessage =
+    messages
+      .slice(0, index)
+      .reverse()
+      .find((m) => m.role === "user")?.content ?? message.content;
 
-  description: message.content,
+  try {
+    const id = await createTicketAction({
+      // TODO: replace with the real customer once channels and sign-in exist
+      customerName: "Rahul Sharma",
+      customerEmail: "rahul.sharma@gmail.com",
+      subject: analysis.summary || analysis.intent,
+      description: customerMessage,
+      summary: analysis.summary,
+      intent: analysis.intent,
+      sentiment: analysis.sentiment,
+      confidence: analysis.confidence,
+      priority:
+        analysis.sentiment === "Angry"
+          ? "High"
+          : analysis.sentiment === "Frustrated"
+          ? "Medium"
+          : "Low",
+      channel: "AI Assistant",
+      category: analysis.intent,
+      tags: [analysis.intent],
+    });
 
-  summary: message.analysis.summary,
-
-  intent: message.analysis.intent,
-
-  sentiment: message.analysis.sentiment,
-
-  confidence: message.analysis.confidence,
-
-  priority:
-    message.analysis.sentiment === "Angry"
-      ? "High"
-      : message.analysis.sentiment === "Frustrated"
-      ? "Medium"
-      : "Low",
-
-  status: "Open",
-
-  customerName: "Rahul Sharma",
-
-  email: "rahul.sharma@gmail.com",
-
-  createdAt: new Date().toLocaleString(),
-
-  category: message.analysis.intent,
-
-  channel: "AI Assistant",
-
-  tags: [message.analysis.intent],
-
-  conversation: [
-    {
-      sender: "Rahul Sharma",
-      role: "customer",
-      message: message.content,
-      time: new Date().toLocaleTimeString(),
-    },
-  ],
-};
-
-  createTicket(ticket);
-
-  router.push("/tickets");
+    router.push(`/tickets/${id}`);
+  } catch (error) {
+    alert(error instanceof Error ? error.message : "Could not create ticket");
+  }
 }
   return (
     <div className="min-h-screen bg-zinc-950 text-white flex justify-center py-10">

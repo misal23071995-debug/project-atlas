@@ -1,5 +1,7 @@
 "use client";
 
+import { TICKET_PRIORITIES, TICKET_STATUSES } from "@/app/lib/tickets";
+
 type TicketFiltersProps = {
   search: string;
   status: string;
@@ -34,10 +36,9 @@ export default function TicketFilters({
           className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
         >
           <option>All</option>
-          <option>Open</option>
-          <option>Pending</option>
-          <option>Resolved</option>
-          <option>Closed</option>
+          {TICKET_STATUSES.map((value) => (
+            <option key={value}>{value}</option>
+          ))}
         </select>
 
         <select
@@ -46,10 +47,9 @@ export default function TicketFilters({
           className="rounded-lg border border-zinc-300 bg-white px-4 py-2 text-sm dark:border-zinc-700 dark:bg-zinc-800"
         >
           <option>All</option>
-          <option>Low</option>
-          <option>Medium</option>
-          <option>High</option>
-          <option>Urgent</option>
+          {TICKET_PRIORITIES.map((value) => (
+            <option key={value}>{value}</option>
+          ))}
         </select>
       </div>
     </div>
