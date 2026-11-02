@@ -52,6 +52,15 @@ export interface TicketActivity {
   time: string;
 }
 
+export interface TicketNote {
+  author: string;
+
+  body: string;
+
+  // ISO timestamp
+  time: string;
+}
+
 export interface Ticket {
   id: string;
 
@@ -89,6 +98,8 @@ export interface TicketDetail extends Ticket {
   conversation: ConversationMessage[];
 
   activities: TicketActivity[];
+
+  notes: TicketNote[];
 }
 
 // Fixed locale and time zone so server and browser render the same text

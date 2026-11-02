@@ -51,8 +51,17 @@ create table if not exists ticket_activities (
   created_at timestamptz not null default now()
 );
 
+create table if not exists ticket_notes (
+  id bigint generated always as identity primary key,
+  ticket_id bigint not null references tickets (id) on delete cascade,
+  author text not null,
+  body text not null,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists ticket_messages_ticket_id_idx on ticket_messages (ticket_id, created_at);
 create index if not exists ticket_activities_ticket_id_idx on ticket_activities (ticket_id, created_at);
+create index if not exists ticket_notes_ticket_id_idx on ticket_notes (ticket_id, created_at);
 create index if not exists tickets_created_at_idx on tickets (created_at desc);
 
 -- Row Level Security on, with no policies: the browser (anon key) can't read
@@ -61,6 +70,7 @@ alter table customers enable row level security;
 alter table tickets enable row level security;
 alter table ticket_messages enable row level security;
 alter table ticket_activities enable row level security;
+alter table ticket_notes enable row level security;
 
 -- Demo data (only inserted once)
 insert into customers (name, email, location, device, orders, csat, created_at)

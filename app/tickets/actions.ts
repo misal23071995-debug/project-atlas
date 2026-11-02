@@ -1,9 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import {
   addActivity,
   addMessage,
+  addNote,
   createTicket,
   updateTicket,
   type NewTicket,
@@ -14,7 +16,8 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/app/lib/tickets";
-import { requireAgent } from "@/app/lib/auth/session";
+import { listAgents, requireAgent } from "@/app/lib/auth/session";
+import { analyzeWithAI } from "@/app/lib/ai/service";
 
 // Every action checks the signed-in agent itself; the proxy alone isn't enough
 
@@ -48,6 +51,53 @@ export async function createTicketAction(input: NewTicket) {
   return id;
 }
 
+export interface NewTicketFormState {
+  error?: string;
+}
+
+// Ticket logged by hand from the New Ticket form (phone call, walk-in, forwarded email...)
+export async function createManualTicketAction(
+  _previous: NewTicketFormState,
+  formData: FormData
+): Promise<NewTicketFormState> {
+  const agent = await requireAgent();
+  const field = (name: string) => String(formData.get(name) ?? "").trim();
+
+  const customerEmail = field("customerEmail");
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+    return { error: "Enter a valid customer email." };
+  }
+
+  let id: string;
+  try {
+    const description = requireText(field("description"), "Description");
+    // The AI fills in summary, intent and sentiment; it falls back to rules if Gemini is unavailable
+    const { analysis } = await analyzeWithAI(description);
+    const priority = field("priority") as TicketPriority;
+
+    id = await createTicketAction({
+      customerName: requireText(field("customerName"), "Customer name", 200),
+      customerEmail,
+      subject: requireText(field("subject"), "Subject", 300),
+      description,
+      summary: analysis.summary,
+      intent: analysis.intent,
+      sentiment: analysis.sentiment,
+      confidence: analysis.confidence,
+      priority: TICKET_PRIORITIES.includes(priority) ? priority : "Medium",
+      channel: field("channel") || "Phone",
+      category: analysis.intent,
+      tags: [analysis.intent],
+    });
+
+    await addActivity(id, `Logged by ${agent.name}`, "bg-green-500");
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Could not create the ticket." };
+  }
+
+  redirect(`/tickets/${id}`);
+}
+
 export async function sendReplyAction(ticketId: string, message: string) {
   const agent = await requireAgent();
 
@@ -60,6 +110,15 @@ export async function sendReplyAction(ticketId: string, message: string) {
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
+}
+
+export async function addNoteAction(ticketId: string, note: string) {
+  const agent = await requireAgent();
+
+  await addNote(ticketId, agent.name, requireText(note, "Note"));
+  await addActivity(ticketId, `Note added by ${agent.name}`, "bg-zinc-500");
+
+  revalidatePath(`/tickets/${ticketId}`);
 }
 
 export async function updateStatusAction(ticketId: string, status: TicketStatus) {
@@ -87,6 +146,10 @@ export async function updatePriorityAction(ticketId: string, priority: TicketPri
 export async function assignTicketAction(ticketId: string, assignedTo: string) {
   const agent = await requireAgent();
   const assignee = requireText(assignedTo, "Agent", 100);
+  const agentNames = (await listAgents()).map((a) => a.name);
+  if (assignee !== "Unassigned" && !agentNames.includes(assignee)) {
+    throw new Error("Choose an agent from the list");
+  }
 
   await updateTicket(ticketId, { assignedTo: assignee });
   await addActivity(ticketId, `Assigned to ${assignee} by ${agent.name}`, "bg-purple-500");

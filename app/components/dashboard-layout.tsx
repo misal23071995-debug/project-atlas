@@ -181,12 +181,12 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
                 </svg>
                 <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-500" />
               </button>
-              <button
-                type="button"
+              <Link
+                href="/tickets/new"
                 className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
               >
                 New Ticket
-              </button>
+              </Link>
             </div>
           </div>
         </header>

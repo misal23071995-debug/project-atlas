@@ -3,9 +3,9 @@ import { cache } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createServerClient } from "@supabase/ssr";
-import type { User } from "@supabase/supabase-js";
 import { getSupabaseConfig } from "@/app/lib/supabase-config";
-import type { Agent } from "./agent";
+import { getSupabase } from "@/app/lib/db/supabase";
+import { toAgent, type Agent } from "./agent";
 
 // Supabase Auth client bound to this request's cookies. Create one per request.
 export async function getAuthClient() {
@@ -28,27 +28,6 @@ export async function getAuthClient() {
   });
 }
 
-// "priya.sharma@acme.com" -> "Priya Sharma"
-function nameFromEmail(email: string) {
-  return email
-    .split("@")[0]
-    .split(/[._-]+/)
-    .filter(Boolean)
-    .map((part) => part[0].toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
-function toAgent(user: User): Agent {
-  const email = user.email ?? "";
-  const metadataName = user.user_metadata?.full_name ?? user.user_metadata?.name;
-  const name =
-    typeof metadataName === "string" && metadataName.trim()
-      ? metadataName.trim()
-      : nameFromEmail(email) || "Agent";
-
-  return { id: user.id, email, name };
-}
-
 // Verified with Supabase on each request; cached so one render only asks once
 export const getCurrentAgent = cache(async (): Promise<Agent | null> => {
   const supabase = await getAuthClient();
@@ -58,6 +37,14 @@ export const getCurrentAgent = cache(async (): Promise<Agent | null> => {
 
   return user ? toAgent(user) : null;
 });
+
+// Everyone with an account, for the Assigned To list. Uses the secret key's admin access.
+export async function listAgents(): Promise<Agent[]> {
+  const { data, error } = await getSupabase().auth.admin.listUsers({ perPage: 1000 });
+  if (error) throw new Error(`Failed to load agents: ${error.message}`);
+
+  return data.users.map(toAgent).sort((a, b) => a.name.localeCompare(b.name));
+}
 
 // For Server Actions and pages: sends visitors who aren't signed in to /login
 export async function requireAgent() {

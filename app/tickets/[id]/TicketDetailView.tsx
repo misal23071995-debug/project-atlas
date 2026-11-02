@@ -16,13 +16,20 @@ import {
   type TicketStatus,
 } from "@/app/lib/tickets";
 import {
+  addNoteAction,
   assignTicketAction,
   sendReplyAction,
   updatePriorityAction,
   updateStatusAction,
 } from "../actions";
 
-export default function TicketDetailView({ ticket }: { ticket: TicketDetail }) {
+export default function TicketDetailView({
+  ticket,
+  agentNames,
+}: {
+  ticket: TicketDetail;
+  agentNames: string[];
+}) {
   const [reply, setReply] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -119,7 +126,15 @@ export default function TicketDetailView({ ticket }: { ticket: TicketDetail }) {
           />
 
           {/* Internal Notes */}
-          <InternalNotes />
+          <InternalNotes
+            notes={ticket.notes.map((note) => ({
+              author: note.author,
+              note: note.body,
+              time: formatDateTime(note.time),
+            }))}
+            onAdd={(note, onSaved) => run(() => addNoteAction(ticket.id, note), onSaved)}
+            disabled={isPending}
+          />
 
           {/* Activity Timeline */}
           <ActivityTimeline
@@ -146,6 +161,7 @@ export default function TicketDetailView({ ticket }: { ticket: TicketDetail }) {
             status={ticket.status}
             priority={ticket.priority}
             assignedTo={ticket.assignedTo}
+            agentNames={agentNames}
             channel={ticket.channel}
             category={ticket.category}
             created={formatDateTime(ticket.createdAt)}

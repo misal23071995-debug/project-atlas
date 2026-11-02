@@ -7,6 +7,7 @@ type Props = {
   status: string;
   priority: string;
   assignedTo: string;
+  agentNames: string[];
   channel: string;
   category: string;
   created: string;
@@ -21,6 +22,7 @@ export default function TicketInfoCard({
   status,
   priority,
   assignedTo,
+  agentNames,
   channel,
   category,
   created,
@@ -29,7 +31,9 @@ export default function TicketInfoCard({
   onPriorityChange,
   onAssignedChange,
 }: Props) {
-  
+  // Keep an older assignee visible even if that name has no account
+  const assigneeOptions = ["Unassigned", ...agentNames];
+  if (!assigneeOptions.includes(assignedTo)) assigneeOptions.push(assignedTo);
 
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
@@ -90,12 +94,9 @@ export default function TicketInfoCard({
             onChange={(e) => onAssignedChange(e.target.value)}
             className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1"
           >
-            <option>Unassigned</option>
-            <option>Sarah K.</option>
-            <option>James L.</option>
-            <option>Maria R.</option>
-            <option>Priya S.</option>
-            <option>Vishal</option>
+            {assigneeOptions.map((name) => (
+              <option key={name}>{name}</option>
+            ))}
           </select>
         </div>
 

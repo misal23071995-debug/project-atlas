@@ -6,6 +6,7 @@ import type {
   Ticket,
   TicketActivity,
   TicketDetail,
+  TicketNote,
   TicketPriority,
   TicketStatus,
 } from "@/app/lib/tickets";
@@ -94,7 +95,7 @@ export async function getTicket(id: string): Promise<TicketDetail | null> {
 
   const supabase = getSupabase();
 
-  const [ticketRes, messagesRes, activitiesRes] = await Promise.all([
+  const [ticketRes, messagesRes, activitiesRes, notesRes] = await Promise.all([
     supabase
       .from("tickets")
       .select(TICKET_COLUMNS)
@@ -111,11 +112,20 @@ export async function getTicket(id: string): Promise<TicketDetail | null> {
       .select("title, color, created_at")
       .eq("ticket_id", id)
       .order("created_at", { ascending: false }),
+    supabase
+      .from("ticket_notes")
+      .select("author, body, created_at")
+      .eq("ticket_id", id)
+      .order("created_at", { ascending: true }),
   ]);
 
   if (ticketRes.error) throw new Error(`Failed to load ticket: ${ticketRes.error.message}`);
   if (messagesRes.error) throw new Error(`Failed to load messages: ${messagesRes.error.message}`);
   if (activitiesRes.error) throw new Error(`Failed to load activity: ${activitiesRes.error.message}`);
+  // PGRST205: the ticket_notes table doesn't exist yet (migration 002 not run), so show no notes
+  if (notesRes.error && notesRes.error.code !== "PGRST205") {
+    throw new Error(`Failed to load notes: ${notesRes.error.message}`);
+  }
   if (!ticketRes.data) return null;
 
   const conversation: ConversationMessage[] = messagesRes.data.map((m) => ({
@@ -131,7 +141,13 @@ export async function getTicket(id: string): Promise<TicketDetail | null> {
     time: a.created_at,
   }));
 
-  return { ...toTicket(ticketRes.data), conversation, activities };
+  const notes: TicketNote[] = (notesRes.data ?? []).map((n) => ({
+    author: n.author,
+    body: n.body,
+    time: n.created_at,
+  }));
+
+  return { ...toTicket(ticketRes.data), conversation, activities, notes };
 }
 
 export type NewTicket = {
@@ -221,6 +237,14 @@ export async function addMessage(
   if (error) throw new Error(`Failed to save message: ${error.message}`);
 
   await touchTicket(ticketId);
+}
+
+export async function addNote(ticketId: string, author: string, body: string) {
+  const { error } = await getSupabase()
+    .from("ticket_notes")
+    .insert({ ticket_id: ticketId, author, body });
+
+  if (error) throw new Error(`Failed to save note: ${error.message}`);
 }
 
 export async function addActivity(ticketId: string, title: string, color: string) {

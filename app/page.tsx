@@ -1,120 +1,98 @@
-"use client";
-
+import Link from "next/link";
 import DashboardLayout from "./components/dashboard-layout";
-import { useAgent } from "./components/AgentProvider";
+import { getCurrentAgent } from "./lib/auth/session";
+import { getDashboardStats } from "./lib/db/dashboard";
+import type { TicketPriority, TicketStatus } from "./lib/tickets";
 
-const kpis = [
-  {
-    title: "Open Tickets",
-    value: "142",
-    change: "+12%",
-    trend: "up",
-    subtext: "vs last week",
-    accent: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-    icon: "🎫",
-  },
-  {
-    title: "SLA Breach Risk",
-    value: "18",
-    change: "-9%",
-    trend: "down",
-    subtext: "needs attention today",
-    accent: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-    icon: "⚠️",
-  },
-  {
-    title: "CSAT",
-    value: "94.2%",
-    change: "+2.4%",
-    trend: "up",
-    subtext: "rolling 7 days",
-    accent: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-    icon: "⭐",
-  },
-  {
-    title: "Avg First Response",
-    value: "2m 48s",
-    change: "-11%",
-    trend: "down",
-    subtext: "all channels combined",
-    accent: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-    icon: "⏱️",
-  },
-];
+// Always show the current state of the queue
+export const dynamic = "force-dynamic";
 
-const channelData = [
-  { channel: "Chat", volume: 486, sla: "96%", color: "bg-blue-500" },
-  { channel: "Email", volume: 212, sla: "91%", color: "bg-violet-500" },
-  { channel: "Voice", volume: 74, sla: "89%", color: "bg-emerald-500" },
-  { channel: "Social", volume: 58, sla: "93%", color: "bg-amber-500" },
-];
+const priorityColors: Record<TicketPriority, string> = {
+  Urgent: "bg-rose-500",
+  High: "bg-orange-500",
+  Medium: "bg-amber-500",
+  Low: "bg-emerald-500",
+};
 
-const backlogData = [
-  { priority: "Urgent", count: 14, color: "bg-rose-500" },
-  { priority: "High", count: 37, color: "bg-orange-500" },
-  { priority: "Medium", count: 61, color: "bg-amber-500" },
-  { priority: "Low", count: 30, color: "bg-emerald-500" },
-];
+const channelColors = ["bg-blue-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500", "bg-pink-500"];
 
-const recentTickets = [
-  {
-    id: "#4821",
-    subject: "Login issue on mobile app",
-    customer: "Rahul Sharma",
-    channel: "Chat",
-    owner: "Sarah K.",
-    status: "Open",
-    time: "5 min ago",
-  },
-  {
-    id: "#4819",
-    subject: "Billing discrepancy for March",
-    customer: "Aditi Mehra",
-    channel: "Email",
-    owner: "James L.",
-    status: "Pending",
-    time: "23 min ago",
-  },
-  {
-    id: "#4815",
-    subject: "Feature request: export report",
-    customer: "Ankit Verma",
-    channel: "Voice",
-    owner: "Maria R.",
-    status: "Resolved",
-    time: "1 hr ago",
-  },
-  {
-    id: "#4812",
-    subject: "Unable to sync wearable data",
-    customer: "Sneha Nair",
-    channel: "Chat",
-    owner: "Priya S.",
-    status: "Open",
-    time: "2 hr ago",
-  },
-];
+function formatDuration(minutes: number) {
+  if (minutes < 1) return "< 1m";
+  if (minutes < 60) return `${Math.round(minutes)}m`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)}h ${Math.round(minutes % 60)}m`;
+  return `${Math.floor(minutes / (24 * 60))}d ${Math.floor((minutes % (24 * 60)) / 60)}h`;
+}
 
-const topAgents = [
-  { name: "Sarah K.", resolved: 48, csat: 97, occupancy: 84 },
-  { name: "James L.", resolved: 42, csat: 94, occupancy: 78 },
-  { name: "Maria R.", resolved: 39, csat: 96, occupancy: 81 },
-  { name: "Priya S.", resolved: 35, csat: 95, occupancy: 76 },
-];
+function timeAgo(iso: string, now: number) {
+  const minutes = Math.floor((now - Date.parse(iso)) / 60000);
+  if (minutes < 1) return "just now";
+  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 24 * 60) return `${Math.floor(minutes / 60)} hr ago`;
+  return `${Math.floor(minutes / (24 * 60))} d ago`;
+}
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status }: { status: TicketStatus }) {
   const styles =
     status === "Open"
       ? "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
-      : status === "Pending"
-      ? "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400"
-      : "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400";
+      : status === "Escalated"
+      ? "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
+      : status === "Resolved" || status === "Closed"
+      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+      : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400";
 
-  return <span className={`rounded-full px-2.5 py-1 text-xs font-medium ${styles}`}>{status}</span>;
+  return <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${styles}`}>{status}</span>;
 }
 
-export default function Home() {
-  const firstName = useAgent()?.name.split(" ")[0];
+function EmptyNote({ children }: { children: React.ReactNode }) {
+  return <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">{children}</p>;
+}
+
+export default async function Home() {
+  const [agent, stats] = await Promise.all([getCurrentAgent(), getDashboardStats()]);
+  const firstName = agent?.name.split(" ")[0];
+  const now = stats.generatedAt;
+
+  const kpis = [
+    {
+      title: "Open Tickets",
+      value: String(stats.open),
+      subtext: "not yet resolved or closed",
+      accent: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+      icon: "🎫",
+    },
+    {
+      title: "Needs Attention",
+      value: String(stats.needsAttention),
+      subtext: "open with Urgent or High priority",
+      accent: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
+      icon: "⚠️",
+    },
+    {
+      title: "Resolved",
+      value: String(stats.resolvedThisWeek),
+      subtext: "resolved or closed in the last 7 days",
+      accent: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
+      icon: "✅",
+    },
+    {
+      title: "Avg First Response",
+      value: stats.avgFirstResponseMinutes === null ? "—" : formatDuration(stats.avgFirstResponseMinutes),
+      subtext: "time to the first agent reply",
+      accent: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
+      icon: "⏱️",
+    },
+  ];
+
+  const headerStats = [
+    { label: "New (24h)", value: stats.newToday, color: "text-zinc-900 dark:text-zinc-50" },
+    { label: "Unassigned", value: stats.unassigned, color: "text-zinc-900 dark:text-zinc-50" },
+    { label: "Backlog", value: stats.open, color: "text-zinc-900 dark:text-zinc-50" },
+    { label: "Escalations", value: stats.escalated, color: "text-amber-600 dark:text-amber-400" },
+  ];
+
+  const maxChannelTotal = Math.max(1, ...stats.byChannel.map((c) => c.total));
+  const maxAgentLoad = Math.max(1, ...stats.byAgent.map((a) => a.open + a.resolved));
 
   return (
     <DashboardLayout>
@@ -127,27 +105,20 @@ export default function Home() {
             Welcome back{firstName ? `, ${firstName}` : ""} 👋
           </h1>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            Here’s a live view of your ticket queue, SLA health, and agent performance across support channels.
+            Here’s a live view of your ticket queue, workload and response times across support channels.
           </p>
         </div>
 
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Queue Health</p>
-            <p className="mt-1 text-lg font-semibold text-emerald-600 dark:text-emerald-400">Stable</p>
-          </div>
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Agents Online</p>
-            <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">22 / 26</p>
-          </div>
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Backlog</p>
-            <p className="mt-1 text-lg font-semibold text-zinc-900 dark:text-zinc-50">142</p>
-          </div>
-          <div className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Escalations</p>
-            <p className="mt-1 text-lg font-semibold text-amber-600 dark:text-amber-400">9</p>
-          </div>
+          {headerStats.map((item) => (
+            <div
+              key={item.label}
+              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+            >
+              <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.label}</p>
+              <p className={`mt-1 text-lg font-semibold ${item.color}`}>{item.value}</p>
+            </div>
+          ))}
         </div>
       </div>
 
@@ -157,19 +128,8 @@ export default function Home() {
             key={item.title}
             className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
           >
-            <div className="flex items-start justify-between">
-              <div className={`flex h-11 w-11 items-center justify-center rounded-2xl text-lg ${item.accent}`}>
-                {item.icon}
-              </div>
-              <span
-                className={`rounded-full px-2.5 py-1 text-xs font-medium ${
-                  item.trend === "up"
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-                    : "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
-                }`}
-              >
-                {item.change}
-              </span>
+            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl text-lg ${item.accent}`}>
+              {item.icon}
             </div>
 
             <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">{item.title}</p>
@@ -185,61 +145,69 @@ export default function Home() {
             <div>
               <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Recent Tickets</h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                Latest customer conversations and queue movement
+                Most recently updated conversations
               </p>
             </div>
-            <button className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
+            <Link
+              href="/tickets"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+            >
               View all
-            </button>
+            </Link>
           </div>
 
-          <div className="mt-6 overflow-x-auto">
-            <table className="min-w-full border-separate border-spacing-y-3">
-              <thead>
-                <tr className="text-left text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
-                  <th className="pb-2 font-medium">Ticket</th>
-                  <th className="pb-2 font-medium">Customer</th>
-                  <th className="pb-2 font-medium">Channel</th>
-                  <th className="pb-2 font-medium">Owner</th>
-                  <th className="pb-2 font-medium">Status</th>
-                  <th className="pb-2 font-medium">Updated</th>
-                </tr>
-              </thead>
-              <tbody>
-                {recentTickets.map((ticket) => (
-                  <tr key={ticket.id} className="rounded-xl bg-zinc-50 dark:bg-zinc-800/40">
-                    <td className="rounded-l-xl px-4 py-4 align-middle">
-                      <div>
-                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50">{ticket.id}</p>
-                        <p className="text-sm text-zinc-500 dark:text-zinc-400">{ticket.subject}</p>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.customer}</td>
-                    <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.channel}</td>
-                    <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.owner}</td>
-                    <td className="px-4 py-4">
-                      <StatusBadge status={ticket.status} />
-                    </td>
-                    <td className="rounded-r-xl px-4 py-4 text-sm text-zinc-500 dark:text-zinc-400">
-                      {ticket.time}
-                    </td>
+          {stats.recent.length === 0 ? (
+            <EmptyNote>No tickets yet.</EmptyNote>
+          ) : (
+            <div className="mt-6 overflow-x-auto">
+              <table className="min-w-full border-separate border-spacing-y-3">
+                <thead>
+                  <tr className="text-left text-xs uppercase tracking-wide text-zinc-500 dark:text-zinc-400">
+                    <th className="pb-2 font-medium">Ticket</th>
+                    <th className="pb-2 font-medium">Customer</th>
+                    <th className="pb-2 font-medium">Channel</th>
+                    <th className="pb-2 font-medium">Owner</th>
+                    <th className="pb-2 font-medium">Status</th>
+                    <th className="pb-2 font-medium">Updated</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                </thead>
+                <tbody>
+                  {stats.recent.map((ticket) => (
+                    <tr key={ticket.id} className="rounded-xl bg-zinc-50 dark:bg-zinc-800/40">
+                      <td className="rounded-l-xl px-4 py-4 align-middle">
+                        <Link href={`/tickets/${ticket.id}`} className="group block">
+                          <p className="text-sm font-semibold text-zinc-900 group-hover:text-indigo-600 dark:text-zinc-50 dark:group-hover:text-indigo-400">
+                            #{ticket.id}
+                          </p>
+                          <p className="text-sm text-zinc-500 dark:text-zinc-400">{ticket.subject}</p>
+                        </Link>
+                      </td>
+                      <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.customer}</td>
+                      <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.channel}</td>
+                      <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.assignedTo}</td>
+                      <td className="px-4 py-4">
+                        <StatusBadge status={ticket.status} />
+                      </td>
+                      <td className="whitespace-nowrap rounded-r-xl px-4 py-4 text-sm text-zinc-500 dark:text-zinc-400">
+                        {timeAgo(ticket.updatedAt, now)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Backlog by Priority</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Current ticket distribution across urgency levels
+            Open tickets by urgency
           </p>
 
           <div className="mt-6 space-y-4">
-            {backlogData.map((item) => {
-              const total = 142;
-              const width = (item.count / total) * 100;
+            {stats.backlogByPriority.map((item) => {
+              const width = stats.open ? (item.count / stats.open) * 100 : 0;
 
               return (
                 <div key={item.priority}>
@@ -248,7 +216,10 @@ export default function Home() {
                     <span className="text-zinc-500 dark:text-zinc-400">{item.count}</span>
                   </div>
                   <div className="h-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
-                    <div className={`h-2.5 rounded-full ${item.color}`} style={{ width: `${width}%` }} />
+                    <div
+                      className={`h-2.5 rounded-full ${priorityColors[item.priority]}`}
+                      style={{ width: `${width}%` }}
+                    />
                   </div>
                 </div>
               );
@@ -259,61 +230,68 @@ export default function Home() {
 
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Channel Performance</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Channels</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Volume and SLA adherence by support channel
+            Where tickets come from, and how many are still open
           </p>
 
-          <div className="mt-6 space-y-5">
-            {channelData.map((item) => {
-              const width = Math.min((item.volume / 500) * 100, 100);
-
-              return (
+          {stats.byChannel.length === 0 ? (
+            <EmptyNote>No tickets yet.</EmptyNote>
+          ) : (
+            <div className="mt-6 space-y-5">
+              {stats.byChannel.map((item, index) => (
                 <div key={item.channel}>
                   <div className="flex items-center justify-between text-sm">
                     <div>
                       <p className="font-medium text-zinc-900 dark:text-zinc-50">{item.channel}</p>
-                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.volume} tickets today</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">
+                        {item.total} {item.total === 1 ? "ticket" : "tickets"}
+                      </p>
                     </div>
-                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{item.sla} SLA</span>
+                    <span className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{item.open} open</span>
                   </div>
                   <div className="mt-2 h-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
-                    <div className={`h-2.5 rounded-full ${item.color}`} style={{ width: `${width}%` }} />
+                    <div
+                      className={`h-2.5 rounded-full ${channelColors[index % channelColors.length]}`}
+                      style={{ width: `${(item.total / maxChannelTotal) * 100}%` }}
+                    />
                   </div>
                 </div>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Top Agents</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Agent Workload</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-            Resolved volume, CSAT and occupancy snapshot
+            Tickets assigned to each agent
           </p>
 
-          <div className="mt-6 space-y-4">
-            {topAgents.map((agent) => (
-              <div key={agent.name} className="rounded-xl border border-zinc-100 p-4 dark:border-zinc-800">
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <p className="font-medium text-zinc-900 dark:text-zinc-50">{agent.name}</p>
-                    <p className="mt-1 text-sm text-zinc-500 dark:text-zinc-400">
-                      {agent.resolved} tickets resolved today
-                    </p>
+          {stats.byAgent.length === 0 ? (
+            <EmptyNote>No tickets are assigned yet.</EmptyNote>
+          ) : (
+            <div className="mt-6 space-y-4">
+              {stats.byAgent.map((item) => (
+                <div key={item.name} className="rounded-xl border border-zinc-100 p-4 dark:border-zinc-800">
+                  <div className="flex items-start justify-between gap-4">
+                    <p className="font-medium text-zinc-900 dark:text-zinc-50">{item.name}</p>
+                    <div className="text-right">
+                      <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{item.open} open</p>
+                      <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.resolved} resolved</p>
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">{agent.csat}% CSAT</p>
-                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{agent.occupancy}% occupancy</p>
-                  </div>
-                </div>
 
-                <div className="mt-3 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800">
-                  <div className="h-2 rounded-full bg-indigo-500" style={{ width: `${agent.csat}%` }} />
+                  <div className="mt-3 h-2 rounded-full bg-zinc-100 dark:bg-zinc-800">
+                    <div
+                      className="h-2 rounded-full bg-indigo-500"
+                      style={{ width: `${((item.open + item.resolved) / maxAgentLoad) * 100}%` }}
+                    />
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
       </section>
     </DashboardLayout>
