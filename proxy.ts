@@ -1,37 +1,56 @@
-import { timingSafeEqual } from "node:crypto";
 import { NextResponse, type NextRequest } from "next/server";
+import { createServerClient } from "@supabase/ssr";
+import { getSupabaseConfig } from "@/app/lib/supabase-config";
 
-// Temporary site-wide password until agent logins exist.
-// Only active when SITE_PASSWORD is set (e.g. on Vercel); local dev stays open.
+// Every page and API route needs a signed-in agent, except the login page.
+// This also refreshes the Supabase session cookie before it expires.
+// Server Actions still check the agent themselves (see requireAgent).
 
-function safeEqual(a: string, b: string) {
-  const left = Buffer.from(a);
-  const right = Buffer.from(b);
-  return left.length === right.length && timingSafeEqual(left, right);
-}
+export async function proxy(request: NextRequest) {
+  const { url, key } = getSupabaseConfig();
+  let response = NextResponse.next({ request });
 
-export function proxy(request: NextRequest) {
-  const password = process.env.SITE_PASSWORD;
-  if (!password) return NextResponse.next();
+  const supabase = createServerClient(url, key, {
+    cookies: {
+      getAll: () => request.cookies.getAll(),
+      setAll(cookiesToSet, headers) {
+        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+        response = NextResponse.next({ request });
+        cookiesToSet.forEach(({ name, value, options }) =>
+          response.cookies.set(name, value, options)
+        );
+        // Keep CDNs from caching a response that carries a session cookie
+        Object.entries(headers).forEach(([header, value]) =>
+          response.headers.set(header, value)
+        );
+      },
+    },
+  });
 
-  const header = request.headers.get("authorization") ?? "";
-  const [scheme, encoded] = header.split(" ");
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
 
-  if (scheme === "Basic" && encoded) {
-    const decoded = Buffer.from(encoded, "base64").toString();
-    // Any username is accepted; only the password is checked
-    const supplied = decoded.slice(decoded.indexOf(":") + 1);
-    if (safeEqual(supplied, password)) return NextResponse.next();
+  const { pathname, search } = request.nextUrl;
+  const isLoginPage = pathname === "/login";
+
+  if (!user && !isLoginPage) {
+    if (pathname.startsWith("/api/")) {
+      return NextResponse.json({ success: false, error: "Not signed in" }, { status: 401 });
+    }
+
+    const loginUrl = new URL("/login", request.url);
+    if (pathname !== "/") loginUrl.searchParams.set("next", pathname + search);
+    return NextResponse.redirect(loginUrl);
   }
 
-  return new NextResponse("Authentication required", {
-    status: 401,
-    headers: { "WWW-Authenticate": 'Basic realm="Atlas", charset="UTF-8"' },
-  });
+  if (user && isLoginPage) {
+    return NextResponse.redirect(new URL("/", request.url));
+  }
+
+  return response;
 }
 
 export const config = {
-  // Everything except static build files, so pages, API routes and
-  // server actions are all protected
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
 };

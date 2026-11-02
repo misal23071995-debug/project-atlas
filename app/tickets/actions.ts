@@ -14,9 +14,9 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/app/lib/tickets";
+import { requireAgent } from "@/app/lib/auth/session";
 
-// TODO: check the signed-in agent here once authentication is added.
-// Until then, anyone who can reach the app can call these actions.
+// Every action checks the signed-in agent itself; the proxy alone isn't enough
 
 function requireText(value: unknown, field: string, max = 5000) {
   if (typeof value !== "string" || !value.trim()) {
@@ -26,6 +26,7 @@ function requireText(value: unknown, field: string, max = 5000) {
 }
 
 export async function createTicketAction(input: NewTicket) {
+  await requireAgent();
   const confidence = Math.max(0, Math.min(100, Math.round(Number(input.confidence) || 0)));
 
   const id = await createTicket({
@@ -48,42 +49,47 @@ export async function createTicketAction(input: NewTicket) {
 }
 
 export async function sendReplyAction(ticketId: string, message: string) {
+  const agent = await requireAgent();
+
   await addMessage(ticketId, {
-    sender: "Support",
+    sender: agent.name,
     role: "agent",
     message: requireText(message, "Reply"),
   });
-  await addActivity(ticketId, "Reply sent", "bg-indigo-500");
+  await addActivity(ticketId, `Reply sent by ${agent.name}`, "bg-indigo-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
 }
 
 export async function updateStatusAction(ticketId: string, status: TicketStatus) {
+  const agent = await requireAgent();
   if (!TICKET_STATUSES.includes(status)) throw new Error("Invalid status");
 
   await updateTicket(ticketId, { status });
-  await addActivity(ticketId, `Status changed to ${status}`, "bg-blue-500");
+  await addActivity(ticketId, `Status changed to ${status} by ${agent.name}`, "bg-blue-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
 }
 
 export async function updatePriorityAction(ticketId: string, priority: TicketPriority) {
+  const agent = await requireAgent();
   if (!TICKET_PRIORITIES.includes(priority)) throw new Error("Invalid priority");
 
   await updateTicket(ticketId, { priority });
-  await addActivity(ticketId, `Priority changed to ${priority}`, "bg-orange-500");
+  await addActivity(ticketId, `Priority changed to ${priority} by ${agent.name}`, "bg-orange-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
 }
 
 export async function assignTicketAction(ticketId: string, assignedTo: string) {
-  const agent = requireText(assignedTo, "Agent", 100);
+  const agent = await requireAgent();
+  const assignee = requireText(assignedTo, "Agent", 100);
 
-  await updateTicket(ticketId, { assignedTo: agent });
-  await addActivity(ticketId, `Assigned to ${agent}`, "bg-purple-500");
+  await updateTicket(ticketId, { assignedTo: assignee });
+  await addActivity(ticketId, `Assigned to ${assignee} by ${agent.name}`, "bg-purple-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");

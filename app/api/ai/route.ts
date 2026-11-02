@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeWithAI } from "@/app/lib/ai/service";
+import { getCurrentAgent } from "@/app/lib/auth/session";
 
 export async function POST(request: NextRequest) {
+  if (!(await getCurrentAgent())) {
+    return NextResponse.json({ success: false, error: "Not signed in" }, { status: 401 });
+  }
+
   try {
     // Accept either field name from callers
     const body = await request.json();

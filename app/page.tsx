@@ -1,6 +1,7 @@
 "use client";
 
 import DashboardLayout from "./components/dashboard-layout";
+import { useAgent } from "./components/AgentProvider";
 
 const kpis = [
   {
@@ -113,6 +114,8 @@ function StatusBadge({ status }: { status: string }) {
 }
 
 export default function Home() {
+  const firstName = useAgent()?.name.split(" ")[0];
+
   return (
     <DashboardLayout>
       <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -121,7 +124,7 @@ export default function Home() {
             Support operations overview
           </p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Welcome back, Vishal 👋
+            Welcome back{firstName ? `, ${firstName}` : ""} 👋
           </h1>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             Here’s a live view of your ticket queue, SLA health, and agent performance across support channels.

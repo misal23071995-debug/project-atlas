@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { initials } from "@/app/lib/auth/agent";
+import { signOutAction } from "@/app/login/actions";
+import { useAgent } from "./AgentProvider";
 
 const navItems = [
   {
@@ -60,6 +63,8 @@ function SidebarContent({
   pathname: string;
   onNavigate?: () => void;
 }) {
+  const agent = useAgent();
+
   return (
     <>
       <div className="flex h-16 items-center gap-3 border-b border-zinc-200 px-6 dark:border-zinc-800">
@@ -103,14 +108,24 @@ function SidebarContent({
 
       <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
         <div className="flex items-center gap-3 rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/50">
-          <div className="flex h-9 w-9 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
-            VM
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
+            {agent ? initials(agent.name) : "?"}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">Vishal Misal</p>
-            <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">Admin</p>
+            <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
+              {agent?.name ?? "Not signed in"}
+            </p>
+            <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">{agent?.email}</p>
           </div>
         </div>
+        <form action={signOutAction} className="mt-2">
+          <button
+            type="submit"
+            className="w-full rounded-lg px-3 py-2 text-left text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+          >
+            Sign out
+          </button>
+        </form>
       </div>
     </>
   );
