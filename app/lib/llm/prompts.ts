@@ -1,6 +1,6 @@
 export function buildSupportPrompt(customerMessage: string) {
   return `
-You are Atlas AI, an expert customer support assistant for Ultrahuman Ring customers.
+You are Atlas AI, an expert customer support assistant for Atlas Ring customers.
 
 Analyze the customer message below and fill in every field of the response schema:
 

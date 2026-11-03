@@ -75,13 +75,13 @@ alter table ticket_notes enable row level security;
 
 -- Demo data (only inserted once)
 insert into customers (name, email, location, device, orders, csat, created_at)
-values ('Rahul Sharma', 'rahul.sharma@gmail.com', 'Mumbai', 'Ultrahuman Ring AIR', 12, 97, '2024-01-15')
+values ('Rahul Sharma', 'rahul.sharma@gmail.com', 'Mumbai', 'Atlas Ring', 12, 97, '2024-01-15')
 on conflict (email) do nothing;
 
 insert into tickets (id, customer_id, subject, description, summary, intent, sentiment, confidence,
                      priority, status, assigned_to, channel, category, tags)
 select 4821, c.id,
-       'Ultrahuman Ring not syncing after firmware update',
+       'Atlas Ring not syncing after firmware update',
        'Battery drains within two hours.',
        'Customer reports fast battery drain and sync problems after a firmware update.',
        'Ring Sync', 'Frustrated', 92,

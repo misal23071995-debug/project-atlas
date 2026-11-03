@@ -92,7 +92,7 @@ export function analyzeMessage(message: string): AIAnalysis {
 
   if (intent === "Ring Sync") {
     suggestedReply =
-      "Please reinstall the Ultrahuman app, reconnect your Ring, and ensure Bluetooth permissions are enabled. If the issue continues, we'll collect diagnostic logs.";
+      "Please reinstall the Atlas app, reconnect your Ring, and ensure Bluetooth permissions are enabled. If the issue continues, we'll collect diagnostic logs.";
   }
 
   if (intent === "Refund") {

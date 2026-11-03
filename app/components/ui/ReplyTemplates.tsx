@@ -5,14 +5,14 @@ const templates = [
     name: "Ring Sync Issue",
     message: `Hi,
 
-Thank you for contacting Ultrahuman.
+Thank you for contacting Atlas Ring.
 
-Please reinstall the Ultrahuman app, reconnect your Ring, and ensure Bluetooth permissions are enabled.
+Please reinstall the Atlas app, reconnect your Ring, and ensure Bluetooth permissions are enabled.
 
 If the issue persists, we'll investigate further.
 
 Regards,
-Ultrahuman Support`,
+Atlas Ring Support`,
   },
 
   {
@@ -24,7 +24,7 @@ We're sorry to hear you'd like a refund.
 We've shared your request with our billing team and will update you shortly.
 
 Regards,
-Ultrahuman Support`,
+Atlas Ring Support`,
   },
 
   {
@@ -36,7 +36,7 @@ We've initiated a replacement request.
 Our logistics team will contact you within 24 hours.
 
 Regards,
-Ultrahuman Support`,
+Atlas Ring Support`,
   },
 
   {
@@ -48,7 +48,7 @@ Thanks for reaching out.
 Your subscription details are being reviewed and we'll update you shortly.
 
 Regards,
-Ultrahuman Support`,
+Atlas Ring Support`,
   },
 ];
 
