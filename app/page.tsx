@@ -2,6 +2,7 @@ import Link from "next/link";
 import DashboardLayout from "./components/dashboard-layout";
 import { getCurrentAgent } from "./lib/auth/session";
 import { getDashboardStats } from "./lib/db/dashboard";
+import { getBotStats } from "./lib/db/bot";
 import type { TicketPriority, TicketStatus } from "./lib/tickets";
 
 // Always show the current state of the queue
@@ -49,7 +50,11 @@ function EmptyNote({ children }: { children: React.ReactNode }) {
 }
 
 export default async function Home() {
-  const [agent, stats] = await Promise.all([getCurrentAgent(), getDashboardStats()]);
+  const [agent, stats, botStats] = await Promise.all([
+    getCurrentAgent(),
+    getDashboardStats(),
+    getBotStats(),
+  ]);
   const firstName = agent?.name.split(" ")[0];
   const now = stats.generatedAt;
 
@@ -137,6 +142,62 @@ export default async function Home() {
             <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{item.subtext}</p>
           </div>
         ))}
+      </section>
+
+      <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="flex flex-wrap items-start justify-between gap-2">
+          <div>
+            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">AI Chatbot</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400">
+              Customer chats in the last 30 days, and how many needed an agent
+            </p>
+          </div>
+          <Link
+            href="/support"
+            target="_blank"
+            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+          >
+            Open customer chat ↗
+          </Link>
+        </div>
+
+        {botStats === null ? (
+          <EmptyNote>
+            Run supabase/migrations/003_support_bot.sql in Supabase to turn on the chatbot.
+          </EmptyNote>
+        ) : botStats.conversations === 0 ? (
+          <EmptyNote>No customer chats yet. Open the customer chat to try it.</EmptyNote>
+        ) : (
+          <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="grid grid-cols-3 gap-3 lg:col-span-2">
+              {[
+                { label: "Deflection rate", value: `${botStats.deflectionRate}%`, color: "text-emerald-600 dark:text-emerald-400" },
+                { label: "Handled by AI", value: botStats.resolvedByBot, color: "text-zinc-900 dark:text-zinc-50" },
+                { label: "Handed to agent", value: botStats.handedOff, color: "text-amber-600 dark:text-amber-400" },
+              ].map((item) => (
+                <div key={item.label} className="rounded-xl bg-zinc-50 p-4 dark:bg-zinc-800/40">
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.label}</p>
+                  <p className={`mt-1 text-2xl font-bold ${item.color}`}>{item.value}</p>
+                </div>
+              ))}
+              <p className="col-span-3 text-xs text-zinc-400 dark:text-zinc-500">
+                Deflection rate = chats the AI handled without creating a ticket, out of {botStats.conversations} chats.
+              </p>
+            </div>
+
+            <div>
+              <p className="text-sm font-medium text-zinc-900 dark:text-zinc-50">Top topics</p>
+              <ul className="mt-3 space-y-2 text-sm">
+                {botStats.topTopics.map((item) => (
+                  <li key={item.topic} className="flex justify-between text-zinc-600 dark:text-zinc-300">
+                    <span>{item.topic}</span>
+                    <span className="text-zinc-400">{item.count}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
+        )}
       </section>
 
       <section className="mt-8 grid gap-6 xl:grid-cols-3">
