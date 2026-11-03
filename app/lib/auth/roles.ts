@@ -30,6 +30,8 @@ const PERMISSIONS = {
   // Build the roster and approve leave. Everyone can see the roster and request leave.
   "roster.manage": ["admin", "lead"],
   "capacity.manage": ["admin", "lead"],
+  // Write courses, assign them and see everyone's results. Everyone can take training.
+  "training.manage": ["admin", "lead", "qa"],
   "team.manage": ["admin"],
   "workspace.manage": ["admin"],
 } as const satisfies Record<string, readonly Role[]>;

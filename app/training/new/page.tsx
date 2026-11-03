@@ -1,0 +1,37 @@
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import DashboardLayout from "@/app/components/dashboard-layout";
+import { listMembers, requireSession } from "@/app/lib/auth/session";
+import { can } from "@/app/lib/auth/roles";
+import { listArticles } from "@/app/lib/db/bot";
+import { getScorecard } from "@/app/lib/db/quality";
+import CourseEditor from "../CourseEditor";
+
+export const dynamic = "force-dynamic";
+
+export default async function NewCoursePage() {
+  const { org, role } = await requireSession();
+  if (!can(role, "training.manage")) redirect("/training");
+
+  const [criteria, articles, members] = await Promise.all([
+    getScorecard(org.id),
+    listArticles(org.id).catch(() => []),
+    listMembers(org.id),
+  ]);
+
+  return (
+    <DashboardLayout>
+      <Link href="/training" className="text-sm text-zinc-400 hover:text-zinc-200">
+        ← Training
+      </Link>
+      <h1 className="mt-2 text-3xl font-bold">New course</h1>
+      <CourseEditor
+        course={null}
+        criteria={criteria.map((c) => ({ id: c.id, label: c.label }))}
+        articles={articles.map((a) => ({ id: a.id, title: a.title }))}
+        members={members.map((m) => ({ id: m.id, name: m.name, role: m.role }))}
+        assignments={[]}
+      />
+    </DashboardLayout>
+  );
+}

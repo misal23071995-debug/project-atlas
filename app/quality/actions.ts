@@ -5,6 +5,7 @@ import { requireSession } from "@/app/lib/auth/session";
 import { getTicket } from "@/app/lib/db/tickets";
 import { agentForTicket, finaliseReview, getScorecard, saveAiScores, saveScorecard } from "@/app/lib/db/quality";
 import { scoreConversation } from "@/app/lib/quality/ai";
+import { assignTrainingForLowScores } from "@/app/lib/training/auto";
 import {
   MAX_CRITERIA,
   SCORE_MAX,
@@ -62,8 +63,9 @@ export async function finaliseReviewAction(
   ticketId: string,
   scores: Record<string, number>,
   feedback: string
-): Promise<{ ok: boolean; error?: string }> {
+): Promise<{ ok: boolean; error?: string; training?: string[] }> {
   const { agent, org } = await requireSession("quality.review");
+  let training: string[] = [];
 
   try {
     const ticket = await loadScorableTicket(org.id, ticketId);
@@ -77,20 +79,25 @@ export async function finaliseReviewAction(
       return { id: c.id, label: c.label, weight: c.weight, score };
     });
 
+    const agentName = agentOf(ticket);
     await finaliseReview(org.id, ticketId, {
-      agentName: agentOf(ticket),
+      agentName,
       scores: finalScores,
       total: totalScore(finalScores),
       feedback: String(feedback ?? "").trim().slice(0, 2000),
       reviewedBy: agent.name,
     });
+
+    // Low scores on a criterion assign the training course linked to it
+    training = await assignTrainingForLowScores(org.id, agentName, finalScores, ticketId);
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Could not save the review." };
   }
 
   revalidatePath(`/quality/${ticketId}`);
   revalidatePath("/quality");
-  return { ok: true };
+  if (training.length) revalidatePath("/training");
+  return { ok: true, training };
 }
 
 export async function saveScorecardAction(

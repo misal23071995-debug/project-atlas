@@ -30,6 +30,7 @@ export default function ReviewForm({
   const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [trainingNotes, setTrainingNotes] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
   const [aiPending, startAi] = useTransition();
 
@@ -75,6 +76,7 @@ export default function ReviewForm({
       if (!result.ok) setError(result.error ?? "Could not save.");
       else {
         setSaved(true);
+        setTrainingNotes(result.training ?? []);
         router.refresh();
       }
     });
@@ -176,6 +178,11 @@ export default function ReviewForm({
 
       {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
       {saved && <p role="status" className="text-sm text-emerald-400">Review saved.</p>}
+      {trainingNotes.map((note) => (
+        <p key={note} className="text-sm text-indigo-300">
+          🎓 {note}
+        </p>
+      ))}
 
       {!readOnly && (
         <button
