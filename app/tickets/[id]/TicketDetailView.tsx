@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import Link from "next/link";
 
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { useCan } from "@/app/components/AgentProvider";
@@ -35,6 +36,7 @@ export default function TicketDetailView({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const canWork = useCan("tickets.work");
+  const canReview = useCan("quality.review");
 
   // Run a server action; the page re-renders with fresh data when it finishes
   function run(action: () => Promise<void>, onSuccess?: () => void) {
@@ -72,14 +74,25 @@ export default function TicketDetailView({
         {/* LEFT SIDE */}
         <div className="space-y-6 lg:col-span-2">
           {/* Header */}
-          <div>
-            <h1 className="text-3xl font-bold">
-              Ticket {ticket.id}
-            </h1>
+          <div className="flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h1 className="text-3xl font-bold">
+                Ticket {ticket.id}
+              </h1>
 
-            <p className="mt-1 text-zinc-400">
-              {ticket.subject}
-            </p>
+              <p className="mt-1 text-zinc-400">
+                {ticket.subject}
+              </p>
+            </div>
+
+            {canReview && ticket.conversation.some((m) => m.role === "agent") && (
+              <Link
+                href={`/quality/${ticket.id}`}
+                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+              >
+                Review quality
+              </Link>
+            )}
           </div>
 
           {error && (

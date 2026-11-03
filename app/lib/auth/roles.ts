@@ -16,7 +16,7 @@ export const ROLE_DESCRIPTIONS: Record<Role, string> = {
   admin: "Everything, including the team and workspace settings",
   lead: "Works tickets and edits the knowledge base",
   agent: "Replies to and updates tickets",
-  qa: "Reads tickets and leaves internal notes",
+  qa: "Scores conversations for quality and leaves internal notes",
 };
 
 const PERMISSIONS = {
@@ -24,6 +24,9 @@ const PERMISSIONS = {
   "tickets.work": ["admin", "lead", "agent"],
   "tickets.note": ["admin", "lead", "agent", "qa"],
   "knowledge.edit": ["admin", "lead"],
+  // Score conversations and see everyone's quality results. Agents only see their own.
+  "quality.review": ["admin", "lead", "qa"],
+  "quality.scorecard": ["admin", "lead"],
   "team.manage": ["admin"],
   "workspace.manage": ["admin"],
 } as const satisfies Record<string, readonly Role[]>;
