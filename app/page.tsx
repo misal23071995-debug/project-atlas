@@ -24,6 +24,10 @@ function formatDuration(minutes: number) {
   return `${Math.floor(minutes / (24 * 60))}d ${Math.floor((minutes % (24 * 60)) / 60)}h`;
 }
 
+function formatStars(average: number | null) {
+  return average === null ? "—" : `${average.toFixed(1)} ★`;
+}
+
 function timeAgo(iso: string, now: number) {
   const minutes = Math.floor((now - Date.parse(iso)) / 60000);
   if (minutes < 1) return "just now";
@@ -191,6 +195,24 @@ export default async function Home() {
               <p className="col-span-3 text-xs text-zinc-400 dark:text-zinc-500">
                 Deflection rate = chats the AI handled without creating a ticket, out of {botStats.conversations} chats.
               </p>
+
+              <div className="col-span-3 grid grid-cols-3 gap-3 border-t border-zinc-100 pt-4 dark:border-zinc-800">
+                {[
+                  {
+                    label: "Chat CSAT",
+                    value: formatStars(botStats.csat.average),
+                    note: `${botStats.csat.responses} ratings · ${botStats.csat.responseRate}% response rate`,
+                  },
+                  { label: "CSAT when AI solved it", value: formatStars(botStats.csat.averageResolvedByBot) },
+                  { label: "CSAT after handover", value: formatStars(botStats.csat.averageHandedOff) },
+                ].map((item) => (
+                  <div key={item.label}>
+                    <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.label}</p>
+                    <p className="mt-1 text-xl font-bold text-zinc-900 dark:text-zinc-50">{item.value}</p>
+                    {item.note && <p className="mt-0.5 text-xs text-zinc-400 dark:text-zinc-500">{item.note}</p>}
+                  </div>
+                ))}
+              </div>
             </div>
 
             <div>

@@ -168,6 +168,20 @@ export async function updateConversation(
   if (error) throw new Error(`Failed to update conversation: ${error.message}`);
 }
 
+// Saves the end-of-chat rating once. Returns false if the chat is still going or already rated.
+export async function saveRating(id: string, rating: number, comment: string) {
+  const { data, error } = await getSupabase()
+    .from("bot_conversations")
+    .update({ csat_rating: rating, csat_comment: comment || null, rated_at: new Date().toISOString() })
+    .eq("id", id)
+    .neq("status", "active")
+    .is("csat_rating", null)
+    .select("id");
+
+  if (error) throw new Error(`Failed to save rating: ${error.message}`);
+  return data.length > 0;
+}
+
 // ---- Dashboard ----
 
 export interface BotStats {
@@ -177,6 +191,20 @@ export interface BotStats {
   // Share of conversations the bot handled without an agent, 0-100
   deflectionRate: number;
   topTopics: { topic: string; count: number }[];
+  csat: {
+    responses: number;
+    // Share of finished chats that left a rating, 0-100
+    responseRate: number;
+    // Average stars, 1-5; null with no ratings
+    average: number | null;
+    // Split by outcome, to see whether handovers hurt satisfaction
+    averageResolvedByBot: number | null;
+    averageHandedOff: number | null;
+  };
+}
+
+function averageOf(values: number[]) {
+  return values.length ? Math.round((values.reduce((a, b) => a + b, 0) / values.length) * 10) / 10 : null;
 }
 
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -188,7 +216,7 @@ export async function getBotStats(): Promise<BotStats | null> {
 
   const { data, error } = await getSupabase()
     .from("bot_conversations")
-    .select("status, topic")
+    .select("status, topic, csat_rating")
     .gt("customer_messages", 0)
     .gte("created_at", since);
 
@@ -205,6 +233,11 @@ export async function getBotStats(): Promise<BotStats | null> {
     topics.set(topic, (topics.get(topic) ?? 0) + 1);
   }
 
+  const finished = data.filter((c) => c.status !== "active");
+  const rated = data.filter((c) => typeof c.csat_rating === "number");
+  const ratingsWhere = (handed: boolean) =>
+    rated.filter((c) => (c.status === "handed_off") === handed).map((c) => c.csat_rating as number);
+
   return {
     conversations,
     resolvedByBot,
@@ -214,6 +247,13 @@ export async function getBotStats(): Promise<BotStats | null> {
       .map(([topic, count]) => ({ topic, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5),
+    csat: {
+      responses: rated.length,
+      responseRate: finished.length ? Math.round((rated.length / finished.length) * 100) : 0,
+      average: averageOf(rated.map((c) => c.csat_rating as number)),
+      averageResolvedByBot: averageOf(ratingsWhere(false)),
+      averageHandedOff: averageOf(ratingsWhere(true)),
+    },
   };
 }
 

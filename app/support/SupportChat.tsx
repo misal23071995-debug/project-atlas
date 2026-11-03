@@ -9,6 +9,7 @@ import {
   startSupportChatAction,
   type SendResult,
 } from "./actions";
+import ChatRating from "./ChatRating";
 
 const SUGGESTIONS = [
   "My ring isn't syncing",
@@ -164,8 +165,9 @@ export default function SupportChat() {
       {error && <p role="alert" className="px-4 pb-2 text-sm text-red-400">{error}</p>}
 
       {state === "ended" ? (
-        <div className="border-t border-zinc-800 p-4 text-center text-sm text-zinc-400">
+        <div className="space-y-4 border-t border-zinc-800 p-4 text-center text-sm text-zinc-400">
           <p>{endNote}</p>
+          {conversationId && <ChatRating key={conversationId} conversationId={conversationId} />}
           <button
             type="button"
             onClick={() => {
@@ -174,7 +176,7 @@ export default function SupportChat() {
               setConversationId(null);
               setEndNote(null);
             }}
-            className="mt-3 text-indigo-400 hover:text-indigo-300"
+            className="text-indigo-400 hover:text-indigo-300"
           >
             Start a new chat
           </button>

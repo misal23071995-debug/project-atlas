@@ -14,6 +14,7 @@ import {
   getConversation,
   getConversationMessages,
   listArticles,
+  saveRating,
   updateConversation,
   type BotConversation,
 } from "@/app/lib/db/bot";
@@ -127,6 +128,23 @@ export async function markResolvedAction(conversationId: string): Promise<SendRe
   revalidatePath("/");
 
   return { ok: true, handedOff: false, reply: { role: "bot", body: reply } };
+}
+
+// End-of-chat "How did we do?" rating, 1-5 stars with an optional comment
+export async function rateChatAction(
+  conversationId: string,
+  rating: number,
+  comment: string
+): Promise<{ ok: boolean; error?: string }> {
+  const stars = Math.round(Number(rating));
+  if (!Number.isFinite(stars) || stars < 1 || stars > 5) return { ok: false, error: "Choose 1 to 5 stars." };
+  if (!(await getConversation(conversationId))) return { ok: false, error: "This chat has expired." };
+
+  const saved = await saveRating(conversationId, stars, String(comment ?? "").trim().slice(0, 1000));
+  if (!saved) return { ok: false, error: "This chat has already been rated." };
+
+  revalidatePath("/");
+  return { ok: true };
 }
 
 // Turn the conversation into a ticket with the full transcript, so the agent has all the context
