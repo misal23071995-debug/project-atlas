@@ -9,6 +9,7 @@ export const KB_CATEGORIES = [
   "Returns & Refunds",
   "Warranty",
   "Account & Privacy",
+  "Plans & Subscriptions",
   "Other",
 ] as const;
 

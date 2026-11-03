@@ -1,0 +1,72 @@
+[
+  {
+    "title": "Atlas+ membership: what's included",
+    "category": "Plans & Subscriptions",
+    "body": "Your Atlas Ring works without a membership: sleep, readiness, heart rate, steps and temperature trends are always free. Atlas+ is an optional membership that adds extra coaching on top. It includes: personalised sleep coaching with a weekly plan, long-term trends going back further than 90 days, guided programmes for stress, recovery and better sleep, and early access to new features. Atlas+ costs ₹299 a month or ₹2,999 a year. New members get a 7-day free trial, once per account. If you cancel during the trial you are not charged. Your ring data is never deleted if your membership ends; you simply go back to the free features."
+  },
+  {
+    "title": "Managing or cancelling your Atlas+ membership",
+    "category": "Plans & Subscriptions",
+    "body": "How you manage Atlas+ depends on where you bought it. Bought in the iPhone app: open the iPhone Settings app, tap your name, then Subscriptions, choose Atlas, and tap Cancel Subscription. Bought in the Android app: open the Google Play Store, tap your profile picture, then Payments & subscriptions > Subscriptions, choose Atlas, and tap Cancel. Bought on the Atlas Ring website: contact support with the email you used, and the team will cancel or pause it for you. Cancelling stops the next renewal; you keep Atlas+ until the end of the period you already paid for. Refunds for app purchases are handled by Apple or Google under their own rules; support can't refund an App Store or Google Play payment. Website purchases can be refunded within 7 days of a renewal if you haven't used the new period."
+  },
+  {
+    "title": "\"Already subscribed\" error or Atlas+ missing after paying",
+    "category": "Plans & Subscriptions",
+    "body": "If the app says you're already subscribed, or you paid but Atlas+ features are locked, try these steps: 1) Check you are signed in to the Atlas app with the same account you used to buy Atlas+. 2) In the app, open Profile > Membership and tap Restore purchases. 3) Make sure your phone is signed in to the same Apple ID or Google account that made the payment. 4) Close the app fully, reopen it, and pull down to refresh. 5) Sign out of the Atlas app and sign back in. If it still isn't working, contact support with the email on your Atlas account and a screenshot of the payment receipt, and the team will match the payment to your account."
+  },
+  {
+    "title": "Atlas Care+ protection plan",
+    "category": "Warranty",
+    "body": "Atlas Care+ is an optional protection plan on top of the standard 1-year warranty. It costs ₹2,499 a year and can be added within 30 days of your ring's delivery. It includes: cover for accidental damage such as cracks and deep scratches, up to two claims per plan year with a ₹999 service fee per claim; express replacement, where a new ring ships within 2 business days before you send the damaged one back; priority support, so your messages are answered first; and a 15% discount on a new Atlas Ring when you upgrade. Care+ does not cover loss, theft or damage done on purpose. The plan renews yearly and can be cancelled at any time. To make a claim, contact support with your order number and a photo of the damage."
+  },
+  {
+    "title": "Changing your ring size or colour",
+    "category": "Sizing",
+    "body": "Before your order ships, you can change the size or colour for free: contact support with your order number as soon as possible. Orders usually ship within 2 business days, and once an order has shipped it can't be changed. After delivery, if the size is wrong, you can exchange it for another size free of charge within 30 days, as long as the ring is undamaged. Colour exchanges after delivery are only possible if the ring is unworn and in its original box, within the same 30 days. Not sure of your size? Order the free sizing kit first and wear the sample ring for a full day before deciding."
+  },
+  {
+    "title": "Changing your delivery address",
+    "category": "Orders & Shipping",
+    "body": "If your order hasn't shipped yet, contact support with your order number and the new address, and the team will update it. Once the order has shipped, the address can no longer be changed by Atlas Ring. Use the tracking link in your shipping email instead: most couriers let you reschedule delivery, pick a nearby collection point, or leave instructions. International orders can't be redirected to another country after they ship. If a parcel is returned to us because of a wrong address, we'll contact you to arrange delivery again."
+  },
+  {
+    "title": "Getting an invoice for your order",
+    "category": "Orders & Shipping",
+    "body": "A tax invoice is emailed to you when your order ships. If you can't find it, check your spam folder, then contact support with your order number and the team will send a copy. To claim GST as a business, enter your company name and GSTIN at checkout. The GSTIN can't be added or changed after the invoice has been issued, so check it before you pay."
+  },
+  {
+    "title": "Promo codes and discounts",
+    "category": "Orders & Shipping",
+    "body": "Enter a promo code on the checkout page before you pay. Only one code can be used per order, and codes can't be combined with other offers unless the offer says so. A code can't be added after an order is placed. If a code isn't working, check it hasn't expired, that it's typed exactly as shown, and that your cart meets any minimum spend or product rules. Referral discounts are applied automatically when you use a friend's referral link."
+  },
+  {
+    "title": "Firmware update stuck or failed",
+    "category": "Sync & App",
+    "body": "Firmware updates need the ring to have at least 30% battery. If an update is stuck or keeps failing: 1) Put the ring on its charger and keep it there for the whole update. 2) Keep your phone within 1 metre, with the Atlas app open on screen and Bluetooth on. 3) Turn off any power-saving or low-battery mode on your phone. 4) Close and reopen the app, then start the update again from Settings > Ring > Firmware. If the app shows \"Update failed\" three times in a row, or the battery says it's too low even though the ring is charged, contact support with your phone model, app version and a screenshot of the error. Don't factory reset the ring during an update unless support asks you to."
+  },
+  {
+    "title": "Factory resetting your ring",
+    "category": "Sync & App",
+    "body": "A factory reset fixes many pairing and syncing problems. First, open the app and sync, so you don't lose recent data; anything synced is stored in your account and stays safe. Then: 1) In the app, go to Settings > Ring > Factory reset and confirm. 2) Put the ring on its charger for 10 seconds. 3) Pair it again with Add ring. Data recorded on the ring since your last sync is lost after a reset. If you can't open the ring settings in the app, contact support for a reset from our side."
+  },
+  {
+    "title": "Charger lights and slow charging",
+    "category": "Battery & Charging",
+    "body": "What the charger light means: slow white breathing means the ring is charging; solid green means fully charged; amber blinking means the ring isn't seated properly or there's a fault; no light means the charger has no power. If charging is slow or the battery percentage doesn't move: 1) Use the included cable with a standard 5V phone adapter; fast chargers and laptop ports can charge slowly or stop. 2) Make sure the sensor bumps face inward and the ring sits flat on the dock. 3) Wipe the ring and dock contacts with a dry cloth. 4) Leave it for 30 minutes, then open the app to refresh the percentage. If the light stays amber or off with a working adapter, contact support; a faulty charger or ring is replaced under warranty."
+  },
+  {
+    "title": "Are my heart rate, HRV, SpO2 and temperature readings accurate?",
+    "category": "Getting Started",
+    "body": "For the best readings, wear the ring snugly on your index or middle finger with the sensor bumps on the palm side; a loose ring is the most common cause of odd numbers. Your first readiness and sleep scores need two nights of wear to set your baseline. Blood oxygen (SpO2) is measured while you sleep and needs you to be still. Temperature is shown as a change from your own baseline, not your exact body temperature. Heart rate during intense exercise like weightlifting can be less accurate because your grip squeezes the finger. The Atlas Ring is a wellness device, not a medical device: it can't diagnose any condition, so talk to a doctor if you're worried about your health."
+  },
+  {
+    "title": "Connecting Apple Health or Health Connect",
+    "category": "Sync & App",
+    "body": "On iPhone: in the Atlas app go to Settings > Integrations > Apple Health, tap Connect, and allow the data types you want to share. On Android: install Health Connect if your phone doesn't have it, then in the Atlas app go to Settings > Integrations > Health Connect and allow access. Step and calorie numbers can differ between apps, because each app has its own way of counting and some add up data from several devices, such as your phone and a watch. If numbers look doubled, set Atlas as the main source for steps in Apple Health (Browse > Activity > Steps > Data Sources & Access) or Health Connect."
+  },
+  {
+    "title": "Contacting Atlas Ring support",
+    "category": "Other",
+    "body": "The quickest way to get help is this chat. If the assistant can't solve it, it passes your conversation to a person, so you don't have to repeat yourself. You can also email help@atlas-ring.example. The team replies within 24 hours, Monday to Saturday, 9am to 9pm IST. To help us solve it faster, include your order number for order questions, and your phone model, app version and a screenshot for app or ring problems. We never ask for your password, OTP or full card number."
+  }
+]
