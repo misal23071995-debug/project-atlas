@@ -23,11 +23,13 @@ function toArticle(row: ArticleRow): KbArticle {
 }
 
 // ---- Knowledge base ----
+// Articles belong to one workspace; every function takes its id.
 
-export async function listArticles({ publishedOnly = false } = {}): Promise<KbArticle[]> {
+export async function listArticles(orgId: string, { publishedOnly = false } = {}): Promise<KbArticle[]> {
   let query = getSupabase()
     .from("kb_articles")
     .select("id, title, category, body, published, updated_at")
+    .eq("org_id", orgId)
     .order("category")
     .order("title");
 
@@ -38,13 +40,14 @@ export async function listArticles({ publishedOnly = false } = {}): Promise<KbAr
   return data.map(toArticle);
 }
 
-export async function getArticle(id: string): Promise<KbArticle | null> {
+export async function getArticle(orgId: string, id: string): Promise<KbArticle | null> {
   if (!/^\d+$/.test(id)) return null;
 
   const { data, error } = await getSupabase()
     .from("kb_articles")
     .select("id, title, category, body, published, updated_at")
     .eq("id", id)
+    .eq("org_id", orgId)
     .returns<ArticleRow[]>()
     .maybeSingle();
 
@@ -55,27 +58,32 @@ export async function getArticle(id: string): Promise<KbArticle | null> {
 export type ArticleInput = Pick<KbArticle, "title" | "category" | "body" | "published">;
 
 // Creates the article when id is null, otherwise updates it. Returns the id.
-export async function saveArticle(id: string | null, input: ArticleInput): Promise<string> {
+export async function saveArticle(orgId: string, id: string | null, input: ArticleInput): Promise<string> {
   const supabase = getSupabase();
   const values = { ...input, updated_at: new Date().toISOString() };
 
   const { data, error } = id
-    ? await supabase.from("kb_articles").update(values).eq("id", id).select("id").single()
-    : await supabase.from("kb_articles").insert(values).select("id").single();
+    ? await supabase.from("kb_articles").update(values).eq("id", id).eq("org_id", orgId).select("id").single()
+    : await supabase.from("kb_articles").insert({ ...values, org_id: orgId }).select("id").single();
 
   if (error) throw new Error(`Failed to save article: ${error.message}`);
   return String(data.id);
 }
 
-export async function deleteArticle(id: string) {
-  const { error } = await getSupabase().from("kb_articles").delete().eq("id", id);
+export async function deleteArticle(orgId: string, id: string) {
+  const { error } = await getSupabase().from("kb_articles").delete().eq("id", id).eq("org_id", orgId);
   if (error) throw new Error(`Failed to delete article: ${error.message}`);
 }
 
 // ---- Conversations ----
+// Customers aren't signed in, so these look conversations up by their random id,
+// and the conversation's own org_id says which workspace it belongs to.
 
 export interface BotConversation {
   id: string;
+  orgId: string;
+  // The company the customer is talking to, for the bot's greeting and prompt
+  orgName: string;
   customerName: string;
   customerEmail: string;
   status: BotConversationStatus;
@@ -83,10 +91,10 @@ export interface BotConversation {
   customerMessages: number;
 }
 
-export async function createConversation(customerName: string, customerEmail: string) {
+export async function createConversation(orgId: string, customerName: string, customerEmail: string) {
   const { data, error } = await getSupabase()
     .from("bot_conversations")
-    .insert({ customer_name: customerName, customer_email: customerEmail })
+    .insert({ org_id: orgId, customer_name: customerName, customer_email: customerEmail })
     .select("id")
     .single();
 
@@ -100,8 +108,22 @@ export async function getConversation(id: string): Promise<BotConversation | nul
 
   const { data, error } = await getSupabase()
     .from("bot_conversations")
-    .select("id, customer_name, customer_email, status, ticket_id, customer_messages")
+    .select(
+      "id, org_id, customer_name, customer_email, status, ticket_id, customer_messages, organization:organizations (name)"
+    )
     .eq("id", id)
+    .returns<
+      {
+        id: string;
+        org_id: string;
+        customer_name: string;
+        customer_email: string;
+        status: BotConversationStatus;
+        ticket_id: number | null;
+        customer_messages: number;
+        organization: { name: string } | null;
+      }[]
+    >()
     .maybeSingle();
 
   if (error) throw new Error(`Failed to load conversation: ${error.message}`);
@@ -109,6 +131,8 @@ export async function getConversation(id: string): Promise<BotConversation | nul
 
   return {
     id: data.id,
+    orgId: data.org_id,
+    orgName: data.organization?.name ?? "Support",
     customerName: data.customer_name,
     customerEmail: data.customer_email,
     status: data.status,
@@ -211,12 +235,13 @@ const DAY_MS = 24 * 60 * 60 * 1000;
 
 // Last 30 days. Conversations where the customer never wrote anything don't count.
 // Returns null until migration 003 has been run.
-export async function getBotStats(): Promise<BotStats | null> {
+export async function getBotStats(orgId: string): Promise<BotStats | null> {
   const since = new Date(Date.now() - 30 * DAY_MS).toISOString();
 
   const { data, error } = await getSupabase()
     .from("bot_conversations")
     .select("status, topic, csat_rating")
+    .eq("org_id", orgId)
     .gt("customer_messages", 0)
     .gte("created_at", since);
 
@@ -291,7 +316,7 @@ type HandoffRow = {
 };
 
 // Last 30 days. Returns null until migration 004 has been run.
-export async function getKnowledgeGaps(): Promise<KnowledgeGaps | null> {
+export async function getKnowledgeGaps(orgId: string): Promise<KnowledgeGaps | null> {
   const supabase = getSupabase();
   const since = new Date(Date.now() - 30 * DAY_MS).toISOString();
 
@@ -299,6 +324,7 @@ export async function getKnowledgeGaps(): Promise<KnowledgeGaps | null> {
     supabase
       .from("bot_conversations")
       .select("id", { count: "exact", head: true })
+      .eq("org_id", orgId)
       .gt("customer_messages", 0)
       .gte("created_at", since),
     supabase
@@ -306,6 +332,7 @@ export async function getKnowledgeGaps(): Promise<KnowledgeGaps | null> {
       .select(
         "id, topic, handoff_type, handoff_reason, ticket_id, created_at, bot_messages (role, body, created_at)"
       )
+      .eq("org_id", orgId)
       .eq("status", "handed_off")
       .gte("created_at", since)
       .order("created_at", { ascending: false })

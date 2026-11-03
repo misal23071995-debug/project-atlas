@@ -1,6 +1,8 @@
 import Link from "next/link";
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { getArticle } from "@/app/lib/db/bot";
+import { requireSession } from "@/app/lib/auth/session";
+import { can } from "@/app/lib/auth/roles";
 import ArticleForm from "../ArticleForm";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +13,9 @@ export default async function EditArticlePage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const article = await getArticle(id);
+  const { org, role } = await requireSession();
+  const article = await getArticle(org.id, id);
+  const canEdit = can(role, "knowledge.edit");
 
   return (
     <DashboardLayout>
@@ -22,8 +26,18 @@ export default async function EditArticlePage({
 
         {article ? (
           <>
-            <h1 className="mt-2 text-3xl font-bold">Edit article</h1>
-            <ArticleForm article={article} />
+            {canEdit ? (
+              <>
+                <h1 className="mt-2 text-3xl font-bold">Edit article</h1>
+                <ArticleForm article={article} />
+              </>
+            ) : (
+              <article className="mt-2">
+                <h1 className="text-3xl font-bold">{article.title}</h1>
+                <p className="mt-1 text-sm text-zinc-500">{article.category}</p>
+                <p className="mt-6 whitespace-pre-line text-zinc-200">{article.body}</p>
+              </article>
+            )}
           </>
         ) : (
           <p className="mt-6 text-zinc-400">This article doesn&apos;t exist.</p>

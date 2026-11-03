@@ -1,15 +1,20 @@
 import Link from "next/link";
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { listArticles } from "@/app/lib/db/bot";
+import { requireSession } from "@/app/lib/auth/session";
+import { can } from "@/app/lib/auth/roles";
 import { formatDateTime } from "@/app/lib/tickets";
 import type { KbArticle } from "@/app/lib/bot/types";
 
 export const dynamic = "force-dynamic";
 
 export default async function KnowledgePage() {
+  const { org, role } = await requireSession();
+  const canEdit = can(role, "knowledge.edit");
+
   let articles: KbArticle[] | null = null;
   try {
-    articles = await listArticles();
+    articles = await listArticles(org.id);
   } catch {
     // Most likely migration 003 hasn't been run yet
   }
@@ -31,12 +36,14 @@ export default async function KnowledgePage() {
           >
             Knowledge gaps
           </Link>
-          <Link
-            href="/knowledge/new"
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
-          >
-            New article
-          </Link>
+          {canEdit && (
+            <Link
+              href="/knowledge/new"
+              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+            >
+              New article
+            </Link>
+          )}
         </div>
       </div>
 

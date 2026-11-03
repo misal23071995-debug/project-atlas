@@ -79,10 +79,13 @@ function toTicket(row: TicketRow): Ticket {
   };
 }
 
-export async function listTickets(): Promise<Ticket[]> {
+// Every function takes the workspace id and only touches that workspace's tickets
+
+export async function listTickets(orgId: string): Promise<Ticket[]> {
   const { data, error } = await getSupabase()
     .from("tickets")
     .select(TICKET_COLUMNS)
+    .eq("org_id", orgId)
     .order("created_at", { ascending: false })
     .returns<TicketRow[]>();
 
@@ -90,7 +93,8 @@ export async function listTickets(): Promise<Ticket[]> {
   return data.map(toTicket);
 }
 
-export async function getTicket(id: string): Promise<TicketDetail | null> {
+// Messages, activity and notes are read alongside, but only returned if the ticket is in this workspace
+export async function getTicket(orgId: string, id: string): Promise<TicketDetail | null> {
   if (!/^\d+$/.test(id)) return null;
 
   const supabase = getSupabase();
@@ -100,6 +104,7 @@ export async function getTicket(id: string): Promise<TicketDetail | null> {
       .from("tickets")
       .select(TICKET_COLUMNS)
       .eq("id", id)
+      .eq("org_id", orgId)
       .returns<TicketRow[]>()
       .maybeSingle(),
     supabase
@@ -165,15 +170,15 @@ export type NewTicket = {
   tags: string[];
 };
 
-export async function createTicket(input: NewTicket): Promise<string> {
+export async function createTicket(orgId: string, input: NewTicket): Promise<string> {
   const supabase = getSupabase();
 
-  // One customer per email, so the same person is recognised across channels
+  // One customer per email in each workspace, so the same person is recognised across channels
   const { data: customer, error: customerError } = await supabase
     .from("customers")
     .upsert(
-      { name: input.customerName, email: input.customerEmail.toLowerCase() },
-      { onConflict: "email", ignoreDuplicates: false }
+      { org_id: orgId, name: input.customerName, email: input.customerEmail.toLowerCase() },
+      { onConflict: "org_id,email", ignoreDuplicates: false }
     )
     .select("id")
     .single();
@@ -183,6 +188,7 @@ export async function createTicket(input: NewTicket): Promise<string> {
   const { data: ticket, error: ticketError } = await supabase
     .from("tickets")
     .insert({
+      org_id: orgId,
       customer_id: customer.id,
       subject: input.subject,
       description: input.description,
@@ -222,10 +228,27 @@ export async function createTicket(input: NewTicket): Promise<string> {
   return String(ticketId);
 }
 
+// Throws unless the ticket exists in this workspace, so ids from another company are refused
+async function assertTicket(orgId: string, ticketId: string) {
+  if (!/^\d+$/.test(ticketId)) throw new Error("Ticket not found");
+
+  const { data, error } = await getSupabase()
+    .from("tickets")
+    .select("id")
+    .eq("id", ticketId)
+    .eq("org_id", orgId)
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to load ticket: ${error.message}`);
+  if (!data) throw new Error("Ticket not found");
+}
+
 export async function addMessage(
+  orgId: string,
   ticketId: string,
   message: Omit<ConversationMessage, "time">
 ) {
+  await assertTicket(orgId, ticketId);
   const supabase = getSupabase();
 
   const { error } = await supabase.from("ticket_messages").insert({
@@ -236,10 +259,11 @@ export async function addMessage(
   });
   if (error) throw new Error(`Failed to save message: ${error.message}`);
 
-  await touchTicket(ticketId);
+  await touchTicket(orgId, ticketId);
 }
 
-export async function addNote(ticketId: string, author: string, body: string) {
+export async function addNote(orgId: string, ticketId: string, author: string, body: string) {
+  await assertTicket(orgId, ticketId);
   const { error } = await getSupabase()
     .from("ticket_notes")
     .insert({ ticket_id: ticketId, author, body });
@@ -247,7 +271,8 @@ export async function addNote(ticketId: string, author: string, body: string) {
   if (error) throw new Error(`Failed to save note: ${error.message}`);
 }
 
-export async function addActivity(ticketId: string, title: string, color: string) {
+export async function addActivity(orgId: string, ticketId: string, title: string, color: string) {
+  await assertTicket(orgId, ticketId);
   const { error } = await getSupabase()
     .from("ticket_activities")
     .insert({ ticket_id: ticketId, title, color });
@@ -256,6 +281,7 @@ export async function addActivity(ticketId: string, title: string, color: string
 }
 
 export async function updateTicket(
+  orgId: string,
   ticketId: string,
   changes: Partial<{ status: TicketStatus; priority: TicketPriority; assignedTo: string }>
 ) {
@@ -267,16 +293,18 @@ export async function updateTicket(
       ...(changes.assignedTo && { assigned_to: changes.assignedTo }),
       updated_at: new Date().toISOString(),
     })
-    .eq("id", ticketId);
+    .eq("id", ticketId)
+    .eq("org_id", orgId);
 
   if (error) throw new Error(`Failed to update ticket: ${error.message}`);
 }
 
-async function touchTicket(ticketId: string) {
+async function touchTicket(orgId: string, ticketId: string) {
   const { error } = await getSupabase()
     .from("tickets")
     .update({ updated_at: new Date().toISOString() })
-    .eq("id", ticketId);
+    .eq("id", ticketId)
+    .eq("org_id", orgId);
 
   if (error) throw new Error(`Failed to update ticket: ${error.message}`);
 }

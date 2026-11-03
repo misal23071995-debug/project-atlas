@@ -57,7 +57,8 @@ function pickArticles(articles: KbArticle[], query: string) {
 function buildPrompt(
   articles: KbArticle[],
   history: { role: "customer" | "bot"; body: string }[],
-  customerName: string
+  customerName: string,
+  brandName: string
 ) {
   const articleText = articles
     .map((a) => `### ${a.title} (${a.category})\n${a.body}`)
@@ -68,7 +69,7 @@ function buildPrompt(
     .map((m) => `${m.role === "customer" ? "Customer" : "Assistant"}: ${m.body}`)
     .join("\n");
 
-  return `You are the Atlas Ring support assistant, chatting with a customer named ${customerName}.
+  return `You are the ${brandName} support assistant, chatting with a customer named ${customerName}.
 
 Rules:
 - Answer ONLY with information from the help articles below. Never invent policies, prices, dates or steps.
@@ -123,7 +124,9 @@ function isBotReply(value: unknown): value is {
 export async function askBot(
   allArticles: KbArticle[],
   history: { role: "customer" | "bot"; body: string }[],
-  customerName: string
+  customerName: string,
+  // The workspace (company) name the bot speaks for
+  brandName: string
 ): Promise<BotReply> {
   const recentCustomerText = history
     .filter((m) => m.role === "customer")
@@ -135,7 +138,7 @@ export async function askBot(
   try {
     const response = await ai.models.generateContent({
       model: MODEL,
-      contents: buildPrompt(articles, history, customerName),
+      contents: buildPrompt(articles, history, customerName, brandName),
       config: {
         responseMimeType: "application/json",
         responseJsonSchema: botReplyJsonSchema,

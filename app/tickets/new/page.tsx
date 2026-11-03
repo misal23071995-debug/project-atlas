@@ -1,7 +1,13 @@
 import DashboardLayout from "@/app/components/dashboard-layout";
 import NewTicketForm from "./NewTicketForm";
+import { redirect } from "next/navigation";
+import { requireSession } from "@/app/lib/auth/session";
+import { can } from "@/app/lib/auth/roles";
 
-export default function NewTicketPage() {
+export default async function NewTicketPage() {
+  const { role } = await requireSession();
+  if (!can(role, "tickets.work")) redirect("/tickets");
+
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-2xl">

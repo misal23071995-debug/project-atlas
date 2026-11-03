@@ -1,6 +1,7 @@
 import Link from "next/link";
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { getKnowledgeGaps } from "@/app/lib/db/bot";
+import { requireSession } from "@/app/lib/auth/session";
 import { HANDOFF_LABELS, type HandoffType } from "@/app/lib/bot/types";
 import { formatDateTime } from "@/app/lib/tickets";
 
@@ -16,7 +17,8 @@ function newArticleLink(topic: string, question: string) {
 }
 
 export default async function KnowledgeGapsPage() {
-  const gaps = await getKnowledgeGaps();
+  const { org } = await requireSession();
+  const gaps = await getKnowledgeGaps(org.id);
 
   return (
     <DashboardLayout>

@@ -6,6 +6,7 @@ import { createServerClient } from "@supabase/ssr";
 import { getSupabaseConfig } from "@/app/lib/supabase-config";
 import { getSupabase } from "@/app/lib/db/supabase";
 import { toAgent, type Agent } from "./agent";
+import { can, type Permission, type Role, type Session, type Workspace } from "./roles";
 
 // Supabase Auth client bound to this request's cookies. Create one per request.
 export async function getAuthClient() {
@@ -38,17 +39,78 @@ export const getCurrentAgent = cache(async (): Promise<Agent | null> => {
   return user ? toAgent(user) : null;
 });
 
-// Everyone with an account, for the Assigned To list. Uses the secret key's admin access.
-export async function listAgents(): Promise<Agent[]> {
-  const { data, error } = await getSupabase().auth.admin.listUsers({ perPage: 1000 });
-  if (error) throw new Error(`Failed to load agents: ${error.message}`);
+// Which workspace a person with several is working in. Only a hint: getSession checks membership.
+export const WORKSPACE_COOKIE = "atlas_workspace";
 
-  return data.users.map(toAgent).sort((a, b) => a.name.localeCompare(b.name));
+type MembershipRow = {
+  role: Role;
+  organization: Workspace | null;
+};
+
+// The signed-in agent, their workspaces and their role in the current one.
+// Null when nobody is signed in; workspaces is empty when they belong to none.
+export const getSession = cache(async (): Promise<Session | { agent: Agent; workspaces: [] } | null> => {
+  const agent = await getCurrentAgent();
+  if (!agent) return null;
+
+  const { data, error } = await getSupabase()
+    .from("memberships")
+    .select("role, organization:organizations (id, name, slug)")
+    .eq("user_id", agent.id)
+    .order("created_at", { ascending: true })
+    .returns<MembershipRow[]>();
+
+  if (error) throw new Error(`Failed to load workspaces: ${error.message}`);
+
+  const workspaces = data
+    .filter((m) => m.organization)
+    .map((m) => ({ ...m.organization!, role: m.role }));
+  if (workspaces.length === 0) return { agent, workspaces: [] };
+
+  const chosenId = (await cookies()).get(WORKSPACE_COOKIE)?.value;
+  const current = workspaces.find((w) => w.id === chosenId) ?? workspaces[0];
+
+  return {
+    agent,
+    org: { id: current.id, name: current.name, slug: current.slug },
+    role: current.role,
+    workspaces,
+  };
+});
+
+// For pages and Server Actions. Sends visitors who aren't signed in to /login and people
+// without a workspace to /welcome. With a permission, refuses roles that don't have it.
+export async function requireSession(permission?: Permission): Promise<Session> {
+  const session = await getSession();
+  if (!session) redirect("/login");
+  if (!("org" in session)) redirect("/welcome");
+  if (permission && !can(session.role, permission)) {
+    throw new Error("Your role doesn't allow this. Ask a workspace admin.");
+  }
+  return session;
 }
 
-// For Server Actions and pages: sends visitors who aren't signed in to /login
-export async function requireAgent() {
-  const agent = await getCurrentAgent();
-  if (!agent) redirect("/login");
-  return agent;
+export interface Member extends Agent {
+  role: Role;
+  joinedAt: string;
+}
+
+// Everyone in a workspace, using the secret key's admin access to read names and emails
+export async function listMembers(orgId: string): Promise<Member[]> {
+  const supabase = getSupabase();
+
+  const [membershipsRes, usersRes] = await Promise.all([
+    supabase.from("memberships").select("user_id, role, created_at").eq("org_id", orgId),
+    supabase.auth.admin.listUsers({ perPage: 1000 }),
+  ]);
+
+  if (membershipsRes.error) throw new Error(`Failed to load team: ${membershipsRes.error.message}`);
+  if (usersRes.error) throw new Error(`Failed to load team: ${usersRes.error.message}`);
+
+  const users = new Map(usersRes.data.users.map((u) => [u.id, u]));
+
+  return membershipsRes.data
+    .filter((m) => users.has(m.user_id))
+    .map((m) => ({ ...toAgent(users.get(m.user_id)!), role: m.role as Role, joinedAt: m.created_at }))
+    .sort((a, b) => a.name.localeCompare(b.name));
 }

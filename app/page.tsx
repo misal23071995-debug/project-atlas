@@ -1,6 +1,6 @@
 import Link from "next/link";
 import DashboardLayout from "./components/dashboard-layout";
-import { getCurrentAgent } from "./lib/auth/session";
+import { requireSession } from "./lib/auth/session";
 import { getDashboardStats } from "./lib/db/dashboard";
 import { getBotStats } from "./lib/db/bot";
 import type { TicketPriority, TicketStatus } from "./lib/tickets";
@@ -54,11 +54,8 @@ function EmptyNote({ children }: { children: React.ReactNode }) {
 }
 
 export default async function Home() {
-  const [agent, stats, botStats] = await Promise.all([
-    getCurrentAgent(),
-    getDashboardStats(),
-    getBotStats(),
-  ]);
+  const { agent, org } = await requireSession();
+  const [stats, botStats] = await Promise.all([getDashboardStats(org.id), getBotStats(org.id)]);
   const firstName = agent?.name.split(" ")[0];
   const now = stats.generatedAt;
 
@@ -164,7 +161,7 @@ export default async function Home() {
               Knowledge gaps
             </Link>
             <Link
-              href="/support"
+              href={`/support/${org.slug}`}
               target="_blank"
               className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
             >

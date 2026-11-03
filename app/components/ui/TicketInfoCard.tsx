@@ -12,6 +12,8 @@ type Props = {
   category: string;
   created: string;
   tags: string[];
+  // For roles that can read tickets but not change them
+  readOnly?: boolean;
 
   onStatusChange: (value: string) => void;
   onPriorityChange: (value: string) => void;
@@ -27,6 +29,7 @@ export default function TicketInfoCard({
   category,
   created,
   tags,
+  readOnly = false,
   onStatusChange,
   onPriorityChange,
   onAssignedChange,
@@ -49,7 +52,8 @@ export default function TicketInfoCard({
           <select
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
-            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1"
+            disabled={readOnly}
+            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1 disabled:opacity-60"
           >
             {TICKET_STATUSES.map((value) => (
               <option key={value}>{value}</option>
@@ -63,7 +67,8 @@ export default function TicketInfoCard({
           <select
             value={priority}
             onChange={(e) => onPriorityChange(e.target.value)}
-            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1"
+            disabled={readOnly}
+            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1 disabled:opacity-60"
           >
             {[...TICKET_PRIORITIES].reverse().map((value) => (
               <option key={value}>{value}</option>
@@ -92,7 +97,8 @@ export default function TicketInfoCard({
           <select
             value={assignedTo}
             onChange={(e) => onAssignedChange(e.target.value)}
-            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1"
+            disabled={readOnly}
+            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1 disabled:opacity-60"
           >
             {assigneeOptions.map((name) => (
               <option key={name}>{name}</option>

@@ -16,10 +16,11 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/app/lib/tickets";
-import { listAgents, requireAgent } from "@/app/lib/auth/session";
+import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { analyzeWithAI } from "@/app/lib/ai/service";
 
-// Every action checks the signed-in agent itself; the proxy alone isn't enough
+// Every action checks the signed-in agent and their role itself; the proxy alone isn't enough.
+// Data calls pass the agent's current workspace, so nobody can touch another company's tickets.
 
 function requireText(value: unknown, field: string, max = 5000) {
   if (typeof value !== "string" || !value.trim()) {
@@ -29,10 +30,10 @@ function requireText(value: unknown, field: string, max = 5000) {
 }
 
 export async function createTicketAction(input: NewTicket) {
-  await requireAgent();
+  const { org } = await requireSession("tickets.work");
   const confidence = Math.max(0, Math.min(100, Math.round(Number(input.confidence) || 0)));
 
-  const id = await createTicket({
+  const id = await createTicket(org.id, {
     customerName: requireText(input.customerName, "Customer name", 200),
     customerEmail: requireText(input.customerEmail, "Customer email", 320),
     subject: requireText(input.subject, "Subject", 300),
@@ -60,7 +61,7 @@ export async function createManualTicketAction(
   _previous: NewTicketFormState,
   formData: FormData
 ): Promise<NewTicketFormState> {
-  const agent = await requireAgent();
+  const { agent, org } = await requireSession("tickets.work");
   const field = (name: string) => String(formData.get(name) ?? "").trim();
 
   const customerEmail = field("customerEmail");
@@ -90,7 +91,7 @@ export async function createManualTicketAction(
       tags: [analysis.intent],
     });
 
-    await addActivity(id, `Logged by ${agent.name}`, "bg-green-500");
+    await addActivity(org.id, id, `Logged by ${agent.name}`, "bg-green-500");
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not create the ticket." };
   }
@@ -99,60 +100,61 @@ export async function createManualTicketAction(
 }
 
 export async function sendReplyAction(ticketId: string, message: string) {
-  const agent = await requireAgent();
+  const { agent, org } = await requireSession("tickets.work");
 
-  await addMessage(ticketId, {
+  await addMessage(org.id, ticketId, {
     sender: agent.name,
     role: "agent",
     message: requireText(message, "Reply"),
   });
-  await addActivity(ticketId, `Reply sent by ${agent.name}`, "bg-indigo-500");
+  await addActivity(org.id, ticketId, `Reply sent by ${agent.name}`, "bg-indigo-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
 }
 
 export async function addNoteAction(ticketId: string, note: string) {
-  const agent = await requireAgent();
+  const { agent, org } = await requireSession("tickets.note");
 
-  await addNote(ticketId, agent.name, requireText(note, "Note"));
-  await addActivity(ticketId, `Note added by ${agent.name}`, "bg-zinc-500");
+  await addNote(org.id, ticketId, agent.name, requireText(note, "Note"));
+  await addActivity(org.id, ticketId, `Note added by ${agent.name}`, "bg-zinc-500");
 
   revalidatePath(`/tickets/${ticketId}`);
 }
 
 export async function updateStatusAction(ticketId: string, status: TicketStatus) {
-  const agent = await requireAgent();
+  const { agent, org } = await requireSession("tickets.work");
   if (!TICKET_STATUSES.includes(status)) throw new Error("Invalid status");
 
-  await updateTicket(ticketId, { status });
-  await addActivity(ticketId, `Status changed to ${status} by ${agent.name}`, "bg-blue-500");
+  await updateTicket(org.id, ticketId, { status });
+  await addActivity(org.id, ticketId, `Status changed to ${status} by ${agent.name}`, "bg-blue-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
 }
 
 export async function updatePriorityAction(ticketId: string, priority: TicketPriority) {
-  const agent = await requireAgent();
+  const { agent, org } = await requireSession("tickets.work");
   if (!TICKET_PRIORITIES.includes(priority)) throw new Error("Invalid priority");
 
-  await updateTicket(ticketId, { priority });
-  await addActivity(ticketId, `Priority changed to ${priority} by ${agent.name}`, "bg-orange-500");
+  await updateTicket(org.id, ticketId, { priority });
+  await addActivity(org.id, ticketId, `Priority changed to ${priority} by ${agent.name}`, "bg-orange-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
 }
 
 export async function assignTicketAction(ticketId: string, assignedTo: string) {
-  const agent = await requireAgent();
+  const { agent, org } = await requireSession("tickets.work");
   const assignee = requireText(assignedTo, "Agent", 100);
-  const agentNames = (await listAgents()).map((a) => a.name);
+  // Only people in this workspace who can work tickets
+  const agentNames = (await listMembers(org.id)).filter((m) => m.role !== "qa").map((m) => m.name);
   if (assignee !== "Unassigned" && !agentNames.includes(assignee)) {
     throw new Error("Choose an agent from the list");
   }
 
-  await updateTicket(ticketId, { assignedTo: assignee });
-  await addActivity(ticketId, `Assigned to ${assignee} by ${agent.name}`, "bg-purple-500");
+  await updateTicket(org.id, ticketId, { assignedTo: assignee });
+  await addActivity(org.id, ticketId, `Assigned to ${assignee} by ${agent.name}`, "bg-purple-500");
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");

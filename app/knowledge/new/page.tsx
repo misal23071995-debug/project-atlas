@@ -1,6 +1,9 @@
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { KB_CATEGORIES, type KbCategory } from "@/app/lib/bot/types";
 import ArticleForm from "../ArticleForm";
+import { requireSession } from "@/app/lib/auth/session";
+import { can } from "@/app/lib/auth/roles";
+import { redirect } from "next/navigation";
 
 export default async function NewArticlePage({
   searchParams,
@@ -8,6 +11,9 @@ export default async function NewArticlePage({
   searchParams: Promise<{ category?: string; question?: string }>;
 }) {
   // Filled in when coming from "Write article" on the Knowledge Gaps report
+  const { role } = await requireSession();
+  if (!can(role, "knowledge.edit")) redirect("/knowledge");
+
   const { category, question } = await searchParams;
   const defaultCategory = KB_CATEGORIES.includes(category as KbCategory) ? category : undefined;
 

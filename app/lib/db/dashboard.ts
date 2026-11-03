@@ -54,7 +54,7 @@ function isOpen(status: TicketStatus) {
 
 // Reads every ticket and summarises it in memory. Fine for thousands of
 // tickets; move the counting into SQL views if the table grows far beyond that.
-export async function getDashboardStats(): Promise<DashboardStats> {
+export async function getDashboardStats(orgId: string): Promise<DashboardStats> {
   const supabase = getSupabase();
 
   const [ticketsRes, repliesRes] = await Promise.all([
@@ -63,12 +63,15 @@ export async function getDashboardStats(): Promise<DashboardStats> {
       .select(
         "id, subject, priority, status, assigned_to, channel, created_at, updated_at, customer:customers (name)"
       )
+      .eq("org_id", orgId)
       .order("updated_at", { ascending: false })
       .returns<DashboardTicketRow[]>(),
     supabase
       .from("ticket_messages")
-      .select("ticket_id, created_at")
+      // Inner join so only replies on this workspace's tickets come back
+      .select("ticket_id, created_at, ticket:tickets!inner (org_id)")
       .eq("role", "agent")
+      .eq("ticket.org_id", orgId)
       .order("created_at", { ascending: true }),
   ]);
 

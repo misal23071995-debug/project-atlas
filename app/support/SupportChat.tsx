@@ -11,19 +11,21 @@ import {
 } from "./actions";
 import ChatRating from "./ChatRating";
 
-const SUGGESTIONS = [
-  "My ring isn't syncing",
-  "How long does the battery last?",
-  "What is your return policy?",
-  "How do I find my ring size?",
-];
-
 type ChatState = "intro" | "chatting" | "ended";
 
 const inputClass =
   "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
 
-export default function SupportChat() {
+export default function SupportChat({
+  workspaceSlug,
+  workspaceName,
+  suggestions = [],
+}: {
+  workspaceSlug: string;
+  workspaceName: string;
+  // Example questions shown as buttons before the customer types anything
+  suggestions?: string[];
+}) {
   const [state, setState] = useState<ChatState>("intro");
   const [conversationId, setConversationId] = useState<string | null>(null);
   const [messages, setMessages] = useState<BotChatMessage[]>([]);
@@ -43,7 +45,7 @@ export default function SupportChat() {
     event.preventDefault();
     setError(null);
     startTransition(async () => {
-      const result = await startSupportChatAction(name, email);
+      const result = await startSupportChatAction(workspaceSlug, name, email);
       if (!result.ok) {
         setError(result.error);
         return;
@@ -73,7 +75,7 @@ export default function SupportChat() {
         } else if (!outgoing) {
           // "That solved it" ends the chat too
           setState("ended");
-          setEndNote("Chat closed. Thanks for contacting Atlas Ring support.");
+          setEndNote(`Chat closed. Thanks for contacting ${workspaceName} support.`);
         }
       } catch {
         setError("Something went wrong. Please try again.");
@@ -183,9 +185,9 @@ export default function SupportChat() {
         </div>
       ) : (
         <div className="space-y-3 border-t border-zinc-800 p-4">
-          {!customerHasWritten && (
+          {!customerHasWritten && suggestions.length > 0 && (
             <div className="flex flex-wrap gap-2">
-              {SUGGESTIONS.map((suggestion) => (
+              {suggestions.map((suggestion) => (
                 <button
                   key={suggestion}
                   type="button"

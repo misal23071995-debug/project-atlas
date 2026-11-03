@@ -2,8 +2,16 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseConfig } from "@/app/lib/supabase-config";
 
-// Pages anyone can open: the agent login and the customer support chat
-const PUBLIC_PATHS = ["/login", "/support"];
+// Pages anyone can open: login, creating a company workspace, and each company's customer chat
+const PUBLIC_PATHS = ["/login", "/signup"];
+const PUBLIC_PREFIXES = ["/support"];
+
+function isPublic(pathname: string) {
+  return (
+    PUBLIC_PATHS.includes(pathname) ||
+    PUBLIC_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+  );
+}
 
 // Every other page and API route needs a signed-in agent.
 // This also refreshes the Supabase session cookie before it expires.
@@ -35,9 +43,9 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   const { pathname, search } = request.nextUrl;
-  const isLoginPage = pathname === "/login";
+  const isLoginPage = pathname === "/login" || pathname === "/signup";
 
-  if (!user && !PUBLIC_PATHS.includes(pathname)) {
+  if (!user && !isPublic(pathname)) {
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ success: false, error: "Not signed in" }, { status: 401 });
     }

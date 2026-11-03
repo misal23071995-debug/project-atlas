@@ -1,6 +1,6 @@
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { getTicket } from "@/app/lib/db/tickets";
-import { listAgents } from "@/app/lib/auth/session";
+import { listMembers, requireSession } from "@/app/lib/auth/session";
 import TicketDetailView from "./TicketDetailView";
 
 // Always read the latest conversation from the database
@@ -12,7 +12,8 @@ export default async function TicketDetailsPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [ticket, agents] = await Promise.all([getTicket(id), listAgents()]);
+  const { org } = await requireSession();
+  const [ticket, members] = await Promise.all([getTicket(org.id, id), listMembers(org.id)]);
 
   if (!ticket) {
     return (
@@ -30,5 +31,5 @@ export default async function TicketDetailsPage({
     );
   }
 
-  return <TicketDetailView ticket={ticket} agentNames={agents.map((agent) => agent.name)} />;
+  return <TicketDetailView ticket={ticket} agentNames={members.filter((m) => m.role !== "qa").map((m) => m.name)} />;
 }

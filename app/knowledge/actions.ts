@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { requireAgent } from "@/app/lib/auth/session";
+import { requireSession } from "@/app/lib/auth/session";
 import { KB_CATEGORIES, type KbCategory } from "@/app/lib/bot/types";
 import { deleteArticle, saveArticle } from "@/app/lib/db/bot";
 
@@ -14,7 +14,7 @@ export async function saveArticleAction(
   _previous: ArticleFormState,
   formData: FormData
 ): Promise<ArticleFormState> {
-  await requireAgent();
+  const { org } = await requireSession("knowledge.edit");
 
   const id = String(formData.get("id") ?? "") || null;
   const title = String(formData.get("title") ?? "").trim().slice(0, 200);
@@ -28,7 +28,7 @@ export async function saveArticleAction(
   if (id && !/^\d+$/.test(id)) return { error: "Unknown article." };
 
   try {
-    await saveArticle(id, { title, category, body, published });
+    await saveArticle(org.id, id, { title, category, body, published });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not save the article." };
   }
@@ -38,10 +38,10 @@ export async function saveArticleAction(
 }
 
 export async function deleteArticleAction(id: string) {
-  await requireAgent();
+  const { org } = await requireSession("knowledge.edit");
   if (!/^\d+$/.test(id)) throw new Error("Unknown article");
 
-  await deleteArticle(id);
+  await deleteArticle(org.id, id);
   revalidatePath("/knowledge");
   redirect("/knowledge");
 }

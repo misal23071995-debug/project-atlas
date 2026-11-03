@@ -1,7 +1,7 @@
 -- Atlas database schema.
--- Run once in the Supabase dashboard: SQL Editor -> New query -> paste -> Run.
--- Safe to re-run: it only creates what is missing and seeds the demo ticket once.
--- For a new project, also run supabase/migrations/003_support_bot.sql (support bot tables and articles).
+-- For a new project: run this once in the Supabase dashboard (SQL Editor -> New query -> paste -> Run),
+-- then every file in supabase/migrations/ in order. 006 adds workspaces (one per company) and roles.
+-- Don't re-run this file after 006: the demo seed below predates workspaces.
 
 create table if not exists customers (
   id uuid primary key default gen_random_uuid(),

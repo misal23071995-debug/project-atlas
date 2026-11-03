@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 
 import DashboardLayout from "@/app/components/dashboard-layout";
+import { useCan } from "@/app/components/AgentProvider";
 import ReplyEditor from "@/app/components/ui/ReplyEditor";
 import CustomerCard from "@/app/components/ui/CustomerCard";
 import TicketInfoCard from "@/app/components/ui/TicketInfoCard";
@@ -33,6 +34,7 @@ export default function TicketDetailView({
   const [reply, setReply] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+  const canWork = useCan("tickets.work");
 
   // Run a server action; the page re-renders with fresh data when it finishes
   function run(action: () => Promise<void>, onSuccess?: () => void) {
@@ -119,11 +121,17 @@ export default function TicketDetailView({
           </div>
 
           {/* Reply Editor */}
-          <ReplyEditor
-            value={reply}
-            onChange={setReply}
-            onSend={handleSendReply}
-          />
+          {canWork ? (
+            <ReplyEditor
+              value={reply}
+              onChange={setReply}
+              onSend={handleSendReply}
+            />
+          ) : (
+            <p className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-400">
+              Your role can read this ticket and leave internal notes, but not reply or change it.
+            </p>
+          )}
 
           {/* Internal Notes */}
           <InternalNotes
@@ -166,6 +174,7 @@ export default function TicketDetailView({
             category={ticket.category}
             created={formatDateTime(ticket.createdAt)}
             tags={ticket.tags}
+            readOnly={!canWork}
             onStatusChange={(status) =>
               run(() => updateStatusAction(ticket.id, status as TicketStatus))
             }
@@ -177,10 +186,12 @@ export default function TicketDetailView({
             }
           />
 
-          <AICopilot
-            customerMessage={latestCustomerMessage}
-            onUseReply={setReply}
-          />
+          {canWork && (
+            <AICopilot
+              customerMessage={latestCustomerMessage}
+              onUseReply={setReply}
+            />
+          )}
         </div>
       </div>
     </DashboardLayout>

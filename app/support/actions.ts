@@ -20,9 +20,11 @@ import {
 } from "@/app/lib/db/bot";
 import { addActivity, createTicket } from "@/app/lib/db/tickets";
 import type { TicketPriority } from "@/app/lib/tickets";
+import { getWorkspaceBySlug } from "@/app/lib/db/workspaces";
 
 // These actions are public: customers use them without signing in.
-// The conversation id (a random UUID) is what lets a customer continue their own chat.
+// The conversation id (a random UUID) is what lets a customer continue their own chat,
+// and the conversation's workspace decides which articles the bot reads and where tickets go.
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -30,15 +32,22 @@ export type StartResult =
   | { ok: true; conversationId: string; greeting: BotChatMessage }
   | { ok: false; error: string };
 
-export async function startSupportChatAction(name: string, email: string): Promise<StartResult> {
+export async function startSupportChatAction(
+  workspaceSlug: string,
+  name: string,
+  email: string
+): Promise<StartResult> {
   const customerName = String(name ?? "").trim().slice(0, 100);
   const customerEmail = String(email ?? "").trim().toLowerCase().slice(0, 320);
 
   if (!customerName) return { ok: false, error: "Please enter your name." };
   if (!EMAIL_PATTERN.test(customerEmail)) return { ok: false, error: "Please enter a valid email." };
 
-  const conversationId = await createConversation(customerName, customerEmail);
-  const greeting = `Hi ${customerName.split(" ")[0]}! I'm the Atlas Ring assistant. Ask me about setup, syncing, battery, sizing, orders, returns or warranty. If I can't help, I'll pass you to our team.`;
+  const workspace = await getWorkspaceBySlug(String(workspaceSlug ?? ""));
+  if (!workspace) return { ok: false, error: "This support page doesn't exist." };
+
+  const conversationId = await createConversation(workspace.id, customerName, customerEmail);
+  const greeting = `Hi ${customerName.split(" ")[0]}! I'm the ${workspace.name} support assistant. Ask me your question, and if I can't help, I'll pass you to our team.`;
   await addConversationMessage(conversationId, "bot", greeting);
 
   return { ok: true, conversationId, greeting: { role: "bot", body: greeting } };
@@ -76,10 +85,10 @@ export async function sendSupportMessageAction(
   await updateConversation(conversation.id, { customerMessages: conversation.customerMessages + 1 });
 
   const [articles, history] = await Promise.all([
-    listArticles({ publishedOnly: true }),
+    listArticles(conversation.orgId, { publishedOnly: true }),
     getConversationMessages(conversation.id),
   ]);
-  const answer = await askBot(articles, history, conversation.customerName);
+  const answer = await askBot(articles, history, conversation.customerName, conversation.orgName);
 
   await addConversationMessage(conversation.id, "bot", answer.reply, answer.sources);
   await updateConversation(conversation.id, { topic: answer.topic });
@@ -157,11 +166,11 @@ async function handOff(
 ) {
   const history = await getConversationMessages(conversation.id);
   const transcript = history
-    .map((m) => `${m.role === "customer" ? conversation.customerName : "Atlas Bot"}: ${m.body}`)
+    .map((m) => `${m.role === "customer" ? conversation.customerName : "Support bot"}: ${m.body}`)
     .join("\n\n");
   const firstQuestion = history.find((m) => m.role === "customer")?.body ?? "Support chat";
 
-  const ticketId = await createTicket({
+  const ticketId = await createTicket(conversation.orgId, {
     customerName: conversation.customerName,
     customerEmail: conversation.customerEmail,
     subject: firstQuestion.length > 80 ? `${firstQuestion.slice(0, 77)}...` : firstQuestion,
@@ -176,7 +185,7 @@ async function handOff(
     tags: ["Bot handover", topic],
   });
 
-  await addActivity(ticketId, `Handed over by the AI chatbot: ${reason}`, "bg-amber-500");
+  await addActivity(conversation.orgId, ticketId, `Handed over by the AI chatbot: ${reason}`, "bg-amber-500");
   await updateConversation(conversation.id, {
     status: "handed_off",
     ticketId,
