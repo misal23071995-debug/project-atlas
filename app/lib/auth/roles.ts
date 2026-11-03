@@ -29,6 +29,7 @@ const PERMISSIONS = {
   "quality.scorecard": ["admin", "lead"],
   // Build the roster and approve leave. Everyone can see the roster and request leave.
   "roster.manage": ["admin", "lead"],
+  "capacity.manage": ["admin", "lead"],
   "team.manage": ["admin"],
   "workspace.manage": ["admin"],
 } as const satisfies Record<string, readonly Role[]>;
