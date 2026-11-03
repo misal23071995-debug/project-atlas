@@ -152,13 +152,21 @@ export default async function Home() {
               Customer chats in the last 30 days, and how many needed an agent
             </p>
           </div>
-          <Link
-            href="/support"
-            target="_blank"
-            className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
-          >
-            Open customer chat ↗
-          </Link>
+          <div className="flex gap-4">
+            <Link
+              href="/knowledge/gaps"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+            >
+              Knowledge gaps
+            </Link>
+            <Link
+              href="/support"
+              target="_blank"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400"
+            >
+              Open customer chat ↗
+            </Link>
+          </div>
         </div>
 
         {botStats === null ? (

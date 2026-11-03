@@ -1,6 +1,6 @@
 import "server-only";
 import { getSupabase } from "./supabase";
-import type { BotConversationStatus, KbArticle } from "@/app/lib/bot/types";
+import type { BotConversationStatus, HandoffType, KbArticle } from "@/app/lib/bot/types";
 
 type ArticleRow = {
   id: number;
@@ -128,10 +128,15 @@ export async function getConversationMessages(id: string) {
   return data as { role: "customer" | "bot"; body: string }[];
 }
 
-export async function addConversationMessage(id: string, role: "customer" | "bot", body: string) {
+export async function addConversationMessage(
+  id: string,
+  role: "customer" | "bot",
+  body: string,
+  sources: string[] = []
+) {
   const { error } = await getSupabase()
     .from("bot_messages")
-    .insert({ conversation_id: id, role, body });
+    .insert({ conversation_id: id, role, body, sources });
 
   if (error) throw new Error(`Failed to save message: ${error.message}`);
 }
@@ -143,6 +148,8 @@ export async function updateConversation(
     topic: string;
     ticketId: string;
     customerMessages: number;
+    handoffReason: string;
+    handoffType: HandoffType;
   }>
 ) {
   const { error } = await getSupabase()
@@ -152,6 +159,8 @@ export async function updateConversation(
       ...(changes.topic && { topic: changes.topic }),
       ...(changes.ticketId && { ticket_id: changes.ticketId }),
       ...(changes.customerMessages !== undefined && { customer_messages: changes.customerMessages }),
+      ...(changes.handoffReason && { handoff_reason: changes.handoffReason }),
+      ...(changes.handoffType && { handoff_type: changes.handoffType }),
       updated_at: new Date().toISOString(),
     })
     .eq("id", id);
@@ -205,5 +214,102 @@ export async function getBotStats(): Promise<BotStats | null> {
       .map(([topic, count]) => ({ topic, count }))
       .sort((a, b) => b.count - a.count)
       .slice(0, 5),
+  };
+}
+
+// ---- Knowledge gaps ----
+
+export interface HandoffItem {
+  conversationId: string;
+  question: string;
+  reason: string;
+  topic: string;
+  ticketId: string | null;
+  // ISO timestamp
+  createdAt: string;
+}
+
+export interface KnowledgeGaps {
+  totalChats: number;
+  handoffs: number;
+  // Every handover type, with how many chats it caused
+  byType: { type: HandoffType | "unknown"; count: number }[];
+  // Questions no article answers, grouped by topic, biggest group first
+  missingArticles: { topic: string; items: HandoffItem[] }[];
+  // Handovers for other reasons (staff actions, upset customers...), newest first
+  otherHandoffs: (HandoffItem & { type: HandoffType | "unknown" })[];
+}
+
+type HandoffRow = {
+  id: string;
+  topic: string | null;
+  handoff_type: HandoffType | null;
+  handoff_reason: string | null;
+  ticket_id: number | null;
+  created_at: string;
+  bot_messages: { role: "customer" | "bot"; body: string; created_at: string }[];
+};
+
+// Last 30 days. Returns null until migration 004 has been run.
+export async function getKnowledgeGaps(): Promise<KnowledgeGaps | null> {
+  const supabase = getSupabase();
+  const since = new Date(Date.now() - 30 * DAY_MS).toISOString();
+
+  const [chatsRes, handoffsRes] = await Promise.all([
+    supabase
+      .from("bot_conversations")
+      .select("id", { count: "exact", head: true })
+      .gt("customer_messages", 0)
+      .gte("created_at", since),
+    supabase
+      .from("bot_conversations")
+      .select(
+        "id, topic, handoff_type, handoff_reason, ticket_id, created_at, bot_messages (role, body, created_at)"
+      )
+      .eq("status", "handed_off")
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .returns<HandoffRow[]>(),
+  ]);
+
+  // 42703: column missing (migration 004 not run); PGRST205: table missing
+  if (handoffsRes.error && ["42703", "PGRST205"].includes(handoffsRes.error.code)) return null;
+  if (handoffsRes.error) throw new Error(`Failed to load knowledge gaps: ${handoffsRes.error.message}`);
+  if (chatsRes.error) throw new Error(`Failed to load knowledge gaps: ${chatsRes.error.message}`);
+
+  const items = handoffsRes.data.map((row) => {
+    const firstQuestion = [...row.bot_messages]
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+      .find((m) => m.role === "customer");
+
+    return {
+      conversationId: row.id,
+      question: firstQuestion?.body ?? "(no question)",
+      reason: row.handoff_reason ?? "",
+      topic: row.topic ?? "Other",
+      ticketId: row.ticket_id === null ? null : String(row.ticket_id),
+      createdAt: row.created_at,
+      type: (row.handoff_type ?? "unknown") as HandoffType | "unknown",
+    };
+  });
+
+  const typeCounts = new Map<HandoffType | "unknown", number>();
+  for (const item of items) typeCounts.set(item.type, (typeCounts.get(item.type) ?? 0) + 1);
+
+  const gapsByTopic = new Map<string, HandoffItem[]>();
+  for (const item of items.filter((i) => i.type === "not_covered")) {
+    gapsByTopic.set(item.topic, [...(gapsByTopic.get(item.topic) ?? []), item]);
+  }
+
+  return {
+    totalChats: chatsRes.count ?? 0,
+    handoffs: items.length,
+    byType: [...typeCounts]
+      .map(([type, count]) => ({ type, count }))
+      .sort((a, b) => b.count - a.count),
+    missingArticles: [...gapsByTopic]
+      .map(([topic, topicItems]) => ({ topic, items: topicItems }))
+      .sort((a, b) => b.items.length - a.items.length),
+    otherHandoffs: items.filter((i) => i.type !== "not_covered"),
   };
 }

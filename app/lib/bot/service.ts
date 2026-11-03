@@ -1,7 +1,7 @@
 import "server-only";
 import { ai } from "@/app/lib/ai/provider";
 import { SENTIMENTS } from "@/app/lib/llm/schemas";
-import { KB_CATEGORIES, type KbArticle } from "./types";
+import { HANDOFF_TYPES, KB_CATEGORIES, type HandoffType, type KbArticle } from "./types";
 
 const MODEL = "models/gemini-3.5-flash-lite";
 const MAX_ARTICLES_IN_PROMPT = 6;
@@ -12,6 +12,7 @@ export interface BotReply {
   needsHuman: boolean;
   // Why the bot is handing over, shown to the agent on the ticket
   handoffReason: string;
+  handoffType: HandoffType | null;
   topic: (typeof KB_CATEGORIES)[number];
   sentiment: (typeof SENTIMENTS)[number];
   sources: string[];
@@ -23,12 +24,13 @@ const botReplyJsonSchema = {
     reply: { type: "string" },
     needs_human: { type: "boolean" },
     handoff_reason: { type: "string" },
+    handoff_type: { type: "string", enum: [...HANDOFF_TYPES, "none"] },
     topic: { type: "string", enum: [...KB_CATEGORIES] },
     sentiment: { type: "string", enum: [...SENTIMENTS] },
     sources: { type: "array", items: { type: "string" } },
   },
-  required: ["reply", "needs_human", "handoff_reason", "topic", "sentiment", "sources"],
-  propertyOrdering: ["reply", "needs_human", "handoff_reason", "topic", "sentiment", "sources"],
+  required: ["reply", "needs_human", "handoff_reason", "handoff_type", "topic", "sentiment", "sources"],
+  propertyOrdering: ["reply", "needs_human", "handoff_reason", "handoff_type", "topic", "sentiment", "sources"],
 };
 
 const words = (text: string) => text.toLowerCase().match(/[a-z0-9]{3,}/g) ?? [];
@@ -80,6 +82,9 @@ Rules:
 - Never ask for passwords or full card numbers.
 - sources: the exact titles of the articles you used (empty if none).
 - handoff_reason: one short sentence for the agent explaining why; empty if needs_human is false.
+- handoff_type: "none" if needs_human is false. Otherwise pick the main reason:
+  "not_covered" (no article answers the question), "needs_staff" (only staff can do it),
+  "customer_request" (they asked for a person), or "upset" (angry, or the steps didn't help).
 - topic: the help category that best fits the customer's question.
 
 Help articles:
@@ -95,6 +100,7 @@ function isBotReply(value: unknown): value is {
   reply: string;
   needs_human: boolean;
   handoff_reason: string;
+  handoff_type: HandoffType | "none";
   topic: BotReply["topic"];
   sentiment: BotReply["sentiment"];
   sources: string[];
@@ -107,6 +113,7 @@ function isBotReply(value: unknown): value is {
     v.reply.trim() !== "" &&
     typeof v.needs_human === "boolean" &&
     typeof v.handoff_reason === "string" &&
+    (v.handoff_type === "none" || HANDOFF_TYPES.includes(v.handoff_type as HandoffType)) &&
     KB_CATEGORIES.includes(v.topic as BotReply["topic"]) &&
     SENTIMENTS.includes(v.sentiment as BotReply["sentiment"]) &&
     Array.isArray(v.sources)
@@ -145,6 +152,12 @@ export async function askBot(
       reply: parsed.reply.trim(),
       needsHuman: parsed.needs_human,
       handoffReason: parsed.handoff_reason.trim(),
+      // If the model says "none" but still needs a human, treat it as a gap so it gets reviewed
+      handoffType: parsed.needs_human
+        ? parsed.handoff_type === "none"
+          ? "not_covered"
+          : parsed.handoff_type
+        : null,
       topic: parsed.topic,
       sentiment: parsed.sentiment,
       sources: parsed.sources.filter((title) => titles.has(title)),
@@ -157,6 +170,7 @@ export async function askBot(
         "Sorry, I'm having trouble answering right now. I've passed your question to our support team, and an agent will follow up with you by email.",
       needsHuman: true,
       handoffReason: "The AI assistant was unavailable.",
+      handoffType: "unavailable",
       topic: "Other",
       sentiment: "Neutral",
       sources: [],

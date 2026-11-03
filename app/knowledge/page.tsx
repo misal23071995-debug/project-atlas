@@ -24,12 +24,20 @@ export default async function KnowledgePage() {
           </p>
         </div>
 
-        <Link
-          href="/knowledge/new"
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
-        >
-          New article
-        </Link>
+        <div className="flex gap-2">
+          <Link
+            href="/knowledge/gaps"
+            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 hover:bg-zinc-800"
+          >
+            Knowledge gaps
+          </Link>
+          <Link
+            href="/knowledge/new"
+            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500"
+          >
+            New article
+          </Link>
+        </div>
       </div>
 
       {articles === null ? (

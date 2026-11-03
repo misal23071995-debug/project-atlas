@@ -40,6 +40,25 @@ export interface BotChatMessage {
 
 export type BotConversationStatus = "active" | "resolved" | "handed_off";
 
+// Why a chat went to an agent. Keep in sync with supabase/migrations/004_handoff_reasons.sql
+export const HANDOFF_TYPES = [
+  "not_covered",
+  "needs_staff",
+  "customer_request",
+  "upset",
+  "unavailable",
+] as const;
+
+export type HandoffType = (typeof HANDOFF_TYPES)[number];
+
+export const HANDOFF_LABELS: Record<HandoffType, string> = {
+  not_covered: "No article covers it",
+  needs_staff: "Needs a staff action",
+  customer_request: "Asked for a person",
+  upset: "Customer upset",
+  unavailable: "AI unavailable",
+};
+
 // Per conversation, to protect the free Gemini quota from abuse
 export const MAX_CUSTOMER_MESSAGES = 20;
 export const MAX_MESSAGE_LENGTH = 1000;

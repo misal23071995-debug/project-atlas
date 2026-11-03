@@ -8,7 +8,13 @@ const inputClass =
   "mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
 const labelClass = "block text-sm font-medium text-zinc-300";
 
-export default function ArticleForm({ article }: { article?: KbArticle }) {
+export default function ArticleForm({
+  article,
+  defaultCategory,
+}: {
+  article?: KbArticle;
+  defaultCategory?: string;
+}) {
   const [state, action, pending] = useActionState<ArticleFormState, FormData>(saveArticleAction, {});
   const [deleting, startDelete] = useTransition();
 
@@ -23,7 +29,7 @@ export default function ArticleForm({ article }: { article?: KbArticle }) {
 
       <label className={labelClass}>
         Category
-        <select name="category" defaultValue={article?.category ?? KB_CATEGORIES[0]} className={inputClass}>
+        <select name="category" defaultValue={article?.category ?? defaultCategory ?? KB_CATEGORIES[0]} className={inputClass}>
           {KB_CATEGORIES.map((category) => (
             <option key={category}>{category}</option>
           ))}

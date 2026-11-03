@@ -6,6 +6,7 @@ import {
   MAX_CUSTOMER_MESSAGES,
   MAX_MESSAGE_LENGTH,
   type BotChatMessage,
+  type HandoffType,
 } from "@/app/lib/bot/types";
 import {
   addConversationMessage,
@@ -62,7 +63,7 @@ export async function sendSupportMessageAction(
     return { ok: false, error: "This chat has ended. Please start a new one if you need more help." };
   }
   if (conversation.customerMessages >= MAX_CUSTOMER_MESSAGES) {
-    await handOff(conversation, "The chat reached the message limit.", "Medium");
+    await handOff(conversation, "The chat reached the message limit.", "upset", "Medium");
     return {
       ok: true,
       handedOff: true,
@@ -79,13 +80,19 @@ export async function sendSupportMessageAction(
   ]);
   const answer = await askBot(articles, history, conversation.customerName);
 
-  await addConversationMessage(conversation.id, "bot", answer.reply);
+  await addConversationMessage(conversation.id, "bot", answer.reply, answer.sources);
   await updateConversation(conversation.id, { topic: answer.topic });
 
   if (answer.needsHuman) {
     const priority: TicketPriority =
       answer.sentiment === "Angry" ? "High" : answer.sentiment === "Frustrated" ? "Medium" : "Low";
-    await handOff(conversation, answer.handoffReason || "The assistant could not resolve this.", priority, answer.topic);
+    await handOff(
+      conversation,
+      answer.handoffReason || "The assistant could not resolve this.",
+      answer.handoffType ?? "not_covered",
+      priority,
+      answer.topic
+    );
   }
 
   return {
@@ -103,7 +110,7 @@ export async function requestHumanAction(conversationId: string): Promise<SendRe
 
   const reply = "No problem. I've passed our conversation to the support team, and an agent will follow up with you by email.";
   await addConversationMessage(conversation.id, "bot", reply);
-  await handOff(conversation, "The customer asked to talk to a person.", "Medium");
+  await handOff(conversation, "The customer asked to talk to a person.", "customer_request", "Medium");
 
   return { ok: true, handedOff: true, reply: { role: "bot", body: reply } };
 }
@@ -126,6 +133,7 @@ export async function markResolvedAction(conversationId: string): Promise<SendRe
 async function handOff(
   conversation: BotConversation,
   reason: string,
+  type: HandoffType,
   priority: TicketPriority,
   topic = "Other"
 ) {
@@ -151,7 +159,12 @@ async function handOff(
   });
 
   await addActivity(ticketId, `Handed over by the AI chatbot: ${reason}`, "bg-amber-500");
-  await updateConversation(conversation.id, { status: "handed_off", ticketId });
+  await updateConversation(conversation.id, {
+    status: "handed_off",
+    ticketId,
+    handoffReason: reason,
+    handoffType: type,
+  });
 
   revalidatePath("/tickets");
   revalidatePath("/");
