@@ -5,6 +5,7 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/app/lib/tickets";
+import { firstResponseClock, isAtRisk, isBreached, resolutionClock, type TicketSla } from "@/app/lib/sla";
 
 const CLOSED_STATUSES: TicketStatus[] = ["Resolved", "Closed"];
 const DAY_MS = 24 * 60 * 60 * 1000;
@@ -18,6 +19,12 @@ type DashboardTicketRow = {
   channel: string;
   created_at: string;
   updated_at: string;
+  first_response_at: string | null;
+  resolved_at: string | null;
+  first_response_due_at: string | null;
+  resolution_due_at: string | null;
+  sla_paused_at: string | null;
+  sla_paused_minutes: number;
   customer: { name: string } | null;
 };
 
@@ -42,10 +49,29 @@ export interface DashboardStats {
   resolvedThisWeek: number;
   // Average minutes from a ticket being created to the first agent reply; null with no replies yet
   avgFirstResponseMinutes: number | null;
+  // Open tickets past a due time, and those close to one
+  slaBreached: number;
+  slaAtRisk: number;
+  // Share of SLA clocks that finished in the last 7 days on time; null when none finished
+  slaMetPercent: number | null;
   backlogByPriority: { priority: TicketPriority; count: number }[];
   byChannel: { channel: string; total: number; open: number }[];
   byAgent: { name: string; open: number; resolved: number }[];
   recent: RecentTicket[];
+}
+
+function toSla(t: DashboardTicketRow): TicketSla {
+  return {
+    priority: t.priority,
+    status: t.status,
+    createdAt: t.created_at,
+    firstResponseAt: t.first_response_at,
+    resolvedAt: t.resolved_at,
+    firstResponseDueAt: t.first_response_due_at,
+    resolutionDueAt: t.resolution_due_at,
+    slaPausedAt: t.sla_paused_at,
+    slaPausedMinutes: t.sla_paused_minutes,
+  };
 }
 
 function isOpen(status: TicketStatus) {
@@ -61,7 +87,7 @@ export async function getDashboardStats(orgId: string): Promise<DashboardStats> 
     supabase
       .from("tickets")
       .select(
-        "id, subject, priority, status, assigned_to, channel, created_at, updated_at, customer:customers (name)"
+        "id, subject, priority, status, assigned_to, channel, created_at, updated_at, first_response_at, resolved_at, first_response_due_at, resolution_due_at, sla_paused_at, sla_paused_minutes, customer:customers (name)"
       )
       .eq("org_id", orgId)
       .order("updated_at", { ascending: false })
@@ -85,9 +111,8 @@ export async function getDashboardStats(orgId: string): Promise<DashboardStats> 
   // "Today" means the last 24 hours, so it doesn't depend on a time zone
   const newToday = tickets.filter((t) => now - Date.parse(t.created_at) < DAY_MS).length;
 
-  // A resolved ticket's updated_at is when it was last changed, which is close enough to when it was resolved
   const resolvedThisWeek = tickets.filter(
-    (t) => !isOpen(t.status) && now - Date.parse(t.updated_at) < 7 * DAY_MS
+    (t) => !isOpen(t.status) && now - Date.parse(t.resolved_at ?? t.updated_at) < 7 * DAY_MS
   ).length;
 
   // Replies are sorted oldest first, so the first one seen per ticket is the first response
@@ -105,6 +130,18 @@ export async function getDashboardStats(orgId: string): Promise<DashboardStats> 
   const avgFirstResponseMinutes = responseMinutes.length
     ? responseMinutes.reduce((sum, minutes) => sum + minutes, 0) / responseMinutes.length
     : null;
+
+  const slaTickets = tickets.map(toSla);
+  // Every reply or resolution clock that stopped in the last week counts once
+  let finished = 0;
+  let met = 0;
+  for (const t of slaTickets) {
+    for (const c of [firstResponseClock(t, now), resolutionClock(t, now)]) {
+      if (!c?.doneAt || now - Date.parse(c.doneAt) >= 7 * DAY_MS) continue;
+      finished += 1;
+      if (c.state === "met") met += 1;
+    }
+  }
 
   const channels = new Map<string, { total: number; open: number }>();
   for (const t of tickets) {
@@ -129,6 +166,9 @@ export async function getDashboardStats(orgId: string): Promise<DashboardStats> 
     needsAttention: openTickets.filter((t) => t.priority === "Urgent" || t.priority === "High").length,
     unassigned: openTickets.filter((t) => t.assigned_to === "Unassigned").length,
     escalated: openTickets.filter((t) => t.status === "Escalated").length,
+    slaBreached: slaTickets.filter((t) => isBreached(t, now)).length,
+    slaAtRisk: slaTickets.filter((t) => isAtRisk(t, now)).length,
+    slaMetPercent: finished ? Math.round((met / finished) * 100) : null,
     newToday,
     resolvedThisWeek,
     avgFirstResponseMinutes,

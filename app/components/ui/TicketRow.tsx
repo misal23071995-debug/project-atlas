@@ -1,4 +1,6 @@
 import Link from "next/link";
+import SlaBadge from "./SlaBadge";
+import type { TicketSla } from "@/app/lib/sla";
 
 type TicketRowProps = {
     id: string;
@@ -9,6 +11,7 @@ type TicketRowProps = {
     status: string;
     agent: string;
     updated: string;
+    sla: TicketSla;
   };
   
   export default function TicketRow({
@@ -20,6 +23,7 @@ type TicketRowProps = {
     status,
     agent,
     updated,
+    sla,
   }: TicketRowProps) {
     return (
       <tr className="border-b border-zinc-800 hover:bg-zinc-800/40 transition-colors">
@@ -70,6 +74,10 @@ type TicketRowProps = {
           </span>
         </td>
   
+        <td className="px-4 py-4">
+          <SlaBadge ticket={sla} />
+        </td>
+
         <td className="px-4 py-4">
           {agent}
         </td>

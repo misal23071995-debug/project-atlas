@@ -84,7 +84,10 @@ export default async function Home() {
     {
       title: "Avg First Response",
       value: stats.avgFirstResponseMinutes === null ? "—" : formatDuration(stats.avgFirstResponseMinutes),
-      subtext: "time to the first agent reply",
+      subtext:
+        stats.slaMetPercent === null
+          ? "time to the first agent reply"
+          : `SLA met on ${stats.slaMetPercent}% in the last 7 days`,
       accent: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
       icon: "⏱️",
     },
@@ -93,7 +96,12 @@ export default async function Home() {
   const headerStats = [
     { label: "New (24h)", value: stats.newToday, color: "text-zinc-900 dark:text-zinc-50" },
     { label: "Unassigned", value: stats.unassigned, color: "text-zinc-900 dark:text-zinc-50" },
-    { label: "Backlog", value: stats.open, color: "text-zinc-900 dark:text-zinc-50" },
+    {
+      label: "SLA breached",
+      value: stats.slaBreached,
+      color: stats.slaBreached ? "text-rose-600 dark:text-rose-400" : "text-zinc-900 dark:text-zinc-50",
+    },
+    { label: "SLA at risk", value: stats.slaAtRisk, color: "text-amber-600 dark:text-amber-400" },
     { label: "Escalations", value: stats.escalated, color: "text-amber-600 dark:text-amber-400" },
   ];
 
@@ -115,7 +123,7 @@ export default async function Home() {
           </p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {headerStats.map((item) => (
             <div
               key={item.label}

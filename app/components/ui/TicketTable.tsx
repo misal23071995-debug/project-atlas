@@ -1,4 +1,5 @@
 import TicketRow from "./TicketRow";
+import type { TicketSla } from "@/app/lib/sla";
 
 type Ticket = {
   id: string;
@@ -9,6 +10,7 @@ type Ticket = {
   status: string;
   agent: string;
   updated: string;
+  sla: TicketSla;
 };
 
 type TicketTableProps = {
@@ -42,6 +44,10 @@ export default function TicketTable({ tickets }: TicketTableProps) {
 
               <th className="px-4 py-4 text-left text-sm font-semibold">
                 Status
+              </th>
+
+              <th className="px-4 py-4 text-left text-sm font-semibold">
+                SLA
               </th>
 
               <th className="px-4 py-4 text-left text-sm font-semibold">

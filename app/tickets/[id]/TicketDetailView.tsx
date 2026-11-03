@@ -8,6 +8,7 @@ import { useCan } from "@/app/components/AgentProvider";
 import ReplyEditor from "@/app/components/ui/ReplyEditor";
 import CustomerCard from "@/app/components/ui/CustomerCard";
 import TicketInfoCard from "@/app/components/ui/TicketInfoCard";
+import SlaCard from "@/app/components/ui/SlaCard";
 import InternalNotes from "@/app/components/ui/InternalNotes";
 import ActivityTimeline from "@/app/components/ui/ActivityTimeline";
 import AICopilot from "@/app/components/ui/AICopilot";
@@ -177,6 +178,8 @@ export default function TicketDetailView({
             location={ticket.customer.location}
             device={ticket.customer.device}
           />
+
+          <SlaCard ticket={ticket} />
 
           <TicketInfoCard
             status={ticket.status}

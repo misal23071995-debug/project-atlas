@@ -92,6 +92,20 @@ export interface Ticket {
   tags: string[];
 
   customer: Customer;
+
+  // SLA: ISO timestamps, null until they happen (or before migration 011 set due times)
+  firstResponseAt: string | null;
+
+  resolvedAt: string | null;
+
+  firstResponseDueAt: string | null;
+
+  resolutionDueAt: string | null;
+
+  // Set while the ticket is Waiting on Customer, which stops the resolution clock
+  slaPausedAt: string | null;
+
+  slaPausedMinutes: number;
 }
 
 export interface TicketDetail extends Ticket {

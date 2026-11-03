@@ -1,5 +1,7 @@
 import "server-only";
 import { getSupabase } from "./supabase";
+import { getSlaTargets } from "./sla";
+import { DEFAULT_SLA_TARGETS, dueTimes, isDone } from "@/app/lib/sla";
 import type {
   ConversationMessage,
   Customer,
@@ -14,6 +16,7 @@ import type {
 const TICKET_COLUMNS = `
   id, subject, description, summary, intent, sentiment, confidence,
   priority, status, assigned_to, channel, category, tags, created_at,
+  first_response_at, resolved_at, first_response_due_at, resolution_due_at, sla_paused_at, sla_paused_minutes,
   customer:customers (id, name, email, location, device, orders, csat, created_at)
 `;
 
@@ -43,6 +46,12 @@ type TicketRow = {
   category: string;
   tags: string[];
   created_at: string;
+  first_response_at: string | null;
+  resolved_at: string | null;
+  first_response_due_at: string | null;
+  resolution_due_at: string | null;
+  sla_paused_at: string | null;
+  sla_paused_minutes: number;
   customer: CustomerRow;
 };
 
@@ -76,6 +85,12 @@ function toTicket(row: TicketRow): Ticket {
     channel: row.channel,
     tags: row.tags,
     customer: toCustomer(row.customer),
+    firstResponseAt: row.first_response_at,
+    resolvedAt: row.resolved_at,
+    firstResponseDueAt: row.first_response_due_at,
+    resolutionDueAt: row.resolution_due_at,
+    slaPausedAt: row.sla_paused_at,
+    slaPausedMinutes: row.sla_paused_minutes ?? 0,
   };
 }
 
@@ -185,6 +200,10 @@ export async function createTicket(orgId: string, input: NewTicket): Promise<str
 
   if (customerError) throw new Error(`Failed to save customer: ${customerError.message}`);
 
+  // The due times are fixed when the ticket is created, so later changes to the targets don't rewrite history
+  const targets = (await getSlaTargets(orgId)) ?? DEFAULT_SLA_TARGETS;
+  const due = dueTimes(new Date().toISOString(), targets[input.priority]);
+
   const { data: ticket, error: ticketError } = await supabase
     .from("tickets")
     .insert({
@@ -200,6 +219,8 @@ export async function createTicket(orgId: string, input: NewTicket): Promise<str
       channel: input.channel,
       category: input.category,
       tags: input.tags,
+      first_response_due_at: due.firstResponseDueAt,
+      resolution_due_at: due.resolutionDueAt,
     })
     .select("id")
     .single();
@@ -260,6 +281,16 @@ export async function addMessage(
   if (error) throw new Error(`Failed to save message: ${error.message}`);
 
   await touchTicket(orgId, ticketId);
+  // The first agent reply stops the first-response clock
+  if (message.role === "agent") {
+    const { error: stampError } = await supabase
+      .from("tickets")
+      .update({ first_response_at: new Date().toISOString() })
+      .eq("id", ticketId)
+      .eq("org_id", orgId)
+      .is("first_response_at", null);
+    if (stampError) throw new Error(`Failed to update ticket: ${stampError.message}`);
+  }
 }
 
 export async function addNote(orgId: string, ticketId: string, author: string, body: string) {
@@ -280,23 +311,88 @@ export async function addActivity(orgId: string, ticketId: string, title: string
   if (error) throw new Error(`Failed to save activity: ${error.message}`);
 }
 
+type SlaStateRow = {
+  status: TicketStatus;
+  priority: TicketPriority;
+  created_at: string;
+  resolved_at: string | null;
+  resolution_due_at: string | null;
+  sla_paused_at: string | null;
+  sla_paused_minutes: number;
+};
+
 export async function updateTicket(
   orgId: string,
   ticketId: string,
   changes: Partial<{ status: TicketStatus; priority: TicketPriority; assignedTo: string }>
 ) {
-  const { error } = await getSupabase()
-    .from("tickets")
-    .update({
-      ...(changes.status && { status: changes.status }),
-      ...(changes.priority && { priority: changes.priority }),
-      ...(changes.assignedTo && { assigned_to: changes.assignedTo }),
-      updated_at: new Date().toISOString(),
-    })
-    .eq("id", ticketId)
-    .eq("org_id", orgId);
+  const supabase = getSupabase();
+  const now = new Date();
+  const values: Record<string, unknown> = {
+    ...(changes.status && { status: changes.status }),
+    ...(changes.priority && { priority: changes.priority }),
+    ...(changes.assignedTo && { assigned_to: changes.assignedTo }),
+    updated_at: now.toISOString(),
+  };
 
+  // Status and priority changes move the SLA clocks, so read where they stand first
+  if (changes.status || changes.priority) {
+    const { data: current, error } = await supabase
+      .from("tickets")
+      .select("status, priority, created_at, resolved_at, resolution_due_at, sla_paused_at, sla_paused_minutes")
+      .eq("id", ticketId)
+      .eq("org_id", orgId)
+      .returns<SlaStateRow[]>()
+      .maybeSingle();
+
+    if (error) throw new Error(`Failed to load ticket: ${error.message}`);
+    if (!current) throw new Error("Ticket not found");
+    Object.assign(values, slaChanges(current, changes, now));
+    if (changes.priority && changes.priority !== current.priority) {
+      // Due times follow the new priority, counted from when the ticket was created
+      const targets = (await getSlaTargets(orgId)) ?? DEFAULT_SLA_TARGETS;
+      const pausedMinutes = (values.sla_paused_minutes as number | undefined) ?? current.sla_paused_minutes;
+      const due = dueTimes(current.created_at, targets[changes.priority], pausedMinutes);
+      values.first_response_due_at = due.firstResponseDueAt;
+      values.resolution_due_at = due.resolutionDueAt;
+    }
+  }
+
+  const { error } = await supabase.from("tickets").update(values).eq("id", ticketId).eq("org_id", orgId);
   if (error) throw new Error(`Failed to update ticket: ${error.message}`);
+}
+
+// Resolving stops the resolution clock, re-opening restarts it, and Waiting on Customer pauses it
+function slaChanges(
+  current: SlaStateRow,
+  changes: Partial<{ status: TicketStatus }>,
+  now: Date
+): Record<string, unknown> {
+  const status = changes.status;
+  if (!status || status === current.status) return {};
+
+  const values: Record<string, unknown> = {};
+
+  if (isDone(status)) {
+    if (!isDone(current.status) || !current.resolved_at) values.resolved_at = now.toISOString();
+  } else if (isDone(current.status)) {
+    values.resolved_at = null;
+  }
+
+  const pauses = status === "Waiting on Customer";
+  if (pauses && !current.sla_paused_at) {
+    values.sla_paused_at = now.toISOString();
+  } else if (!pauses && current.sla_paused_at) {
+    // The time spent waiting is added to the resolution due time
+    const pausedFor = Math.max(0, Math.round((now.getTime() - Date.parse(current.sla_paused_at)) / 60000));
+    values.sla_paused_at = null;
+    values.sla_paused_minutes = current.sla_paused_minutes + pausedFor;
+    if (current.resolution_due_at) {
+      values.resolution_due_at = new Date(Date.parse(current.resolution_due_at) + pausedFor * 60000).toISOString();
+    }
+  }
+
+  return values;
 }
 
 async function touchTicket(orgId: string, ticketId: string) {

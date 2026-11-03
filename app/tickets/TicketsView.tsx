@@ -1,11 +1,13 @@
 "use client";
 
-import TicketFilters from "@/app/components/ui/TicketFilters";
+import TicketFilters, { SLA_FILTERS } from "@/app/components/ui/TicketFilters";
 import TicketTable from "@/app/components/ui/TicketTable";
 import BulkToolbar from "@/app/components/ui/BulkToolbar";
 import { useMemo, useState } from "react";
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { formatDateTime, type Ticket } from "@/app/lib/tickets";
+import { useNow } from "@/app/components/useNow";
+import { currentClock, isAtRisk, isBreached } from "@/app/lib/sla";
 
 
 const PAGE_SIZE = 8;
@@ -19,12 +21,14 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<StatusFilter>(ALL_STATUSES);
   const [priorityFilter, setPriorityFilter] = useState<PriorityFilter>(ALL_PRIORITIES);
+  const [slaFilter, setSlaFilter] = useState<string>(SLA_FILTERS[0]);
   const [page, setPage] = useState(1);
+  const now = useNow();
 
   const filteredTickets = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return tickets.filter((ticket) => {
+    const matches = tickets.filter((ticket) => {
       const matchesSearch =
         !query ||
         ticket.id.toLowerCase().includes(query) ||
@@ -35,9 +39,21 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
       const matchesStatus = statusFilter === ALL_STATUSES || ticket.status === statusFilter;
       const matchesPriority = priorityFilter === ALL_PRIORITIES || ticket.priority === priorityFilter;
 
-      return matchesSearch && matchesStatus && matchesPriority;
+      const matchesSla =
+        slaFilter === SLA_FILTERS[0] ||
+        now === null ||
+        (slaFilter === "Breached" && isBreached(ticket, now)) ||
+        (slaFilter === "At risk" && isAtRisk(ticket, now)) ||
+        (slaFilter === "Paused" && ticket.slaPausedAt !== null);
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesSla;
     });
-  }, [tickets, search, statusFilter, priorityFilter]);
+
+    // With an SLA filter on, show what's due soonest (or most overdue) first
+    if (slaFilter === SLA_FILTERS[0] || now === null) return matches;
+    const minutesLeft = (ticket: Ticket) => currentClock(ticket, now).clock?.minutesLeft ?? Infinity;
+    return [...matches].sort((a, b) => minutesLeft(a) - minutesLeft(b));
+  }, [tickets, search, statusFilter, priorityFilter, slaFilter, now]);
 
   const totalPages = Math.max(1, Math.ceil(filteredTickets.length / PAGE_SIZE));
   const currentPage = Math.min(page, totalPages);
@@ -64,6 +80,11 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
     setPage(1);
   }
 
+  function handleSlaChange(value: string) {
+    setSlaFilter(value);
+    setPage(1);
+  }
+
   return (
     <DashboardLayout>
       <div className="mb-8">
@@ -80,6 +101,8 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
   search={search}
   status={statusFilter}
   priority={priorityFilter}
+  sla={slaFilter}
+  onSlaChange={handleSlaChange}
   onSearchChange={handleSearchChange}
   onStatusChange={(value) =>
     handleStatusChange(value as StatusFilter)
@@ -101,6 +124,7 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
     status: ticket.status,
     agent: ticket.assignedTo,
     updated: formatDateTime(ticket.createdAt),
+    sla: ticket,
   }))}
 />
 

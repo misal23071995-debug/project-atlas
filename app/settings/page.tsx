@@ -45,6 +45,15 @@ export default async function SettingsPage() {
         )}
 
         <Section
+          title="SLA targets"
+          description="How fast the team should reply to and resolve tickets of each priority."
+        >
+          <Link href="/settings/sla" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+            {can(role, "sla.manage") ? "Edit SLA targets →" : "See SLA targets →"}
+          </Link>
+        </Section>
+
+        <Section
           title="Team"
           description={can(role, "team.manage") ? "Add people and choose their roles." : "See who is in this workspace."}
         >
