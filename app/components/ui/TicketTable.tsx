@@ -13,63 +13,39 @@ type Ticket = {
   sla: TicketSla;
 };
 
-type TicketTableProps = {
-  tickets: Ticket[];
-};
+const HEADERS = ["Channel", "Priority", "Status", "SLA"];
 
-export default function TicketTable({ tickets }: TicketTableProps) {
+export default function TicketTable({ tickets }: { tickets: Ticket[] }) {
+  if (!tickets.length) {
+    return <p className="px-6 py-16 text-center text-sm text-zinc-500">No tickets match these filters.</p>;
+  }
+
   return (
-    <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
-      <div className="overflow-x-auto">
-        <table className="min-w-full">
-          <thead className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-800">
-            <tr>
-              <th className="px-4 py-4"></th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                Ticket
-              </th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                Customer
-              </th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                Channel
-              </th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                Priority
-              </th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                Status
-              </th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                SLA
-              </th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                Agent
-              </th>
-
-              <th className="px-4 py-4 text-left text-sm font-semibold">
-                Updated
-              </th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {tickets.map((ticket) => (
-              <TicketRow
-                key={ticket.id}
-                {...ticket}
-              />
+    <div className="overflow-x-auto">
+      <table className="w-full min-w-[52rem] table-fixed text-left">
+        <colgroup>
+          <col />
+          <col className="w-28" />
+          <col className="w-24" />
+          <col className="w-40" />
+          <col className="w-40" />
+          <col className="w-36" />
+        </colgroup>
+        <thead>
+          <tr className="text-xs font-medium uppercase tracking-wide text-zinc-500">
+            <th className="py-3 pl-5 pr-4 font-medium sm:pl-6">Ticket</th>
+            {HEADERS.map((h) => (
+              <th key={h} className="px-4 py-3 font-medium">{h}</th>
             ))}
-          </tbody>
-        </table>
-      </div>
+            <th className="py-3 pl-4 pr-5 font-medium sm:pr-6">Agent</th>
+          </tr>
+        </thead>
+        <tbody>
+          {tickets.map((ticket) => (
+            <TicketRow key={ticket.id} {...ticket} />
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

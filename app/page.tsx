@@ -3,7 +3,8 @@ import DashboardLayout from "./components/dashboard-layout";
 import { requireSession } from "./lib/auth/session";
 import { getDashboardStats } from "./lib/db/dashboard";
 import { getBotStats } from "./lib/db/bot";
-import type { TicketPriority, TicketStatus } from "./lib/tickets";
+import type { TicketPriority } from "./lib/tickets";
+import { ChannelLabel, StatusBadge } from "./components/ui/Badges";
 
 // Always show the current state of the queue
 export const dynamic = "force-dynamic";
@@ -15,7 +16,6 @@ const priorityColors: Record<TicketPriority, string> = {
   Low: "bg-emerald-500",
 };
 
-const channelColors = ["bg-blue-500", "bg-violet-500", "bg-emerald-500", "bg-amber-500", "bg-pink-500"];
 
 function formatDuration(minutes: number) {
   if (minutes < 1) return "< 1m";
@@ -36,19 +36,6 @@ function timeAgo(iso: string, now: number) {
   return `${Math.floor(minutes / (24 * 60))} d ago`;
 }
 
-function StatusBadge({ status }: { status: TicketStatus }) {
-  const styles =
-    status === "Open"
-      ? "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400"
-      : status === "Escalated"
-      ? "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400"
-      : status === "Resolved" || status === "Closed"
-      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
-      : "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400";
-
-  return <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs font-medium ${styles}`}>{status}</span>;
-}
-
 function EmptyNote({ children }: { children: React.ReactNode }) {
   return <p className="mt-6 text-sm text-zinc-500 dark:text-zinc-400">{children}</p>;
 }
@@ -65,21 +52,24 @@ export default async function Home() {
       value: String(stats.open),
       subtext: "not yet resolved or closed",
       accent: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-      icon: "🎫",
+      icon: "M4 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z",
+      href: "/tickets",
     },
     {
       title: "Needs Attention",
       value: String(stats.needsAttention),
       subtext: "open with Urgent or High priority",
       accent: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
-      icon: "⚠️",
+      icon: "M12 9v4m0 4h.01M10.3 3.9 2.6 17.3A2 2 0 0 0 4.3 20h15.4a2 2 0 0 0 1.7-2.7L13.7 3.9a2 2 0 0 0-3.4 0",
+      href: "/tickets",
     },
     {
       title: "Resolved",
       value: String(stats.resolvedThisWeek),
       subtext: "resolved or closed in the last 7 days",
       accent: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
-      icon: "✅",
+      icon: "M9 12.5l2 2 4-4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0",
+      href: "/reports",
     },
     {
       title: "Avg First Response",
@@ -89,7 +79,8 @@ export default async function Home() {
           ? "time to the first agent reply"
           : `SLA met on ${stats.slaMetPercent}% in the last 7 days`,
       accent: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
-      icon: "⏱️",
+      icon: "M12 8v4l2.5 2M9 2h6M12 21a8 8 0 1 0 0-16 8 8 0 0 0 0 16",
+      href: "/reports",
     },
   ];
 
@@ -116,7 +107,7 @@ export default async function Home() {
             Support operations overview
           </p>
           <h1 className="mt-1 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">
-            Welcome back{firstName ? `, ${firstName}` : ""} 👋
+            Good to see you{firstName ? `, ${firstName}` : ""}
           </h1>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
             Here’s a live view of your ticket queue, workload and response times across support channels.
@@ -127,10 +118,10 @@ export default async function Home() {
           {headerStats.map((item) => (
             <div
               key={item.label}
-              className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+              className="rounded-xl border border-zinc-800 bg-zinc-900/60 px-4 py-3"
             >
               <p className="text-xs text-zinc-500 dark:text-zinc-400">{item.label}</p>
-              <p className={`mt-1 text-lg font-semibold ${item.color}`}>{item.value}</p>
+              <p className={`mt-1 text-lg font-semibold tabular ${item.color}`}>{item.value}</p>
             </div>
           ))}
         </div>
@@ -138,22 +129,26 @@ export default async function Home() {
 
       <section className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {kpis.map((item) => (
-          <div
+          <Link
             key={item.title}
-            className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm transition hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900"
+            href={item.href}
+            className="group rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 transition-colors hover:border-zinc-700 hover:bg-zinc-900"
           >
-            <div className={`flex h-11 w-11 items-center justify-center rounded-2xl text-lg ${item.accent}`}>
-              {item.icon}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-zinc-400">{item.title}</p>
+              <span className={`flex h-8 w-8 items-center justify-center rounded-lg ${item.accent}`}>
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+                  <path d={item.icon} />
+                </svg>
+              </span>
             </div>
-
-            <p className="mt-4 text-sm text-zinc-500 dark:text-zinc-400">{item.title}</p>
-            <p className="mt-1 text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50">{item.value}</p>
-            <p className="mt-1 text-xs text-zinc-400 dark:text-zinc-500">{item.subtext}</p>
-          </div>
+            <p className="mt-3 text-3xl font-semibold tracking-tight text-zinc-50 tabular">{item.value}</p>
+            <p className="mt-1 text-xs text-zinc-500">{item.subtext}</p>
+          </Link>
         ))}
       </section>
 
-      <section className="mt-8 rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="mt-8 rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
         <div className="flex flex-wrap items-start justify-between gap-2">
           <div>
             <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">AI Chatbot</h2>
@@ -236,7 +231,7 @@ export default async function Home() {
       </section>
 
       <section className="mt-8 grid gap-6 xl:grid-cols-3">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 xl:col-span-2">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 xl:col-span-2">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Recent Tickets</h2>
@@ -279,7 +274,7 @@ export default async function Home() {
                         </Link>
                       </td>
                       <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.customer}</td>
-                      <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.channel}</td>
+                      <td className="px-4 py-4"><ChannelLabel channel={ticket.channel} /></td>
                       <td className="px-4 py-4 text-sm text-zinc-900 dark:text-zinc-50">{ticket.assignedTo}</td>
                       <td className="px-4 py-4">
                         <StatusBadge status={ticket.status} />
@@ -295,7 +290,7 @@ export default async function Home() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Backlog by Priority</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Open tickets by urgency
@@ -325,7 +320,7 @@ export default async function Home() {
       </section>
 
       <section className="mt-8 grid gap-6 lg:grid-cols-2">
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Channels</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Where tickets come from, and how many are still open
@@ -335,7 +330,7 @@ export default async function Home() {
             <EmptyNote>No tickets yet.</EmptyNote>
           ) : (
             <div className="mt-6 space-y-5">
-              {stats.byChannel.map((item, index) => (
+              {stats.byChannel.map((item) => (
                 <div key={item.channel}>
                   <div className="flex items-center justify-between text-sm">
                     <div>
@@ -348,7 +343,7 @@ export default async function Home() {
                   </div>
                   <div className="mt-2 h-2.5 rounded-full bg-zinc-100 dark:bg-zinc-800">
                     <div
-                      className={`h-2.5 rounded-full ${channelColors[index % channelColors.length]}`}
+                      className="h-2.5 rounded-full bg-indigo-500"
                       style={{ width: `${(item.total / maxChannelTotal) * 100}%` }}
                     />
                   </div>
@@ -358,7 +353,7 @@ export default async function Home() {
           )}
         </div>
 
-        <div className="rounded-2xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
           <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Agent Workload</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Tickets assigned to each agent

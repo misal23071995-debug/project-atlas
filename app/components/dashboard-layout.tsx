@@ -103,6 +103,14 @@ const navItems = [
   },
 ];
 
+// Groups in the sidebar, by the job each page does
+const NAV_SECTIONS = [
+  { label: "Support", items: ["Dashboard", "Tickets", "Knowledge Base"] },
+  { label: "Quality and people", items: ["Quality", "Training", "Roster"] },
+  { label: "Planning", items: ["Capacity", "Reports"] },
+  { label: "Workspace", items: ["Team", "Settings"] },
+];
+
 function SidebarContent({
   pathname,
   onNavigate,
@@ -126,7 +134,7 @@ function SidebarContent({
             <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
               {session?.org.name ?? "Atlas"}
             </p>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400">Atlas support desk</p>
+            <p className="text-xs text-zinc-500">Atlas support desk</p>
           </div>
         </Link>
       </div>
@@ -150,31 +158,41 @@ function SidebarContent({
         </div>
       )}
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {navItems.map((item) => {
-          // The longest matching link wins, so /settings/team highlights Team, not Settings
-          const matches = (href: string) =>
-            href === "/" ? pathname === "/" : href !== "#" && pathname.startsWith(href);
-          const isActive =
-            matches(item.href) &&
-            !navItems.some((other) => other.href.length > item.href.length && matches(other.href));
+      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+        {NAV_SECTIONS.map((section) => (
+          <div key={section.label}>
+            <p className="px-3 pb-1.5 text-[0.68rem] font-medium uppercase tracking-[0.08em] text-zinc-500">{section.label}</p>
+            <div className="space-y-0.5">
+              {navItems
+                .filter((item) => section.items.includes(item.label))
+                .map((item) => {
+                  // The longest matching link wins, so /settings/team highlights Team, not Settings
+                  const matches = (href: string) =>
+                    href === "/" ? pathname === "/" : href !== "#" && pathname.startsWith(href);
+                  const isActive =
+                    matches(item.href) &&
+                    !navItems.some((other) => other.href.length > item.href.length && matches(other.href));
 
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              onClick={onNavigate}
-              className={`flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors ${
-                isActive
-                  ? "bg-indigo-50 text-indigo-700 dark:bg-indigo-500/10 dark:text-indigo-400"
-                  : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-              }`}
-            >
-              {item.icon}
-              {item.label}
-            </Link>
-          );
-        })}
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={onNavigate}
+                      aria-current={isActive ? "page" : undefined}
+                      className={`relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
+                        isActive
+                          ? "bg-indigo-500/10 text-indigo-200 before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-indigo-400"
+                          : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100"
+                      }`}
+                    >
+                      <span className={isActive ? "text-indigo-300" : "text-zinc-500"}>{item.icon}</span>
+                      {item.label}
+                    </Link>
+                  );
+                })}
+            </div>
+          </div>
+        ))}
       </nav>
 
       <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
@@ -209,7 +227,8 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const canWork = useCan("tickets.work");
-  const workspaceName = useSession()?.org.name ?? "Atlas";
+  const session = useSession();
+  const workspaceName = session?.org.name ?? "Atlas";
 
   return (
     <div className="flex min-h-screen bg-zinc-50 font-sans dark:bg-zinc-950">
@@ -223,7 +242,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-200 bg-white transition-transform duration-200 dark:border-zinc-800 dark:bg-zinc-900 lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-800/80 bg-zinc-900 lg:bg-zinc-900/60 transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -231,7 +250,7 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-zinc-200 bg-white/80 px-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/80 sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-zinc-800/80 bg-zinc-950/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
           <button
             type="button"
             aria-label="Open sidebar"
@@ -247,29 +266,35 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
             <p className="text-sm text-zinc-500 dark:text-zinc-400 lg:hidden">{workspaceName}</p>
             <div className="hidden flex-1 lg:block" />
             <div className="flex items-center gap-3">
-              <button
-                type="button"
-                aria-label="Notifications"
-                className="relative rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
-              >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 0 0 5.454-1.31A8.967 8.967 0 0 1 18 9.75V9A6 6 0 0 0 6 9v.75a8.967 8.967 0 0 1-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 0 1-5.714 0m5.714 0a3 3 0 1 1-5.714 0" />
-                </svg>
-                <span className="absolute right-1.5 top-1.5 h-2 w-2 rounded-full bg-indigo-500" />
-              </button>
+              {session && (
+                <a
+                  href={`/support/${session.org.slug}`}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="hidden h-9 items-center gap-1.5 rounded-lg px-3 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 sm:inline-flex"
+                >
+                  Customer chat
+                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+                    <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </a>
+              )}
               {canWork && (
                 <Link
                   href="/tickets/new"
-                  className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-indigo-500"
+                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 text-sm font-medium text-white shadow-sm shadow-indigo-950 transition-colors hover:bg-indigo-500"
                 >
-                  New Ticket
+                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
+                    <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+                  </svg>
+                  New ticket
                 </Link>
               )}
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        <main className="mx-auto w-full max-w-[96rem] flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
       </div>
     </div>
   );

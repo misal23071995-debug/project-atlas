@@ -41,7 +41,7 @@ function Row({ label, clock, now }: { label: string; clock: Clock | null; now: n
       <div className="flex items-center justify-between">
         <span className="text-zinc-500">{label}</span>
         {clock && now !== null ? (
-          <span className={`rounded-full px-3 py-1 text-xs font-medium ${CLOCK_STYLES[clock.state]}`}>
+          <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${CLOCK_STYLES[clock.state]}`}>
             {STATE_LABELS[clock.state]}
           </span>
         ) : (

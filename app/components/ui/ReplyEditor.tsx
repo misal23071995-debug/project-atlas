@@ -10,6 +10,8 @@ type ReplyEditorProps = {
   savedReplies: SavedReply[];
   placeholders: PlaceholderValues;
   title?: string;
+  // Under the box, e.g. where an email reply goes
+  note?: string;
 };
 
 export default function ReplyEditor({
@@ -18,11 +20,12 @@ export default function ReplyEditor({
   onSend,
   savedReplies,
   placeholders,
-  title = "Reply to Customer",
+  title = "Reply to customer",
+  note = "The customer sees this reply.",
 }: ReplyEditorProps) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
-      <h2 className="mb-6 text-2xl font-semibold">
+    <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6">
+      <h2 className="mb-4 text-lg font-semibold text-zinc-50">
         {title}
       </h2>
 
@@ -37,27 +40,19 @@ export default function ReplyEditor({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Type your reply..."
-        className="h-48 w-full rounded-lg border border-zinc-700 bg-zinc-800 p-4 text-white placeholder:text-zinc-500 focus:border-indigo-500 focus:outline-none"
+        className="h-44 w-full rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-500 focus:border-indigo-500 focus:outline-none"
       />
 
-      <div className="mt-6 flex items-center justify-between">
-        <button className="rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800">
-          📎 Attach File
+      <div className="mt-4 flex items-center justify-between gap-3">
+        <p className="min-w-0 break-words text-xs text-zinc-500">{note}</p>
+        <button
+          type="button"
+          onClick={onSend}
+          disabled={!value.trim()}
+          className="inline-flex h-9 items-center rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
+        >
+          Send reply
         </button>
-
-        <div className="space-x-3">
-          <button className="rounded-lg border border-zinc-700 px-4 py-2 hover:bg-zinc-800">
-            Save Draft
-          </button>
-
-          <button
-            onClick={onSend}
-            disabled={!value.trim()}
-            className="rounded-lg bg-indigo-600 px-4 py-2 hover:bg-indigo-500 disabled:cursor-not-allowed disabled:opacity-50"
-          >
-            Send Reply
-          </button>
-        </div>
       </div>
     </div>
   );

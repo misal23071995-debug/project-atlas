@@ -1,26 +1,50 @@
 @import "tailwindcss";
 
+/* Atlas has one look: a dark operations console. Every `dark:` style always applies, so screens
+   written with light and dark variants and screens written dark-only look the same. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  /* Neutrals with a slight blue-indigo bias, replacing Tailwind's zinc everywhere it's used */
+  --color-zinc-50: #f6f7fb;
+  --color-zinc-100: #eceef5;
+  --color-zinc-200: #d9dce8;
+  --color-zinc-300: #b9bed0;
+  --color-zinc-400: #9aa1b6;
+  --color-zinc-500: #737b92;
+  --color-zinc-600: #535a70;
+  --color-zinc-700: #353b4f;
+  --color-zinc-800: #222737;
+  --color-zinc-900: #151925;
+  --color-zinc-950: #0c0f17;
+
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
+  --background: var(--color-zinc-950);
+  --foreground: var(--color-zinc-100);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  font-feature-settings: "cv11", "ss01";
+}
+
+/* Numbers that sit in columns or tiles line up */
+.tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-indigo-500) 40%, transparent);
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-indigo-400);
+  outline-offset: 2px;
 }

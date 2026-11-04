@@ -157,12 +157,12 @@ export function clockLabel(kind: "reply" | "resolve", c: Clock) {
 }
 
 export const CLOCK_STYLES: Record<ClockState, string> = {
-  running: "bg-emerald-500/15 text-emerald-400",
-  at_risk: "bg-amber-500/15 text-amber-400",
-  breached: "bg-rose-500/15 text-rose-400",
-  paused: "bg-zinc-500/20 text-zinc-300",
-  met: "bg-emerald-500/10 text-emerald-500",
-  missed: "bg-rose-500/10 text-rose-500",
+  running: "bg-emerald-500/10 text-emerald-300 ring-emerald-500/25",
+  at_risk: "bg-amber-500/10 text-amber-300 ring-amber-500/30",
+  breached: "bg-rose-500/15 text-rose-300 ring-rose-500/35",
+  paused: "bg-zinc-500/15 text-zinc-300 ring-zinc-500/25",
+  met: "bg-emerald-500/5 text-emerald-400/90 ring-emerald-500/15",
+  missed: "bg-rose-500/5 text-rose-400/90 ring-rose-500/15",
 };
 
 // Parses "15m", "4h", "1h 30m", "3d" or a bare number of minutes. Null if it can't.

@@ -15,7 +15,7 @@ export default function SlaBadge({ ticket }: { ticket: TicketSla }) {
   return (
     <span
       title={`Due ${formatDateTime(clock.dueAt)}`}
-      className={`whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium ${CLOCK_STYLES[clock.state]}`}
+      className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset ${CLOCK_STYLES[clock.state]}`}
     >
       {clockLabel(kind, clock)}
     </span>
