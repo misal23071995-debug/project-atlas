@@ -92,6 +92,15 @@ const navItems = [
     ),
   },
   {
+    label: "Automation",
+    href: "/settings/automation",
+    icon: (
+      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="m3.75 13.5 10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75Z" />
+      </svg>
+    ),
+  },
+  {
     label: "Settings",
     href: "/settings",
     icon: (
@@ -108,7 +117,7 @@ const NAV_SECTIONS = [
   { label: "Support", items: ["Dashboard", "Tickets", "Knowledge Base"] },
   { label: "Quality and people", items: ["Quality", "Training", "Roster"] },
   { label: "Planning", items: ["Capacity", "Reports"] },
-  { label: "Workspace", items: ["Team", "Settings"] },
+  { label: "Workspace", items: ["Team", "Automation", "Settings"] },
 ];
 
 function SidebarContent({

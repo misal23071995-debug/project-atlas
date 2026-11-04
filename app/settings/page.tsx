@@ -59,6 +59,12 @@ export default async function SettingsPage() {
           </Link>
         </Section>
 
+        <Section title="Automation" description="Assign new tickets automatically and set rules for priority, tags, escalation and closing.">
+          <Link href="/settings/automation" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+            {can(role, "automation.manage") ? "Set up automation →" : "See automation rules →"}
+          </Link>
+        </Section>
+
         {can(role, "email.manage") && (
           <Section title="Email" description="Turn customer emails into tickets and reply by email.">
             <Link href="/settings/email" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">

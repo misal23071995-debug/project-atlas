@@ -20,6 +20,7 @@ import {
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { analyzeWithAI } from "@/app/lib/ai/service";
 import { emailAgentReply, emailSurveyIfDue } from "@/app/lib/db/email";
+import { onTicketCreated } from "@/app/lib/db/automation";
 
 // This site's address, for links in emails (the survey page)
 async function siteOrigin() {
@@ -57,6 +58,8 @@ export async function createTicketAction(input: NewTicket) {
     category: String(input.category ?? "General Support").slice(0, 100),
     tags: Array.isArray(input.tags) ? input.tags.map(String).slice(0, 20) : [],
   });
+  // Automation rules and assignment run before anyone opens it
+  await onTicketCreated(org.id, id);
 
   revalidatePath("/tickets");
   return id;

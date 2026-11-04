@@ -28,6 +28,8 @@ const PERMISSIONS = {
   "replies.manage": ["admin", "lead"],
   // Email settings and the test inbox; changing the incoming address is for admins (workspace.manage)
   "email.manage": ["admin", "lead"],
+  // Automation rules and how tickets are assigned
+  "automation.manage": ["admin", "lead"],
   // Score conversations and see everyone's quality results. Agents only see their own.
   "quality.review": ["admin", "lead", "qa"],
   "quality.scorecard": ["admin", "lead"],

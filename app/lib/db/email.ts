@@ -2,6 +2,7 @@ import "server-only";
 import { getSupabase } from "./supabase";
 import { getSlaTargets } from "./sla";
 import { addActivity, addMessage, createTicket, updateTicket } from "./tickets";
+import { onTicketCreated, runRules } from "./automation";
 import { analyzeWithAI } from "@/app/lib/ai/service";
 import { sendEmail, type SendResult } from "@/app/lib/email/provider";
 import { subjectWithRef, ticketRef, type InboundEmail } from "@/app/lib/email/parse";
@@ -176,6 +177,7 @@ export async function receiveEmail(org: { id: string; name: string }, mail: Inbo
     } else {
       await addActivity(org.id, ticketId, "Customer replied by email", "bg-amber-500");
     }
+    await runRules(org.id, ticketId, "customer_replied");
     return { ticketId, outcome: "replied" };
   }
 
@@ -204,6 +206,8 @@ export async function receiveEmail(org: { id: string; name: string }, mail: Inbo
       .eq("ticket_id", ticketId)
       .eq("role", "customer");
   }
+
+  await onTicketCreated(org.id, ticketId);
 
   const settings = await getEmailSettings(org.id);
   if (settings?.autoAcknowledge) {

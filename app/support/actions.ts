@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { onTicketCreated } from "@/app/lib/db/automation";
 import { askBot } from "@/app/lib/bot/service";
 import {
   MAX_CUSTOMER_MESSAGES,
@@ -186,6 +187,7 @@ async function handOff(
   });
 
   await addActivity(conversation.orgId, ticketId, `Handed over by the AI chatbot: ${reason}`, "bg-amber-500");
+  await onTicketCreated(conversation.orgId, ticketId);
   await updateConversation(conversation.id, {
     status: "handed_off",
     ticketId,

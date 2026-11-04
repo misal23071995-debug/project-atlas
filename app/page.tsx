@@ -1,5 +1,7 @@
 import Link from "next/link";
+import { after } from "next/server";
 import DashboardLayout from "./components/dashboard-layout";
+import { sweepTimedRules } from "@/app/lib/db/automation";
 import { requireSession } from "./lib/auth/session";
 import { getDashboardStats } from "./lib/db/dashboard";
 import { getBotStats } from "./lib/db/bot";
@@ -42,6 +44,8 @@ function EmptyNote({ children }: { children: React.ReactNode }) {
 
 export default async function Home() {
   const { agent, org } = await requireSession();
+  // SLA-breach and waiting rules are checked in the background, after the page is sent
+  after(() => sweepTimedRules(org.id));
   const [stats, botStats] = await Promise.all([getDashboardStats(org.id), getBotStats(org.id)]);
   const firstName = agent?.name.split(" ")[0];
   const now = stats.generatedAt;
