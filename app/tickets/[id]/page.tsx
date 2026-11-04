@@ -2,6 +2,8 @@ import DashboardLayout from "@/app/components/dashboard-layout";
 import { getTicket } from "@/app/lib/db/tickets";
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { listSavedReplies } from "@/app/lib/db/replies";
+import { listCustomerOrders } from "@/app/lib/db/orders";
+import { getSupabase } from "@/app/lib/db/supabase";
 import TicketDetailView from "./TicketDetailView";
 
 // Always read the latest conversation from the database
@@ -36,8 +38,20 @@ export default async function TicketDetailsPage({
     );
   }
 
+  const [orders, others] = await Promise.all([
+    listCustomerOrders(org.id, ticket.customer.id),
+    getSupabase()
+      .from("tickets")
+      .select("id", { count: "exact", head: true })
+      .eq("org_id", org.id)
+      .eq("customer_id", ticket.customer.id)
+      .neq("id", ticket.id),
+  ]);
+
   return (
     <TicketDetailView
+      orders={orders}
+      otherTickets={others.count ?? 0}
       ticket={ticket}
       agentNames={members.filter((m) => m.role !== "qa").map((m) => m.name)}
       savedReplies={savedReplies ?? []}

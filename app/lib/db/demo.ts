@@ -20,6 +20,7 @@ import { DEFAULT_SLA_TARGETS } from "@/app/lib/sla";
 import { totalScore, type CriterionScore } from "@/app/lib/quality/types";
 import type { HandoffType } from "@/app/lib/bot/types";
 import type { TicketPriority, TicketStatus } from "@/app/lib/tickets";
+import { orderPrefix, type OrderItem, type OrderStatus } from "@/app/lib/orders";
 
 // Fills a workspace with about 90 days of realistic, clearly marked demo activity, and removes it again.
 // Demo tickets carry the "Demo data" tag and demo customers an @demo-customers.example email.
@@ -46,6 +47,20 @@ const HANDOFFS: { type: HandoffType; weight: number; reason: string }[] = [
   { type: "customer_request", weight: 20, reason: "Customer asked to talk to a person" },
   { type: "upset", weight: 10, reason: "Customer is frustrated" },
 ];
+
+const DEMO_PRODUCTS: OrderItem[] = [
+  { name: "Atlas Ring", variant: "Size 8 · Matte Black", quantity: 1, price: 28999 },
+  { name: "Atlas Ring", variant: "Size 9 · Silver", quantity: 1, price: 28999 },
+  { name: "Atlas Ring", variant: "Size 10 · Rose Gold", quantity: 1, price: 30999 },
+  { name: "Atlas Ring", variant: "Size 7 · Gold", quantity: 1, price: 30999 },
+];
+const DEMO_ADD_ONS: OrderItem[] = [
+  { name: "Atlas Care+ (1 year)", quantity: 1, price: 2499 },
+  { name: "Spare charging dock", quantity: 1, price: 1999 },
+  { name: "Atlas+ membership (1 year)", quantity: 1, price: 2999 },
+];
+const CARRIERS = ["Blue Dart", "Delhivery", "DTDC", "Ekart"];
+const ORDER_TOPICS = ["Orders & Shipping", "Returns & Refunds", "Sizing", "Warranty"];
 
 // Small seeded random generator, so every load looks the same
 function random(seed: number) {
@@ -118,12 +133,58 @@ export async function loadDemoData(orgId: string, slug: string) {
       created_at: iso(now - (DAYS + 30) * DAY + rand() * DAYS * DAY),
     };
   });
-  const customers = (await insertAll("customers", people, "id, name")) as { id: string; name: string }[];
+  const customers = (await insertAll("customers", people, "id, name, email")) as { id: string; name: string; email: string }[];
+
+  // ---- Orders: one or two per customer over the last few months ----
+  const { data: orgRow } = await getSupabase().from("organizations").select("name").eq("id", orgId).single();
+  const prefix = orderPrefix(orgRow?.name ?? slug);
+  const latestOrder = new Map<string, string>();
+  const orderRows: Record<string, unknown>[] = [];
+  let orderSeq = 10000 + Math.floor(rand() * 5000);
+  for (const customer of customers) {
+    const count = rand() < 0.3 ? 2 : 1;
+    for (let n = 0; n < count; n++) {
+      const placed = now - (1 + rand() * (DAYS + 20)) * DAY;
+      const age = (now - placed) / DAY;
+      const roll = rand();
+      const status: OrderStatus =
+        age < 1.5 ? "processing" : age < 6 ? "shipped" : roll < 0.04 ? "refunded" : roll < 0.07 ? "returned" : roll < 0.09 ? "cancelled" : "delivered";
+      const items: OrderItem[] = [pick(rand, DEMO_PRODUCTS)];
+      if (rand() < 0.3) items.push(pick(rand, DEMO_ADD_ONS));
+      const shipped = status === "cancelled" || status === "processing" ? null : placed + (0.5 + rand() * 1.5) * DAY;
+      const delivered = shipped && status !== "shipped" ? shipped + (2 + rand() * 4) * DAY : null;
+      const orderNumber = `${prefix}-${orderSeq++}`;
+      orderRows.push({
+        org_id: orgId,
+        customer_id: customer.id,
+        order_number: orderNumber,
+        status,
+        items,
+        total: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
+        carrier: shipped ? pick(rand, CARRIERS) : null,
+        tracking_number: shipped ? String(Math.floor(1e10 + rand() * 9e10)) : null,
+        ship_city: pick(rand, LOCATIONS).split(",")[0],
+        placed_at: iso(placed),
+        shipped_at: shipped ? iso(shipped) : null,
+        delivered_at: delivered ? iso(Math.min(delivered, now - MIN)) : null,
+        closed_at: ["cancelled", "refunded"].includes(status) ? iso(placed + 3 * DAY) : null,
+        closed_by: ["cancelled", "refunded"].includes(status) ? pick(rand, DEMO_AGENTS).name : null,
+        source: "demo",
+      });
+      // Tickets quote the customer's latest order that actually went through
+      if (status !== "cancelled") latestOrder.set(customer.id, orderNumber);
+    }
+  }
+  const { error: orderError } = await getSupabase().from("orders").insert(orderRows);
+  // PGRST205: orders aren't set up in this database yet, so skip them
+  if (orderError && orderError.code !== "PGRST205") throw new Error(`Failed to save demo orders: ${orderError.message}`);
+  const hasOrders = !orderError;
 
   // ---- Tickets ----
   type Draft = {
     row: Record<string, unknown>;
     customer: string;
+    customerEmail: string;
     agent: (typeof DEMO_AGENTS)[number];
     topic: (typeof DEMO_TOPICS)[number];
     question: string;
@@ -152,7 +213,12 @@ export async function loadDemoData(orgId: string, slug: string) {
       const agent = weighted(rand, DEMO_AGENTS);
       const target = targets[priority];
       const customer = pick(rand, customers);
-      const question = pick(rand, topic.questions);
+      // Order questions quote the customer's order number, as real ones do
+      const orderNumber = latestOrder.get(customer.id);
+      const question =
+        hasOrders && orderNumber && ORDER_TOPICS.includes(topic.category) && rand() < 0.7
+          ? `${pick(rand, topic.questions)} My order number is ${orderNumber}.`
+          : pick(rand, topic.questions);
 
       // Phone calls are answered live; everything else waits in the queue
       const replyMinutes =
@@ -191,6 +257,7 @@ export async function loadDemoData(orgId: string, slug: string) {
 
       drafts.push({
         customer: customer.name,
+        customerEmail: customer.email,
         agent,
         topic,
         question,
@@ -314,7 +381,8 @@ export async function loadDemoData(orgId: string, slug: string) {
       row: {
         org_id: orgId,
         customer_name: d.customer,
-        customer_email: `${d.customer.replace(" ", ".")}.chat${i}@${slug}.${DEMO_EMAIL_DOMAIN}`.toLowerCase(),
+        // The same person as the ticket, so the chat shows on their profile
+        customer_email: d.customerEmail,
         status: "handed_off",
         topic: d.topic.category,
         ticket_id: ids[i].id,
@@ -371,7 +439,8 @@ export async function loadDemoData(orgId: string, slug: string) {
 // Removes only rows marked as demo data. Messages, activity and reviews go with their tickets.
 export async function removeDemoData(orgId: string) {
   const supabase = getSupabase();
-  const domain = `%.${DEMO_EMAIL_DOMAIN}`;
+  // Matches both name@demo-customers.example and name@workspace.demo-customers.example
+  const domain = `%${DEMO_EMAIL_DOMAIN}`;
 
   const tickets = await supabase.from("tickets").delete({ count: "exact" }).eq("org_id", orgId).contains("tags", [DEMO_TAG]);
   if (tickets.error) throw new Error(`Failed to remove demo tickets: ${tickets.error.message}`);

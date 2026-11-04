@@ -54,11 +54,18 @@ function pickArticles(articles: KbArticle[], query: string) {
     .map(({ article }) => article);
 }
 
+// Orders the customer quoted: ones that belong to the email they started the chat with, and ones that don't
+export interface OrderContext {
+  verified: string[];
+  unmatched: string[];
+}
+
 function buildPrompt(
   articles: KbArticle[],
   history: { role: "customer" | "bot"; body: string }[],
   customerName: string,
-  brandName: string
+  brandName: string,
+  orders: OrderContext
 ) {
   const articleText = articles
     .map((a) => `### ${a.title} (${a.category})\n${a.body}`)
@@ -69,6 +76,13 @@ function buildPrompt(
     .map((m) => `${m.role === "customer" ? "Customer" : "Assistant"}: ${m.body}`)
     .join("\n");
 
+  const orderText = orders.verified.length
+    ? `Order details (checked against this customer's email; you may share these with them):\n${orders.verified.join("\n\n")}`
+    : "(no order details)";
+  const unmatchedText = orders.unmatched.length
+    ? `The customer quoted ${orders.unmatched.join(", ")}, but no order with that number belongs to the email they used in this chat.`
+    : "";
+
   return `You are the ${brandName} support assistant, chatting with a customer named ${customerName}.
 
 Rules:
@@ -77,8 +91,13 @@ Rules:
 - Set needs_human to true, and say a support agent will follow up by email, when:
   * the articles don't cover the question,
   * the customer asks for a person, agent or human,
-  * the customer needs something only staff can do (look up a specific order, start a return, approve a refund or warranty claim, change a payment),
+  * the customer needs something only staff can do (cancel an order, change a delivery address, start a return, approve a refund or warranty claim, change a payment),
   * the customer is angry, or has said twice that the steps didn't help.
+- Orders:
+  * If order details are given below, answer questions about that order's status, items, shipping, carrier, tracking number and delivery from them, without handing over. Never mention any other order or customer.
+  * If the customer asks about a specific order but no order details are given, ask for their order number (it's in their order confirmation email), and don't hand over yet.
+  * If the order number they gave isn't found for their email, say you couldn't find that order under the email they used in this chat, and ask them to check the number. If they can't, hand over as "needs_staff".
+  * Never reveal whether an order exists under someone else's email.
 - Never promise refunds, replacements, discounts or exceptions.
 - Never ask for passwords or full card numbers.
 - sources: the exact titles of the articles you used (empty if none).
@@ -90,6 +109,9 @@ Rules:
 
 Help articles:
 ${articleText || "(none available)"}
+
+${orderText}
+${unmatchedText}
 
 Conversation so far:
 ${transcript}
@@ -126,7 +148,8 @@ export async function askBot(
   history: { role: "customer" | "bot"; body: string }[],
   customerName: string,
   // The workspace (company) name the bot speaks for
-  brandName: string
+  brandName: string,
+  orders: OrderContext = { verified: [], unmatched: [] }
 ): Promise<BotReply> {
   const recentCustomerText = history
     .filter((m) => m.role === "customer")
@@ -138,7 +161,7 @@ export async function askBot(
   try {
     const response = await ai.models.generateContent({
       model: MODEL,
-      contents: buildPrompt(articles, history, customerName, brandName),
+      contents: buildPrompt(articles, history, customerName, brandName, orders),
       config: {
         responseMimeType: "application/json",
         responseJsonSchema: botReplyJsonSchema,

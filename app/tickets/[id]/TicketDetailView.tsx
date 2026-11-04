@@ -14,6 +14,8 @@ import { useAgent } from "@/app/components/AgentProvider";
 import { ChannelLabel, PriorityBadge, StatusBadge } from "@/app/components/ui/Badges";
 import { initials } from "@/app/lib/auth/agent";
 import type { SavedReply } from "@/app/lib/replies";
+import OrdersPanel from "@/app/components/ui/OrdersPanel";
+import { findOrderNumbers, type Order } from "@/app/lib/orders";
 import InternalNotes from "@/app/components/ui/InternalNotes";
 import ActivityTimeline from "@/app/components/ui/ActivityTimeline";
 import AICopilot from "@/app/components/ui/AICopilot";
@@ -40,10 +42,15 @@ export default function TicketDetailView({
   ticket,
   agentNames,
   savedReplies,
+  orders,
+  otherTickets,
 }: {
   ticket: TicketDetail;
   agentNames: string[];
   savedReplies: SavedReply[];
+  // Null until orders are set up
+  orders: Order[] | null;
+  otherTickets: number;
 }) {
   const agent = useAgent();
   const origin = useSyncExternalStore(subscribeNever, browserOrigin, serverOrigin);
@@ -209,17 +216,31 @@ export default function TicketDetailView({
         {/* RIGHT SIDE */}
         <div className="space-y-6">
           <CustomerCard
+            id={ticket.customer.id}
             name={ticket.customer.name}
             email={ticket.customer.email}
             customerSince={new Date(ticket.customer.customerSince).toLocaleDateString("en-IN", {
               month: "short",
               year: "numeric",
             })}
-            orders={ticket.customer.orders}
-            csat={ticket.customer.csat ?? 0}
             location={ticket.customer.location}
             device={ticket.customer.device}
+            otherTickets={otherTickets}
           />
+
+          {orders && (
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6">
+              <h2 className="mb-4 text-lg font-semibold text-zinc-50">Orders</h2>
+              <OrdersPanel
+                orders={orders}
+                ticketId={ticket.id}
+                // Orders the customer quoted in this conversation go first
+                mentioned={findOrderNumbers(`${ticket.subject} ${ticket.conversation.map((m) => m.message).join(" ")}`)}
+                canAct={canWork}
+                limit={3}
+              />
+            </div>
+          )}
 
           <SlaCard ticket={ticket} />
 

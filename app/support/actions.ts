@@ -2,7 +2,9 @@
 
 import { revalidatePath } from "next/cache";
 import { onTicketCreated } from "@/app/lib/db/automation";
-import { askBot } from "@/app/lib/bot/service";
+import { askBot, type OrderContext } from "@/app/lib/bot/service";
+import { findCustomerOrder } from "@/app/lib/db/orders";
+import { findOrderNumbers, orderFactsForBot } from "@/app/lib/orders";
 import {
   MAX_CUSTOMER_MESSAGES,
   MAX_MESSAGE_LENGTH,
@@ -89,7 +91,8 @@ export async function sendSupportMessageAction(
     listArticles(conversation.orgId, { publishedOnly: true }),
     getConversationMessages(conversation.id),
   ]);
-  const answer = await askBot(articles, history, conversation.customerName, conversation.orgName);
+  const orders = await orderContext(conversation.orgId, conversation.customerEmail, history);
+  const answer = await askBot(articles, history, conversation.customerName, conversation.orgName, orders);
 
   await addConversationMessage(conversation.id, "bot", answer.reply, answer.sources);
   await updateConversation(conversation.id, { topic: answer.topic });
@@ -111,6 +114,20 @@ export async function sendSupportMessageAction(
     handedOff: answer.needsHuman,
     reply: { role: "bot", body: answer.reply, sources: answer.sources },
   };
+}
+
+// Order numbers in the customer's recent messages, looked up only under the email this chat started with.
+// The email isn't verified, so the number acts as the second key: both must match before the bot shares anything.
+async function orderContext(orgId: string, email: string, history: { role: string; body: string }[]): Promise<OrderContext> {
+  const recent = history.filter((m) => m.role === "customer").slice(-4).map((m) => m.body).join(" ");
+  const numbers = findOrderNumbers(recent);
+  const context: OrderContext = { verified: [], unmatched: [] };
+  for (const number of numbers) {
+    const order = await findCustomerOrder(orgId, number, email);
+    if (order) context.verified.push(orderFactsForBot(order));
+    else context.unmatched.push(number);
+  }
+  return context;
 }
 
 // Customer clicked "Talk to a person"
