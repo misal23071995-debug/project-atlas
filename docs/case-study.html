@@ -94,6 +94,15 @@ thead th { border-top: 0; font: 500 0.75rem/1.2 var(--mono); letter-spacing: 0.0
 td code, .mono { font-family: var(--mono); font-size: 0.85em; }
 td:first-child { font-weight: 500; }
 
+/* Modules: a ruled two-column list, since they are peers, not a sequence */
+.modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0 2rem; margin: 0; }
+.modules div { border-top: 1px solid var(--rule); padding-block: 0.85rem; display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
+.modules dt { font-weight: 600; }
+.modules dd { margin: 0; font-size: 0.92rem; color: var(--muted); }
+.loops { display: flex; flex-direction: column; gap: 1.75rem; }
+.loops > div { display: flex; flex-direction: column; gap: 0.75rem; }
+.loops > div > h3 { font: 500 0.8rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+
 .note { background: var(--accent-soft); border-radius: 8px; padding: 1rem 1.1rem; font-size: 0.93rem; }
 
 footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.4rem; }
@@ -104,34 +113,79 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
 <main class="page">
   <header>
     <p class="eyebrow">Case study · Customer experience</p>
-    <h1>Cutting support volume with an AI chatbot, without hurting CSAT</h1>
-    <p class="lede">A working support desk for a fictional smart-ring brand, built to test how far self-service AI can go before a customer needs a person.</p>
+    <h1>Running support as one system: channels, quality, people and planning</h1>
+    <p class="lede">A working, multi-company support platform for a fictional smart-ring brand. It covers what a CX lead runs every day: an AI chatbot and email, SLAs, quality checks, training, rosters, capacity and reporting.</p>
     <div class="meta">
       <span><strong>Vishal Misal</strong></span>
       <span>Next.js · Supabase · Google Gemini</span>
-      <span><a href="https://project-atlas-pied.vercel.app/support">Try the customer chat</a></span>
+      <span><a href="https://project-atlas-pied.vercel.app/support/atlas-ring">Try the customer chat</a></span>
       <span><a href="https://github.com/misal23071995-debug/project-atlas">Source on GitHub</a></span>
     </div>
   </header>
 
   <section>
     <p class="eyebrow">The question</p>
-    <p class="question">How do you take repeat questions off agents’ plates without customers feeling stonewalled by a bot?</p>
-    <p>Most queues are full of questions that already have an answer: <em>my ring won’t sync</em>, <em>how long does the battery last</em>, <em>what’s the return policy</em>. Agents spend their time retyping help articles while customers with real problems wait. A chatbot can absorb that volume, but a bad one creates a different problem: wrong answers, dead ends, and customers who arrive at an agent already angry.</p>
-  </section>
-
-  <section>
-    <p class="eyebrow">Approach</p>
-    <h2>Three rules for the bot</h2>
-    <ul class="plain">
-      <li><strong>Answer only from the knowledge base.</strong> If no article covers the question, say so. A confident wrong answer costs more trust than “let me get a person”.</li>
-      <li><strong>Know when to stop.</strong> Hand over when the question isn’t covered, when only staff can act, when the customer asks for a person, or when they’re upset.</li>
-      <li><strong>Never make the customer repeat themselves.</strong> Every handover becomes a ticket with the full chat, a one-line reason, and a priority set from sentiment.</li>
-    </ul>
+    <p class="question">How do you handle more customers, faster, without the quality of support slipping?</p>
+    <p>Most teams answer that question with separate tools: one for tickets, a spreadsheet for the roster, another for QC scores, a slide deck for the monthly report. The links between them live in the lead’s head. A low QC score doesn’t reach the training plan until the next review. The forecast doesn’t reach the roster until someone notices the queue is on fire. I wanted to see what it looks like when those links are built in.</p>
   </section>
 
   <section class="wide">
-    <p class="eyebrow">What it looks like</p>
+    <p class="eyebrow">What I built</p>
+    <h2>Eleven modules, one workspace</h2>
+    <dl class="modules">
+      <div><dt>AI chatbot</dt><dd>Answers only from published help articles and cites them. Hands over to a person with the full transcript when it can’t help.</dd></div>
+      <div><dt>Email</dt><dd>Incoming emails become tickets that the AI has already read. Replies thread back onto the same ticket and reopen it. Customers get an automatic acknowledgement and a survey link.</dd></div>
+      <div><dt>Ticket desk</dt><dd>Queue, assignment, internal notes, an AI copilot that drafts replies, and saved replies with the customer’s name filled in.</dd></div>
+      <div><dt>SLA tracking</dt><dd>First-reply and resolution targets per priority, with live on-track, at-risk and breached labels. The clock pauses while waiting on the customer.</dd></div>
+      <div><dt>CSAT</dt><dd>A private survey link on every ticket, plus ratings at the end of bot chats. Results show per agent and over time.</dd></div>
+      <div><dt>Quality (QC)</dt><dd>A weighted scorecard. The AI scores first; a QA analyst finalises. Results by agent and criterion.</dd></div>
+      <div><dt>Training</dt><dd>Courses with a lesson and an AI-written quiz. A low QC score assigns the linked course automatically.</dd></div>
+      <div><dt>Rostering</dt><dd>Weekly shifts with breaks and overnight cover. Agents request leave and leads approve it.</dd></div>
+      <div><dt>Capacity planning</dt><dd>An hourly forecast from ticket history, Erlang C staffing with shrinkage, and a heat map of roster gaps.</dd></div>
+      <div><dt>Reports</dt><dd>Any date range against the period before: response and resolution times, SLA, CSAT, agents, channels, contact reasons, QC, deflection, training. CSV for every table.</dd></div>
+      <div><dt>Workspaces and roles</dt><dd>Each company has its own private workspace, with Admin, Team Lead, Agent and QA Analyst roles.</dd></div>
+    </dl>
+  </section>
+
+  <section class="wide">
+    <p class="eyebrow">How it connects</p>
+    <h2>Three loops a CX lead runs</h2>
+    <div class="loops">
+      <div>
+        <h3>Content: the bot shows the team what to teach it</h3>
+        <ol class="loop">
+          <li><h3>Customer asks</h3><p>The bot searches published articles.</p></li>
+          <li><h3>Bot can’t answer</h3><p>It hands over with the transcript and a reason.</p></li>
+          <li><h3>Gap is logged</h3><p>The Knowledge Gaps report groups it by topic.</p></li>
+          <li><h3>Article written</h3><p>One click from the gap, category filled in.</p></li>
+          <li><h3>Next customer answered</h3><p>Deflection rises on that topic.</p></li>
+        </ol>
+      </div>
+      <div>
+        <h3>Quality: coaching happens when the gap is found</h3>
+        <ol class="loop">
+          <li><h3>Ticket resolved</h3><p>The customer rates it from the survey link.</p></li>
+          <li><h3>AI scores it</h3><p>Against the team’s own weighted scorecard.</p></li>
+          <li><h3>Reviewer finalises</h3><p>A person adjusts the scores and adds feedback.</p></li>
+          <li><h3>Low score on a criterion</h3><p>The linked course is assigned, due in a week.</p></li>
+          <li><h3>Agent passes the quiz</h3><p>Reports track it alongside their QC trend.</p></li>
+        </ol>
+      </div>
+      <div>
+        <h3>Planning: demand sets the staffing target</h3>
+        <ol class="loop">
+          <li><h3>Ticket history</h3><p>Averaged into contacts per hour of the week.</p></li>
+          <li><h3>Erlang C</h3><p>Agents needed to hit the service level, plus shrinkage.</p></li>
+          <li><h3>Roster overlay</h3><p>People on shift, minus breaks and leave.</p></li>
+          <li><h3>Gap heat map</h3><p>Shows exactly which hours are short.</p></li>
+          <li><h3>SLA results</h3><p>Show whether the fix worked.</p></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="wide">
+    <p class="eyebrow">What the bot looks like</p>
     <div class="examples">
       <div>
         <div class="chat" aria-label="Example chat solved by the bot">
@@ -153,31 +207,22 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
     <p class="caption">Both are real replies from test runs of the bot.</p>
   </section>
 
-  <section class="wide">
-    <p class="eyebrow">The improvement loop</p>
-    <h2>The bot shows the team what to teach it next</h2>
-    <ol class="loop">
-      <li><h3>Customer asks</h3><p>The bot searches published articles for an answer.</p></li>
-      <li><h3>Bot can’t answer</h3><p>It hands over with the transcript and a reason.</p></li>
-      <li><h3>Gap is logged</h3><p>The Knowledge Gaps report groups the question by topic.</p></li>
-      <li><h3>Agent writes the article</h3><p>One click from the gap, category pre-filled.</p></li>
-      <li><h3>Next customer is answered</h3><p>Deflection rises on that topic.</p></li>
-    </ol>
-  </section>
-
   <section>
-    <p class="eyebrow">Why it hands over</p>
-    <h2>Not every handover is a content problem</h2>
-    <p>Grouping handovers by reason separates fixes that need different owners.</p>
+    <p class="eyebrow">Design decisions</p>
+    <h2>Choices a support lead would make</h2>
     <div class="table-wrap">
       <table>
-        <thead><tr><th>Reason</th><th>Example</th><th>Who fixes it</th></tr></thead>
+        <thead><tr><th>Decision</th><th>Why</th></tr></thead>
         <tbody>
-          <tr><td>No article covers it</td><td>“Is it waterproof?”</td><td>Knowledge base owner: write the article</td></tr>
-          <tr><td>Needs a staff action</td><td>“Where is order AT-5512?”</td><td>Ops or product: an order-lookup tool, or a policy change</td></tr>
-          <tr><td>Asked for a person</td><td>“Can I speak to a human?”</td><td>Review: is the bot failing earlier in the chat?</td></tr>
-          <tr><td>Customer upset</td><td>“It broke after 2 weeks, I want my money back”</td><td>Agent, at higher priority</td></tr>
-          <tr><td>AI unavailable</td><td>Quota or outage</td><td>Engineering</td></tr>
+          <tr><td>The bot answers only from articles</td><td>A confident wrong answer costs more trust than “let me get a person”.</td></tr>
+          <tr><td>Handovers are grouped by reason</td><td>“No article” is a content fix; “needs staff” is a process or tooling fix. They need different owners.</td></tr>
+          <tr><td>SLA due times are fixed at creation</td><td>Changing targets later shouldn’t rewrite last month’s results.</td></tr>
+          <tr><td>The clock pauses on Waiting on Customer</td><td>Agents aren’t penalised for time the customer takes.</td></tr>
+          <tr><td>Medians next to averages</td><td>One ticket stuck for a week drags an average; the median shows the typical customer’s wait.</td></tr>
+          <tr><td>The AI scores QC, a person finalises it</td><td>The AI makes it fast enough to review more conversations, and a person stays accountable for each score. The report tracks how far the AI’s scores differ from the final ones.</td></tr>
+          <tr><td>Erlang C, not tickets ÷ agents</td><td>Queues don’t scale linearly; the standard contact-centre model shows the real headcount.</td></tr>
+          <tr><td>Only the ticket’s customer can reply onto it</td><td>A guessed ticket number in an email subject can’t post into someone else’s case.</td></tr>
+          <tr><td>Agents don’t see team reports</td><td>Agents see their own results without a leaderboard of their colleagues.</td></tr>
         </tbody>
       </table>
     </div>
@@ -185,31 +230,33 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
 
   <section>
     <p class="eyebrow">Measurement</p>
-    <h2>What the dashboard tracks</h2>
+    <h2>What the reports track</h2>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Metric</th><th>Why it matters</th></tr></thead>
         <tbody>
-          <tr><td>Deflection rate</td><td>Share of chats solved without creating a ticket: the volume the bot takes off the queue.</td></tr>
-          <tr><td>CSAT, AI-solved vs handed over</td><td>An average hides a bot that frustrates people. The split shows whether deflection is costing satisfaction.</td></tr>
-          <tr><td>CSAT response rate</td><td>Tells you how much to trust the CSAT number.</td></tr>
-          <tr><td>Handovers by reason</td><td>Points each fix at the right owner.</td></tr>
-          <tr><td>Top topics</td><td>Where to invest content first.</td></tr>
-          <tr><td>First response time, backlog by priority, agent workload</td><td>The health of the human side of the queue.</td></tr>
+          <tr><td>First reply and resolution time</td><td>The customer’s experience of speed, as a median and an average.</td></tr>
+          <tr><td>SLA met %, breached and at risk</td><td>Whether the team keeps its promises, and what needs attention right now.</td></tr>
+          <tr><td>CSAT, from tickets and from bot chats</td><td>Shows whether faster or automated handling is costing satisfaction.</td></tr>
+          <tr><td>Bot deflection and handover reasons</td><td>The volume the bot takes off the queue, and what stops it taking more.</td></tr>
+          <tr><td>Contact reasons</td><td>What to fix at the source with product and ops, so contacts don’t happen at all.</td></tr>
+          <tr><td>QC by agent and criterion</td><td>Where coaching is needed, and for whom.</td></tr>
+          <tr><td>Training passed and overdue</td><td>Whether the coaching actually happened.</td></tr>
+          <tr><td>Agents needed vs rostered, per hour</td><td>Where the next shift change should go.</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note">This is a demo with no live customer traffic yet, so there are no results to report. In a pilot I’d set a baseline for the first two weeks, then judge success on deflection rising while CSAT for handed-over chats holds steady or improves.</p>
+    <p class="note">There is no live customer traffic yet, so there are no real results to report. A one-click demo dataset fills a workspace with 90 days of made-up activity, including a sync-issue spike and agents with different strengths, so every report can be walked through. In a pilot I’d take two weeks as a baseline, then judge success on SLA met % and first reply time improving while CSAT holds steady or rises.</p>
   </section>
 
   <section>
-    <p class="eyebrow">Also in the desk</p>
-    <h2>The agent side</h2>
+    <p class="eyebrow">Built to be adopted</p>
+    <h2>Runs at no cost, and upgrades by configuration</h2>
     <ul class="plain">
-      <li>Invite-only agent logins; every reply, note and status change records who made it.</li>
-      <li>An AI copilot on each ticket that summarises the issue, reads sentiment and drafts a reply for the agent to edit.</li>
-      <li>Internal notes, assignment to real agents, and a form for logging phone or walk-in requests.</li>
-      <li>A knowledge base editor, so the support team, not engineers, owns what the bot says.</li>
+      <li>The AI runs on Gemini’s free tier, and moving to a paid model is a small code change.</li>
+      <li>Email works end to end in demo mode. Sending real mail is two environment variables once the company’s domain is verified.</li>
+      <li>Incoming mail arrives through a private webhook for each workspace. It accepts Postmark’s format, or simple JSON from any other provider.</li>
+      <li>A test inbox in Settings sends pretend customer emails through the same steps as real ones.</li>
     </ul>
   </section>
 
@@ -217,15 +264,15 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
     <p class="eyebrow">Next</p>
     <h2>What I’d build next</h2>
     <ul class="plain">
-      <li><strong>Order lookup</strong> inside the bot, to remove the most common staff-action handover.</li>
-      <li><strong>Email channel</strong>, so agent replies reach customers and incoming emails become tickets.</li>
-      <li><strong>A weekly gap digest</strong> emailed to the CX lead every Monday.</li>
-      <li><strong>SLA timers and escalation rules</strong> on tickets.</li>
+      <li><strong>Social and voice channels:</strong> Meta, X and a calling tool, feeding the same queue, SLAs and reports.</li>
+      <li><strong>Order lookup inside the bot</strong>, to remove the most common staff-action handover.</li>
+      <li><strong>Business-hours SLAs</strong> and automatic escalation rules.</li>
+      <li><strong>Invite-only sign-up</strong> for company deployments.</li>
     </ul>
   </section>
 
   <footer>
-    <p>Atlas Ring is a fictional brand; all help articles and demo data are made up.</p>
+    <p>Atlas Ring is a fictional brand; all help articles, customers, agents and demo data are made up.</p>
     <p>Built with Next.js, Supabase and Google Gemini, using Claude Code as an AI pair programmer.</p>
   </footer>
 </main>
