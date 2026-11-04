@@ -32,6 +32,8 @@ const PERMISSIONS = {
   "capacity.manage": ["admin", "lead"],
   // Set the reply and resolution targets for each priority. Everyone sees the SLA clocks.
   "sla.manage": ["admin", "lead"],
+  // Team-wide reports, including how each agent is doing
+  "reports.view": ["admin", "lead", "qa"],
   // Write courses, assign them and see everyone's results. Everyone can take training.
   "training.manage": ["admin", "lead", "qa"],
   "team.manage": ["admin"],
