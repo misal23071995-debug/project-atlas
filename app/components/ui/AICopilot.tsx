@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SparkleIcon from "./SparkleIcon";
 import type { AIAnalysis } from "@/app/lib/ai";
 import { fetchAnalysis } from "@/app/lib/ai/client";
 
@@ -36,24 +37,25 @@ export default function AICopilot({
 
   if (!analysis) {
     return (
-      <div className="rounded-xl border border-indigo-900 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6">
-        <p className="animate-pulse text-zinc-400">
-          ✨ Atlas AI is analyzing this ticket...
+      <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-zinc-900/60 p-6">
+        <p className="flex animate-pulse items-center gap-2 text-sm text-zinc-400">
+          <SparkleIcon className="h-4 w-4 text-indigo-300" />
+          Atlas AI is reading this ticket…
         </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-xl border border-indigo-900 bg-gradient-to-br from-zinc-900 to-zinc-950 p-6">
+    <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-zinc-900/60 p-6">
       <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-600 text-xl">
-          ✨
+        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
+          <SparkleIcon className="h-5 w-5" />
         </div>
 
         <div>
-          <h2 className="text-2xl font-bold">
-            AI Copilot
+          <h2 className="text-lg font-semibold text-zinc-50">
+            AI copilot
           </h2>
 
           <p className="text-sm text-zinc-400">

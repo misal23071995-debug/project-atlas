@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import SparkleIcon from "@/app/components/ui/SparkleIcon";
 import { useRouter } from "next/navigation";
 import type { QaReview } from "@/app/lib/db/quality";
 import {
@@ -108,9 +109,10 @@ export default function ReviewForm({
           type="button"
           onClick={scoreWithAi}
           disabled={aiPending || isPending}
-          className="w-full rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 hover:bg-indigo-500/20 disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 hover:bg-indigo-500/20 disabled:opacity-60"
         >
-          {aiPending ? "AI is reading the conversation…" : review?.aiTotal != null ? "✨ Re-score with AI" : "✨ Score with AI"}
+          <SparkleIcon />
+          {aiPending ? "AI is reading the conversation…" : review?.aiTotal != null ? "Re-score with AI" : "Score with AI"}
         </button>
       )}
 

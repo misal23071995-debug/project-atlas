@@ -69,7 +69,8 @@ export default async function EmailSettingsPage() {
                   <span className="text-emerald-400">Connected through {connection.provider}, sending from {connection.from}.</span>
                 ) : (
                   <span>
-                    <span className="text-amber-300">Not connected.</span> Replies are saved on the ticket and marked
+                    <span className="text-amber-300">Not connected.</span>{" "}
+                    Replies are saved on the ticket and marked
                     &ldquo;not emailed&rdquo;. To send real email, create a free Resend account, verify your company&apos;s
                     domain, then add RESEND_API_KEY and EMAIL_FROM (for example support@yourcompany.com) to the
                     project&apos;s environment variables in Vercel.

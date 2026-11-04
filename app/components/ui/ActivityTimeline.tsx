@@ -14,7 +14,7 @@ export default function ActivityTimeline({
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       <h2 className="mb-6 text-lg font-semibold">
-        Activity Timeline
+        Activity
       </h2>
 
       <div className="space-y-6">

@@ -41,7 +41,7 @@ export default function TicketInfoCard({
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       <h2 className="mb-6 text-xl font-semibold">
-        Ticket Information
+        Ticket details
       </h2>
 
       <div className="space-y-5">

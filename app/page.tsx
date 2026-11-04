@@ -48,7 +48,7 @@ export default async function Home() {
 
   const kpis = [
     {
-      title: "Open Tickets",
+      title: "Open tickets",
       value: String(stats.open),
       subtext: "not yet resolved or closed",
       accent: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
@@ -56,7 +56,7 @@ export default async function Home() {
       href: "/tickets",
     },
     {
-      title: "Needs Attention",
+      title: "Needs attention",
       value: String(stats.needsAttention),
       subtext: "open with Urgent or High priority",
       accent: "bg-rose-500/10 text-rose-600 dark:text-rose-400",
@@ -72,7 +72,7 @@ export default async function Home() {
       href: "/reports",
     },
     {
-      title: "Avg First Response",
+      title: "Avg first response",
       value: stats.avgFirstResponseMinutes === null ? "—" : formatDuration(stats.avgFirstResponseMinutes),
       subtext:
         stats.slaMetPercent === null
@@ -234,7 +234,7 @@ export default async function Home() {
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6 xl:col-span-2">
           <div className="flex items-center justify-between">
             <div>
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Recent Tickets</h2>
+              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Recent tickets</h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400">
                 Most recently updated conversations
               </p>
@@ -291,7 +291,7 @@ export default async function Home() {
         </div>
 
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Backlog by Priority</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Backlog by priority</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Open tickets by urgency
           </p>
@@ -354,7 +354,7 @@ export default async function Home() {
         </div>
 
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-6">
-          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Agent Workload</h2>
+          <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">Agent workload</h2>
           <p className="text-sm text-zinc-500 dark:text-zinc-400">
             Tickets assigned to each agent
           </p>

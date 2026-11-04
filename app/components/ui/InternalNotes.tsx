@@ -28,7 +28,7 @@ export default function InternalNotes({
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       <h2 className="text-lg font-semibold">
-        Internal Notes
+        Internal notes
       </h2>
       <p className="mb-6 mt-1 text-xs text-zinc-500">
         Only your team can see these. They are never sent to the customer.

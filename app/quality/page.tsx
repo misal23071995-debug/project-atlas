@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { StatusBadge } from "@/app/components/ui/Badges";
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { requireSession } from "@/app/lib/auth/session";
 import { can } from "@/app/lib/auth/roles";
@@ -101,7 +102,7 @@ export default async function QualityPage() {
                             <p className="max-w-md truncate text-xs text-zinc-500">{item.subject}</p>
                           </td>
                           <td className="px-4 py-3 text-zinc-300">{item.agentName}</td>
-                          <td className="px-4 py-3 text-zinc-400">{item.status}</td>
+                          <td className="px-4 py-3"><StatusBadge status={item.status} /></td>
                           <td className="px-4 py-3">
                             <Score value={item.aiTotal} />
                           </td>

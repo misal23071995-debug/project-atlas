@@ -29,10 +29,10 @@ function gapCell(rostered: number, needed: number) {
     // Darker red the bigger the shortfall, relative to what's needed
     const share = needed ? -gap / needed : 1;
     const className =
-      share > 0.5 ? "bg-red-600/70 text-white" : share > 0.25 ? "bg-red-500/45 text-red-50" : "bg-red-500/25 text-red-200";
+      share > 0.5 ? "bg-rose-500/35 text-rose-50" : share > 0.25 ? "bg-rose-500/20 text-rose-100" : "bg-rose-500/10 text-rose-200";
     return { className, title: `Short by ${fmt(-gap)}` };
   }
-  if (gap < 1) return { className: "bg-emerald-500/25 text-emerald-200", title: "Right on target" };
+  if (gap < 1) return { className: "bg-emerald-500/20 text-emerald-200", title: "Right on target" };
   return { className: "bg-sky-500/15 text-sky-300", title: `${fmt(gap)} more than needed` };
 }
 
@@ -180,8 +180,8 @@ export default function CapacityView({
 
       {view === "gap" && (
         <div className="mt-3 flex flex-wrap gap-4 text-xs text-zinc-400">
-          <span><span className="mr-1 inline-block h-3 w-3 rounded bg-red-500/60 align-middle" />Short of agents</span>
-          <span><span className="mr-1 inline-block h-3 w-3 rounded bg-emerald-500/40 align-middle" />On target</span>
+          <span><span className="mr-1 inline-block h-3 w-3 rounded bg-rose-500/35 align-middle" />Short of agents</span>
+          <span><span className="mr-1 inline-block h-3 w-3 rounded bg-emerald-500/20 align-middle" />On target</span>
           <span><span className="mr-1 inline-block h-3 w-3 rounded bg-sky-500/30 align-middle" />More than needed</span>
           <span>Each cell: rostered / needed</span>
         </div>

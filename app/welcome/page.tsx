@@ -12,7 +12,7 @@ export default async function WelcomePage() {
   if ("org" in session) redirect("/");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-4 font-sans dark:bg-zinc-950">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 bg-[radial-gradient(60rem_30rem_at_50%_-10%,rgba(99,102,241,0.16),transparent)] p-4 font-sans">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">You&apos;re not in a workspace</h1>

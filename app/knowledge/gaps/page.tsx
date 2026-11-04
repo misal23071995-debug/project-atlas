@@ -25,7 +25,7 @@ export default async function KnowledgeGapsPage() {
       <Link href="/knowledge" className="text-sm text-zinc-400 hover:text-zinc-200">
         ← Knowledge Base
       </Link>
-      <h1 className="mt-2 text-3xl font-bold">Knowledge Gaps</h1>
+      <h1 className="mt-2 text-3xl font-bold">Knowledge gaps</h1>
       <p className="mt-1 max-w-3xl text-zinc-400">
         Why the AI chatbot handed customers to an agent in the last 30 days. Questions with no matching article
         are the quickest wins: write the article, and the bot answers next time.
@@ -41,7 +41,7 @@ export default async function KnowledgeGapsPage() {
         </p>
       ) : (
         <>
-          <section className="mt-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <section className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
             <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
               <p className="text-xs text-zinc-400">Handovers</p>
               <p className="mt-1 text-2xl font-bold">

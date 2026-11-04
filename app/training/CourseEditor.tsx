@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import SparkleIcon from "@/app/components/ui/SparkleIcon";
 import { useRouter } from "next/navigation";
 import { ROLE_LABELS, type Role } from "@/app/lib/auth/roles";
 import {
@@ -161,9 +162,10 @@ export default function CourseEditor({
               type="button"
               onClick={writeWithAi}
               disabled={isWriting || questions.length >= MAX_QUESTIONS}
-              className="rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 hover:bg-indigo-500/20 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 hover:bg-indigo-500/20 disabled:opacity-60"
             >
-              {isWriting ? "AI is writing…" : "✨ Write 5 questions with AI"}
+              <SparkleIcon />
+              {isWriting ? "AI is writing…" : "Write 5 questions with AI"}
             </button>
           </div>
 
