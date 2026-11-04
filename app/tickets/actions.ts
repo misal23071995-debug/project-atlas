@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   addActivity,
@@ -18,6 +19,15 @@ import {
 } from "@/app/lib/tickets";
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { analyzeWithAI } from "@/app/lib/ai/service";
+import { emailAgentReply, emailSurveyIfDue } from "@/app/lib/db/email";
+
+// This site's address, for links in emails (the survey page)
+async function siteOrigin() {
+  const h = await headers();
+  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
+  const protocol = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
+  return `${protocol}://${host}`;
+}
 
 // Every action checks the signed-in agent and their role itself; the proxy alone isn't enough.
 // Data calls pass the agent's current workspace, so nobody can touch another company's tickets.
@@ -101,13 +111,17 @@ export async function createManualTicketAction(
 
 export async function sendReplyAction(ticketId: string, message: string) {
   const { agent, org } = await requireSession("tickets.work");
+  const text = requireText(message, "Reply");
 
-  await addMessage(org.id, ticketId, {
-    sender: agent.name,
-    role: "agent",
-    message: requireText(message, "Reply"),
-  });
-  await addActivity(org.id, ticketId, `Reply sent by ${agent.name}`, "bg-indigo-500");
+  const messageId = await addMessage(org.id, ticketId, { sender: agent.name, role: "agent", message: text });
+  // On email tickets the reply also goes to the customer's inbox
+  const email = await emailAgentReply(org.id, org.name, ticketId, messageId, text);
+  await addActivity(
+    org.id,
+    ticketId,
+    email?.status === "sent" ? `Reply emailed by ${agent.name}` : `Reply sent by ${agent.name}`,
+    "bg-indigo-500"
+  );
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");
@@ -128,6 +142,7 @@ export async function updateStatusAction(ticketId: string, status: TicketStatus)
 
   await updateTicket(org.id, ticketId, { status });
   await addActivity(org.id, ticketId, `Status changed to ${status} by ${agent.name}`, "bg-blue-500");
+  if (status === "Resolved") await emailSurveyIfDue(org.id, org.name, ticketId, await siteOrigin());
 
   revalidatePath(`/tickets/${ticketId}`);
   revalidatePath("/tickets");

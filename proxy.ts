@@ -2,9 +2,10 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseConfig } from "@/app/lib/supabase-config";
 
-// Pages anyone can open: login, creating a company workspace, each company's customer chat, and survey links
+// Pages anyone can open: login, creating a company workspace, each company's customer chat, survey links
 const PUBLIC_PATHS = ["/login", "/signup"];
-const PUBLIC_PREFIXES = ["/support", "/rate"];
+// The incoming-mail webhook checks its own secret key instead of a sign-in
+const PUBLIC_PREFIXES = ["/support", "/rate", "/api/email/inbound"];
 
 function isPublic(pathname: string) {
   return (

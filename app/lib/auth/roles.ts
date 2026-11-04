@@ -26,6 +26,8 @@ const PERMISSIONS = {
   "knowledge.edit": ["admin", "lead"],
   // Write the saved replies agents insert into tickets. Everyone who works tickets can use them.
   "replies.manage": ["admin", "lead"],
+  // Email settings and the test inbox; changing the incoming address is for admins (workspace.manage)
+  "email.manage": ["admin", "lead"],
   // Score conversations and see everyone's quality results. Agents only see their own.
   "quality.review": ["admin", "lead", "qa"],
   "quality.scorecard": ["admin", "lead"],

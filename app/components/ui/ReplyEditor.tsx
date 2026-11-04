@@ -9,6 +9,7 @@ type ReplyEditorProps = {
   onSend: () => void;
   savedReplies: SavedReply[];
   placeholders: PlaceholderValues;
+  title?: string;
 };
 
 export default function ReplyEditor({
@@ -17,11 +18,12 @@ export default function ReplyEditor({
   onSend,
   savedReplies,
   placeholders,
+  title = "Reply to Customer",
 }: ReplyEditorProps) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
       <h2 className="mb-6 text-2xl font-semibold">
-        Reply to Customer
+        {title}
       </h2>
 
       <ReplyTemplates

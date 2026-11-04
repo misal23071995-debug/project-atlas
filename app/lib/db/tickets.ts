@@ -131,7 +131,7 @@ export async function getTicket(orgId: string, id: string): Promise<TicketDetail
       .maybeSingle(),
     supabase
       .from("ticket_messages")
-      .select("sender, role, body, created_at")
+      .select("sender, role, body, created_at, delivery, delivery_note")
       .eq("ticket_id", id)
       .order("created_at", { ascending: true }),
     supabase
@@ -160,6 +160,8 @@ export async function getTicket(orgId: string, id: string): Promise<TicketDetail
     role: m.role,
     message: m.body,
     time: m.created_at,
+    delivery: m.delivery,
+    deliveryNote: m.delivery_note,
   }));
 
   const activities: TicketActivity[] = activitiesRes.data.map((a) => ({
@@ -271,20 +273,27 @@ async function assertTicket(orgId: string, ticketId: string) {
   if (!data) throw new Error("Ticket not found");
 }
 
+// Returns the new message's id
 export async function addMessage(
   orgId: string,
   ticketId: string,
-  message: Omit<ConversationMessage, "time">
-) {
+  message: Pick<ConversationMessage, "sender" | "role" | "message">,
+  extra: { emailMessageId?: string | null } = {}
+): Promise<number> {
   await assertTicket(orgId, ticketId);
   const supabase = getSupabase();
 
-  const { error } = await supabase.from("ticket_messages").insert({
-    ticket_id: ticketId,
-    sender: message.sender,
-    role: message.role,
-    body: message.message,
-  });
+  const { data, error } = await supabase
+    .from("ticket_messages")
+    .insert({
+      ticket_id: ticketId,
+      sender: message.sender,
+      role: message.role,
+      body: message.message,
+      ...(extra.emailMessageId && { email_message_id: extra.emailMessageId }),
+    })
+    .select("id")
+    .single();
   if (error) throw new Error(`Failed to save message: ${error.message}`);
 
   await touchTicket(orgId, ticketId);
@@ -298,6 +307,7 @@ export async function addMessage(
       .is("first_response_at", null);
     if (stampError) throw new Error(`Failed to update ticket: ${stampError.message}`);
   }
+  return data.id as number;
 }
 
 export async function addNote(orgId: string, ticketId: string, author: string, body: string) {

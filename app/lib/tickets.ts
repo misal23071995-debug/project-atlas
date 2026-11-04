@@ -41,6 +41,11 @@ export interface ConversationMessage {
 
   // ISO timestamp
   time: string;
+
+  // For replies on email tickets: whether the email went out
+  delivery?: "sent" | "not_sent" | "failed" | null;
+
+  deliveryNote?: string | null;
 }
 
 export interface TicketActivity {

@@ -141,6 +141,15 @@ export default function TicketDetailView({
 
                   <p className="mt-2 text-xs text-zinc-500">
                     {formatDateTime(message.time)}
+                    {message.delivery === "sent" && <span className="ml-2 text-emerald-400">· Emailed</span>}
+                    {message.delivery === "not_sent" && (
+                      <span className="ml-2 text-amber-400" title={message.deliveryNote ?? undefined}>
+                        · Not emailed: {message.deliveryNote ?? "email isn't connected"}
+                      </span>
+                    )}
+                    {message.delivery === "failed" && (
+                      <span className="ml-2 text-rose-400">· Email failed: {message.deliveryNote ?? "unknown error"}</span>
+                    )}
                   </p>
                 </div>
               ))}
@@ -153,6 +162,7 @@ export default function TicketDetailView({
               value={reply}
               onChange={setReply}
               onSend={handleSendReply}
+              title={ticket.channel === "Email" ? `Reply by email to ${ticket.customer.email}` : undefined}
               savedReplies={savedReplies}
               placeholders={{
                 customer_first_name: ticket.customer.name.split(" ")[0],

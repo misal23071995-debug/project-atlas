@@ -59,6 +59,14 @@ export default async function SettingsPage() {
           </Link>
         </Section>
 
+        {can(role, "email.manage") && (
+          <Section title="Email" description="Turn customer emails into tickets and reply by email.">
+            <Link href="/settings/email" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+              Set up email →
+            </Link>
+          </Section>
+        )}
+
         <Section title="Saved replies" description="Ready-made answers agents insert into tickets.">
           <Link href="/settings/replies" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
             {can(role, "replies.manage") ? "Edit saved replies →" : "See saved replies →"}
