@@ -106,9 +106,19 @@ export interface Ticket {
   slaPausedAt: string | null;
 
   slaPausedMinutes: number;
+
+  // Customer satisfaction from the ticket's survey link (1-5), null until they rate it
+  csatRating: number | null;
+
+  csatComment: string | null;
+
+  csatRatedAt: string | null;
 }
 
 export interface TicketDetail extends Ticket {
+  // Private key in the customer's survey link
+  csatToken: string;
+
   conversation: ConversationMessage[];
 
   activities: TicketActivity[];

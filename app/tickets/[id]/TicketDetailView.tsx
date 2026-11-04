@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
 
 import DashboardLayout from "@/app/components/dashboard-layout";
@@ -9,6 +9,9 @@ import ReplyEditor from "@/app/components/ui/ReplyEditor";
 import CustomerCard from "@/app/components/ui/CustomerCard";
 import TicketInfoCard from "@/app/components/ui/TicketInfoCard";
 import SlaCard from "@/app/components/ui/SlaCard";
+import CsatCard from "@/app/components/ui/CsatCard";
+import { useAgent } from "@/app/components/AgentProvider";
+import type { SavedReply } from "@/app/lib/replies";
 import InternalNotes from "@/app/components/ui/InternalNotes";
 import ActivityTimeline from "@/app/components/ui/ActivityTimeline";
 import AICopilot from "@/app/components/ui/AICopilot";
@@ -26,13 +29,23 @@ import {
   updateStatusAction,
 } from "../actions";
 
+// The site's own address, only known in the browser
+const subscribeNever = () => () => {};
+const browserOrigin = () => window.location.origin;
+const serverOrigin = () => null;
+
 export default function TicketDetailView({
   ticket,
   agentNames,
+  savedReplies,
 }: {
   ticket: TicketDetail;
   agentNames: string[];
+  savedReplies: SavedReply[];
 }) {
+  const agent = useAgent();
+  const origin = useSyncExternalStore(subscribeNever, browserOrigin, serverOrigin);
+  const surveyLink = origin ? `${origin}/rate/${ticket.csatToken}` : null;
   const [reply, setReply] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -140,6 +153,14 @@ export default function TicketDetailView({
               value={reply}
               onChange={setReply}
               onSend={handleSendReply}
+              savedReplies={savedReplies}
+              placeholders={{
+                customer_first_name: ticket.customer.name.split(" ")[0],
+                customer_name: ticket.customer.name,
+                agent_name: agent?.name,
+                ticket_id: ticket.id,
+                survey_link: surveyLink ?? undefined,
+              }}
             />
           ) : (
             <p className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-400">
@@ -180,6 +201,14 @@ export default function TicketDetailView({
           />
 
           <SlaCard ticket={ticket} />
+
+          <CsatCard
+            rating={ticket.csatRating}
+            comment={ticket.csatComment}
+            ratedAt={ticket.csatRatedAt}
+            surveyLink={surveyLink}
+            onInsert={canWork ? (link) => setReply((r) => (r.trim() ? `${r.trimEnd()}\n\nHow did we do? ${link}` : `How did we do? ${link}`)) : undefined}
+          />
 
           <TicketInfoCard
             status={ticket.status}

@@ -1,17 +1,22 @@
 "use client";
 
 import ReplyTemplates from "./ReplyTemplates";
+import type { PlaceholderValues, SavedReply } from "@/app/lib/replies";
 
 type ReplyEditorProps = {
   value: string;
   onChange: (value: string) => void;
   onSend: () => void;
+  savedReplies: SavedReply[];
+  placeholders: PlaceholderValues;
 };
 
 export default function ReplyEditor({
   value,
   onChange,
   onSend,
+  savedReplies,
+  placeholders,
 }: ReplyEditorProps) {
   return (
     <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
@@ -20,7 +25,10 @@ export default function ReplyEditor({
       </h2>
 
       <ReplyTemplates
-        onSelect={onChange}
+        replies={savedReplies}
+        values={placeholders}
+        // Added below anything already typed, so a draft isn't lost
+        onSelect={(reply) => onChange(value.trim() ? `${value.trimEnd()}\n\n${reply}` : reply)}
       />
 
       <textarea

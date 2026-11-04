@@ -24,6 +24,8 @@ const PERMISSIONS = {
   "tickets.work": ["admin", "lead", "agent"],
   "tickets.note": ["admin", "lead", "agent", "qa"],
   "knowledge.edit": ["admin", "lead"],
+  // Write the saved replies agents insert into tickets. Everyone who works tickets can use them.
+  "replies.manage": ["admin", "lead"],
   // Score conversations and see everyone's quality results. Agents only see their own.
   "quality.review": ["admin", "lead", "qa"],
   "quality.scorecard": ["admin", "lead"],

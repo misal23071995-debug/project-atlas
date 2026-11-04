@@ -2,9 +2,9 @@ import { NextResponse, type NextRequest } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { getSupabaseConfig } from "@/app/lib/supabase-config";
 
-// Pages anyone can open: login, creating a company workspace, and each company's customer chat
+// Pages anyone can open: login, creating a company workspace, each company's customer chat, and survey links
 const PUBLIC_PATHS = ["/login", "/signup"];
-const PUBLIC_PREFIXES = ["/support"];
+const PUBLIC_PREFIXES = ["/support", "/rate"];
 
 function isPublic(pathname: string) {
   return (

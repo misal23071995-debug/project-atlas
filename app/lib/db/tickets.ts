@@ -17,6 +17,7 @@ const TICKET_COLUMNS = `
   id, subject, description, summary, intent, sentiment, confidence,
   priority, status, assigned_to, channel, category, tags, created_at,
   first_response_at, resolved_at, first_response_due_at, resolution_due_at, sla_paused_at, sla_paused_minutes,
+  csat_rating, csat_comment, csat_rated_at,
   customer:customers (id, name, email, location, device, orders, csat, created_at)
 `;
 
@@ -52,6 +53,9 @@ type TicketRow = {
   resolution_due_at: string | null;
   sla_paused_at: string | null;
   sla_paused_minutes: number;
+  csat_rating: number | null;
+  csat_comment: string | null;
+  csat_rated_at: string | null;
   customer: CustomerRow;
 };
 
@@ -91,6 +95,9 @@ function toTicket(row: TicketRow): Ticket {
     resolutionDueAt: row.resolution_due_at,
     slaPausedAt: row.sla_paused_at,
     slaPausedMinutes: row.sla_paused_minutes ?? 0,
+    csatRating: row.csat_rating,
+    csatComment: row.csat_comment,
+    csatRatedAt: row.csat_rated_at,
   };
 }
 
@@ -117,10 +124,10 @@ export async function getTicket(orgId: string, id: string): Promise<TicketDetail
   const [ticketRes, messagesRes, activitiesRes, notesRes] = await Promise.all([
     supabase
       .from("tickets")
-      .select(TICKET_COLUMNS)
+      .select(`${TICKET_COLUMNS}, csat_token`)
       .eq("id", id)
       .eq("org_id", orgId)
-      .returns<TicketRow[]>()
+      .returns<(TicketRow & { csat_token: string })[]>()
       .maybeSingle(),
     supabase
       .from("ticket_messages")
@@ -167,7 +174,7 @@ export async function getTicket(orgId: string, id: string): Promise<TicketDetail
     time: n.created_at,
   }));
 
-  return { ...toTicket(ticketRes.data), conversation, activities, notes };
+  return { ...toTicket(ticketRes.data), csatToken: ticketRes.data.csat_token, conversation, activities, notes };
 }
 
 export type NewTicket = {
@@ -403,4 +410,57 @@ async function touchTicket(orgId: string, ticketId: string) {
     .eq("org_id", orgId);
 
   if (error) throw new Error(`Failed to update ticket: ${error.message}`);
+}
+
+// ---- Customer satisfaction survey (public, found by the private token in the link) ----
+
+export interface SurveyTicket {
+  ticketId: string;
+  subject: string;
+  customerName: string;
+  workspaceName: string;
+  rating: number | null;
+  comment: string | null;
+}
+
+export async function getSurveyTicket(token: string): Promise<SurveyTicket | null> {
+  if (!/^[0-9a-f-]{36}$/i.test(token)) return null;
+
+  const { data, error } = await getSupabase()
+    .from("tickets")
+    .select("id, subject, csat_rating, csat_comment, customer:customers (name), org:organizations (name)")
+    .eq("csat_token", token)
+    .returns<
+      { id: number; subject: string; csat_rating: number | null; csat_comment: string | null; customer: { name: string } | null; org: { name: string } | null }[]
+    >()
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to load the survey: ${error.message}`);
+  if (!data) return null;
+  return {
+    ticketId: String(data.id),
+    subject: data.subject,
+    customerName: data.customer?.name ?? "",
+    workspaceName: data.org?.name ?? "Support",
+    rating: data.csat_rating,
+    comment: data.csat_comment,
+  };
+}
+
+// The customer can change their answer; the latest one counts
+export async function saveSurveyRating(token: string, rating: number, comment: string) {
+  const { data, error } = await getSupabase()
+    .from("tickets")
+    .update({ csat_rating: rating, csat_comment: comment || null, csat_rated_at: new Date().toISOString() })
+    .eq("csat_token", token)
+    .select("id, org_id")
+    .maybeSingle();
+
+  if (error) throw new Error(`Failed to save your rating: ${error.message}`);
+  if (!data) throw new Error("This survey link isn't valid.");
+
+  const { error: activityError } = await getSupabase()
+    .from("ticket_activities")
+    .insert({ ticket_id: data.id, title: `Customer rated the support ${rating}/5`, color: rating >= 4 ? "bg-emerald-500" : "bg-rose-500" });
+  if (activityError) throw new Error(`Failed to save activity: ${activityError.message}`);
 }

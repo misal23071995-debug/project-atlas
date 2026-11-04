@@ -2,6 +2,7 @@ import "server-only";
 import { getSupabase } from "./supabase";
 import { getSlaTargets } from "./sla";
 import { getScorecard } from "./quality";
+import { addStarterReplies, listSavedReplies } from "./replies";
 import {
   CHANNELS,
   DEMO_AGENTS,
@@ -37,6 +38,8 @@ const PRIORITIES: { priority: TicketPriority; weight: number }[] = [
   { priority: "Medium", weight: 52 },
   { priority: "Low", weight: 21 },
 ];
+const CSAT_PRAISE = ["Quick and friendly, thank you!", "Sorted in one reply. Great service.", "Very helpful and clear."];
+const CSAT_COMPLAINTS = ["Took too long to get an answer.", "I had to explain my problem twice.", "Fixed in the end, but slow."];
 const HANDOFFS: { type: HandoffType; weight: number; reason: string }[] = [
   { type: "needs_staff", weight: 45, reason: "Needs an agent to check the order or account" },
   { type: "not_covered", weight: 25, reason: "No help article covers this question" },
@@ -181,6 +184,11 @@ export async function loadDemoData(orgId: string, slug: string) {
         if (status === "Waiting on Customer") pausedAt = firstReplyAt + (now - firstReplyAt) * rand();
       }
 
+      // About a third of customers answer the survey; happier with the stronger agents
+      const rated = resolvedAt !== null && rand() < 0.32;
+      const ratedAt = rated ? Math.min(now - MIN, resolvedAt! + (1 + rand() * 20) * 60 * MIN) : null;
+      const csat = rated ? Math.max(1, Math.min(5, Math.round(4.2 + agent.quality * 0.9 + (rand() - 0.55) * 2.2))) : null;
+
       drafts.push({
         customer: customer.name,
         agent,
@@ -213,6 +221,9 @@ export async function loadDemoData(orgId: string, slug: string) {
           resolution_due_at: iso(created + target.resolutionMinutes * MIN),
           sla_paused_at: pausedAt ? iso(pausedAt) : null,
           sla_paused_minutes: 0,
+          csat_rating: csat,
+          csat_comment: csat !== null && rand() < 0.3 ? pick(rand, csat >= 4 ? CSAT_PRAISE : CSAT_COMPLAINTS) : null,
+          csat_rated_at: ratedAt ? iso(ratedAt) : null,
         },
       });
     }
@@ -350,6 +361,9 @@ export async function loadDemoData(orgId: string, slug: string) {
     botMessages.push({ conversation_id: chatIds[i].id, role: "bot", body: c.answer, created_at: iso(at + 20_000) });
   });
   await insertAll("bot_messages", botMessages);
+
+  // Agents need something in the saved replies list to show off
+  if ((await listSavedReplies(orgId))?.length === 0) await addStarterReplies(orgId, "Atlas");
 
   return { tickets: ids.length, reviews: reviews.length, chats: chats.length };
 }

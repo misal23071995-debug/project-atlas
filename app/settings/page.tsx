@@ -59,6 +59,12 @@ export default async function SettingsPage() {
           </Link>
         </Section>
 
+        <Section title="Saved replies" description="Ready-made answers agents insert into tickets.">
+          <Link href="/settings/replies" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+            {can(role, "replies.manage") ? "Edit saved replies →" : "See saved replies →"}
+          </Link>
+        </Section>
+
         <Section
           title="Team"
           description={can(role, "team.manage") ? "Add people and choose their roles." : "See who is in this workspace."}

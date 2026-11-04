@@ -1,6 +1,7 @@
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { getTicket } from "@/app/lib/db/tickets";
 import { listMembers, requireSession } from "@/app/lib/auth/session";
+import { listSavedReplies } from "@/app/lib/db/replies";
 import TicketDetailView from "./TicketDetailView";
 
 // Always read the latest conversation from the database
@@ -13,7 +14,11 @@ export default async function TicketDetailsPage({
 }) {
   const { id } = await params;
   const { org } = await requireSession();
-  const [ticket, members] = await Promise.all([getTicket(org.id, id), listMembers(org.id)]);
+  const [ticket, members, savedReplies] = await Promise.all([
+    getTicket(org.id, id),
+    listMembers(org.id),
+    listSavedReplies(org.id),
+  ]);
 
   if (!ticket) {
     return (
@@ -31,5 +36,11 @@ export default async function TicketDetailsPage({
     );
   }
 
-  return <TicketDetailView ticket={ticket} agentNames={members.filter((m) => m.role !== "qa").map((m) => m.name)} />;
+  return (
+    <TicketDetailView
+      ticket={ticket}
+      agentNames={members.filter((m) => m.role !== "qa").map((m) => m.name)}
+      savedReplies={savedReplies ?? []}
+    />
+  );
 }

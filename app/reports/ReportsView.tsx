@@ -266,6 +266,7 @@ export default function ReportsView({
     csvMinutes(x.avgResolutionMinutes),
     csvMinutes(x.medianResolutionMinutes),
     x.slaMetPercent,
+    x.ticketCsatAverage,
     x.csatAverage,
   ];
 
@@ -327,10 +328,10 @@ export default function ReportsView({
             delta={<Delta now={s.slaMetPercent} before={p.slaMetPercent} better="up" />}
           />
           <Tile
-            label="Chat CSAT"
-            value={s.csatAverage === null ? "—" : `${s.csatAverage} ★`}
-            sub={`${num(s.csatResponses)} ratings`}
-            delta={<Delta now={s.csatAverage} before={p.csatAverage} better="up" />}
+            label="CSAT"
+            value={s.ticketCsatAverage === null ? "—" : `${s.ticketCsatAverage} ★`}
+            sub={`${num(s.ticketCsatResponses)} ticket ratings · bot chats ${s.csatAverage === null ? "—" : `${s.csatAverage} ★`}`}
+            delta={<Delta now={s.ticketCsatAverage} before={p.ticketCsatAverage} better="up" />}
           />
         </div>
         <p className="-mt-3 text-xs text-zinc-500">Changes are {compare}.</p>
@@ -368,7 +369,7 @@ export default function ReportsView({
           description="Resolved tickets are counted for whoever holds the ticket; first reply time for whoever sent it."
           onExport={exportTable(
             "agents",
-            ["Agent", "Resolved", "Replies", "Open now", "Avg first reply (min)", "SLA met %", "QC average", "QC reviews", "Training passed", "Training overdue"],
+            ["Agent", "Resolved", "Replies", "Open now", "Avg first reply (min)", "SLA met %", "CSAT", "CSAT ratings", "QC average", "QC reviews", "Training passed", "Training overdue"],
             report.agents.map((a) => [
               a.name,
               a.resolved,
@@ -376,6 +377,8 @@ export default function ReportsView({
               a.openNow,
               csvMinutes(a.avgFirstResponseMinutes),
               a.slaMetPercent,
+              a.csatAverage,
+              a.csatResponses,
               a.qcAverage,
               a.qcReviews,
               a.trainingPassed,
@@ -384,7 +387,7 @@ export default function ReportsView({
           )}
         >
           <Table
-            header={["Agent", "Resolved", "Replies", "Open now", "Avg first reply", "SLA met", "QC score", "Training"]}
+            header={["Agent", "Resolved", "Replies", "Open now", "Avg first reply", "SLA met", "CSAT", "QC score", "Training"]}
             rows={report.agents.map((a) => [
               a.name,
               a.resolved,
@@ -392,6 +395,7 @@ export default function ReportsView({
               a.openNow,
               duration(a.avgFirstResponseMinutes),
               pct(a.slaMetPercent),
+              a.csatAverage === null ? "—" : `${a.csatAverage} ★ (${a.csatResponses})`,
               a.qcAverage === null ? "—" : `${a.qcAverage}% (${a.qcReviews})`,
               a.trainingOverdue ? (
                 <span className="text-rose-400">{a.trainingOverdue} overdue</span>
@@ -553,7 +557,7 @@ export default function ReportsView({
             type="button"
             onClick={exportTable(
               "summary",
-              ["Period", "Created", "Resolved", "Avg first reply (min)", "Median first reply (min)", "Avg resolution (min)", "Median resolution (min)", "SLA met %", "Chat CSAT"],
+              ["Period", "Created", "Resolved", "Avg first reply (min)", "Median first reply (min)", "Avg resolution (min)", "Median resolution (min)", "SLA met %", "Ticket CSAT", "Chat CSAT"],
               [summaryRows(`${period.fromDate} to ${period.toDate}`, s), summaryRows("Previous period", p)]
             )}
             className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"

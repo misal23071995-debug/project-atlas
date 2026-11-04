@@ -23,7 +23,10 @@ export interface Summary {
   // Reply and resolution clocks that stopped in the period, and the share that stopped on time
   slaClocks: number;
   slaMetPercent: number | null;
-  // Average chat rating, 1-5
+  // Average rating from ticket surveys, 1-5
+  ticketCsatAverage: number | null;
+  ticketCsatResponses: number;
+  // Average rating at the end of bot chats, 1-5
   csatAverage: number | null;
   csatResponses: number;
 }
@@ -47,6 +50,8 @@ export interface Report {
     openNow: number;
     avgFirstResponseMinutes: number | null;
     slaMetPercent: number | null;
+    csatAverage: number | null;
+    csatResponses: number;
     qcAverage: number | null;
     qcReviews: number;
     trainingPassed: number;
@@ -78,6 +83,8 @@ type TicketRow = {
   resolution_due_at: string | null;
   sla_paused_at: string | null;
   sla_paused_minutes: number;
+  csat_rating: number | null;
+  csat_rated_at: string | null;
 };
 
 type ReplyRow = { ticket_id: number; sender: string; created_at: string };
@@ -147,6 +154,7 @@ function measure(tickets: TicketRow[], chats: ChatRow[], from: number, to: numbe
   const ttr = resolved.map((t) => minutesBetween(t.created_at, t.resolved_at!));
   const clocks = [...replyClocks, ...resolveClocks];
   const rated = chats.filter((c) => c.csat_rating !== null && inWindow(c.rated_at ?? c.created_at));
+  const ticketRatings = tickets.filter((t) => t.csat_rating !== null && inWindow(t.csat_rated_at));
 
   const summary: Summary = {
     created: created.length,
@@ -157,11 +165,13 @@ function measure(tickets: TicketRow[], chats: ChatRow[], from: number, to: numbe
     medianResolutionMinutes: median(ttr),
     slaClocks: clocks.length,
     slaMetPercent: percent(clocks.filter(({ c }) => c!.state === "met").length, clocks.length),
+    ticketCsatAverage: round1(mean(ticketRatings.map((t) => t.csat_rating!))),
+    ticketCsatResponses: ticketRatings.length,
     csatAverage: round1(mean(rated.map((c) => c.csat_rating!))),
     csatResponses: rated.length,
   };
 
-  return { summary, created, resolved, replied, replyClocks, resolveClocks };
+  return { summary, created, resolved, replied, replyClocks, resolveClocks, ticketRatings };
 }
 
 type Measured = ReturnType<typeof measure>;
@@ -212,11 +222,13 @@ export async function getReport(orgId: string, period: Period): Promise<Report> 
       supabase
         .from("tickets")
         .select(
-          "id, priority, status, assigned_to, channel, category, created_at, first_response_at, resolved_at, first_response_due_at, resolution_due_at, sla_paused_at, sla_paused_minutes"
+          "id, priority, status, assigned_to, channel, category, created_at, first_response_at, resolved_at, first_response_due_at, resolution_due_at, sla_paused_at, sla_paused_minutes, csat_rating, csat_rated_at"
         )
         .eq("org_id", orgId)
         // Created since the previous period began, or still open, or resolved since then
-        .or(`created_at.gte.${sinceIso},resolved_at.gte.${sinceIso},status.not.in.(Resolved,Closed)`)
+        .or(
+          `created_at.gte.${sinceIso},resolved_at.gte.${sinceIso},csat_rated_at.gte.${sinceIso},status.not.in.(Resolved,Closed)`
+        )
         .order("id")
         .range(a, b)
     ),
@@ -334,6 +346,7 @@ export async function getReport(orgId: string, period: Period): Promise<Report> 
       const firstReplies = current.replied.filter((t) => (firstReplier.get(t.id) ?? t.assigned_to) === name);
       const qc = (reviews ?? []).filter((r) => r.agent_name === name && r.total !== null);
       const training = (assignments ?? []).filter((a) => names.get(a.user_id) === name);
+      const ratings = current.ticketRatings.filter((t) => t.assigned_to === name).map((t) => t.csat_rating!);
       return {
         name,
         resolved: current.resolved.filter((t) => t.assigned_to === name).length,
@@ -341,13 +354,15 @@ export async function getReport(orgId: string, period: Period): Promise<Report> 
         openNow: open.filter((t) => t.assigned_to === name).length,
         avgFirstResponseMinutes: mean(firstReplies.map((t) => minutesBetween(t.created_at, t.first_response_at!))),
         slaMetPercent: metPercent(clocksByAgent.get(name) ?? []),
+        csatAverage: round1(mean(ratings)),
+        csatResponses: ratings.length,
         qcAverage: qc.length ? Math.round(mean(qc.map((r) => r.total!))!) : null,
         qcReviews: qc.length,
         trainingPassed: training.filter((a) => a.passed_at && inPeriod(a.passed_at, period)).length,
         trainingOverdue: training.filter((a) => a.status !== "passed" && a.due_date !== null && a.due_date < today).length,
       };
     })
-    .filter((a) => a.resolved || a.replies || a.openNow || a.qcReviews || a.trainingPassed || a.trainingOverdue)
+    .filter((a) => a.resolved || a.replies || a.openNow || a.csatResponses || a.qcReviews || a.trainingPassed || a.trainingOverdue)
     .sort((a, b) => b.resolved + b.replies - (a.resolved + a.replies) || a.name.localeCompare(b.name));
 
   // ---- Quality ----
