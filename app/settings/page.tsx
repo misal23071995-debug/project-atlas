@@ -4,8 +4,12 @@ import DashboardLayout from "@/app/components/dashboard-layout";
 import { requireSession } from "@/app/lib/auth/session";
 import { can, ROLE_LABELS } from "@/app/lib/auth/roles";
 import { CopyLink, PasswordForm, ProfileForm, WorkspaceForm } from "./forms";
+import { countDemoTickets } from "@/app/lib/db/demo";
+import DemoData from "./DemoData";
 
 export const dynamic = "force-dynamic";
+// Loading demo data writes a few thousand rows, which takes longer than the default limit
+export const maxDuration = 120;
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
@@ -23,6 +27,8 @@ export default async function SettingsPage() {
   const host = requestHeaders.get("x-forwarded-host") ?? requestHeaders.get("host") ?? "localhost:3000";
   const protocol = requestHeaders.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
   const chatUrl = `${protocol}://${host}/support/${org.slug}`;
+  const canManageWorkspace = can(role, "workspace.manage");
+  const demoTickets = canManageWorkspace ? await countDemoTickets(org.id) : 0;
 
   return (
     <DashboardLayout>
@@ -61,6 +67,12 @@ export default async function SettingsPage() {
             Open team →
           </Link>
         </Section>
+
+        {canManageWorkspace && (
+          <Section title="Demo data" description="For demos and interviews">
+            <DemoData demoTickets={demoTickets} />
+          </Section>
+        )}
 
         <Section title="Your profile" description={agent.email}>
           <ProfileForm name={agent.name} />
