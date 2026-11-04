@@ -2,36 +2,50 @@
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:ital,wght@0,400;0,500;0,600;1,400&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: a single reading column like a support-ops brief, with a wider band for the loop and metrics tables */
+/* Layout: a support-ops brief. A reading column for the argument, wide bands for the console, loops and charts.
+   The SLA states (on track / at risk / breached) are the subject's own signal colours and carry meaning only. */
 :root {
-  --paper: #f6f7f9;
+  --paper: #f3f5f9;
   --sheet: #ffffff;
-  --ink: #17202b;
-  --muted: #5a6573;
-  --rule: #dfe3e9;
-  --accent: #2c5bd6;
-  --accent-soft: #e7edfb;
-  --handover: #b5660f;
-  --handover-soft: #fbf0e2;
-  --solved: #1d7a52;
-  --solved-soft: #e3f3ec;
-  --display: "Newsreader", Georgia, "Times New Roman", serif;
+  --ink: #131a2c;
+  --muted: #5a6479;
+  --faint: #7d869a;
+  --rule: #dce1eb;
+  --accent: #4f46e5;
+  --accent-soft: #eceafd;
+  --ok: #15803d;
+  --ok-soft: #e3f4e8;
+  --warn: #b45309;
+  --warn-soft: #fbf0dc;
+  --bar: #4f46e5;
+  --bar-hi: #b45309;
+  /* The product's own dark console, the same in both themes */
+  --console: #0f1422;
+  --console-line: #232b40;
+  --console-ink: #e6e9f2;
+  --console-muted: #8b93a9;
+  --console-id: #a5a8ff;
+  --console-ok: #4ade80;
+  --console-warn: #fbbf24;
+  --console-bad: #fb7185;
+  --console-paused: #c3c8d6;
+  --display: "Bricolage Grotesque", "Helvetica Neue", Arial, sans-serif;
   --body: "Public Sans", "Helvetica Neue", Arial, sans-serif;
   --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --paper: #10151c; --sheet: #161d26; --ink: #e6eaf0; --muted: #9aa5b3; --rule: #2a3441;
-    --accent: #7ea2ff; --accent-soft: #1d2a46; --handover: #f0a957; --handover-soft: #33261a;
-    --solved: #5ccf9b; --solved-soft: #16302a; color-scheme: dark;
+    --paper: #0b0f1a; --sheet: #131a2a; --ink: #e8ebf4; --muted: #a0a9bd; --faint: #7b849b; --rule: #252e45;
+    --accent: #8f93fb; --accent-soft: #1f2347; --ok: #4ade80; --ok-soft: #12291c; --warn: #fbbf24; --warn-soft: #2e2410;
+    --bar: #8f93fb; --bar-hi: #fbbf24; --console-line: #2a3350; color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --paper: #10151c; --sheet: #161d26; --ink: #e6eaf0; --muted: #9aa5b3; --rule: #2a3441;
-  --accent: #7ea2ff; --accent-soft: #1d2a46; --handover: #f0a957; --handover-soft: #33261a;
-  --solved: #5ccf9b; --solved-soft: #16302a; color-scheme: dark;
+  --paper: #0b0f1a; --sheet: #131a2a; --ink: #e8ebf4; --muted: #a0a9bd; --faint: #7b849b; --rule: #252e45;
+  --accent: #8f93fb; --accent-soft: #1f2347; --ok: #4ade80; --ok-soft: #12291c; --warn: #fbbf24; --warn-soft: #2e2410;
+  --bar: #8f93fb; --bar-hi: #fbbf24; --console-line: #2a3350; color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -42,237 +56,488 @@ body {
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
 }
-.page { max-width: 46rem; margin: 0 auto; padding-block: 3.5rem 4rem; display: flex; flex-direction: column; gap: 3rem; }
-.wide { max-width: 58rem; width: 100%; margin: 0 auto; }
+.page { max-width: 68rem; margin: 0 auto; padding-block: 3rem 4rem; display: flex; flex-direction: column; gap: 4.5rem; }
+.read { max-width: 44rem; }
 
-h1, h2 { font-family: var(--display); font-weight: 600; text-wrap: balance; line-height: 1.15; margin: 0; }
-h1 { font-size: clamp(2.1rem, 5vw, 3rem); letter-spacing: -0.01em; }
-h2 { font-size: 1.6rem; }
-h3 { font-size: 1rem; font-weight: 600; margin: 0; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.3rem, 5.4vw, 3.9rem); font-weight: 700; line-height: 1.02; letter-spacing: -0.025em; }
+h2 { font-size: clamp(1.6rem, 3vw, 2.1rem); font-weight: 700; line-height: 1.1; letter-spacing: -0.015em; }
+h3 { font-size: 1.05rem; font-weight: 700; line-height: 1.25; }
 p { margin: 0; max-width: 65ch; }
 a { color: var(--accent); text-underline-offset: 3px; }
-a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 2px; }
+a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 3px; }
 
-.eyebrow { font: 500 0.75rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-section { display: flex; flex-direction: column; gap: 1rem; }
+.eyebrow { font: 500 0.72rem/1 var(--mono); letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); }
+section { display: flex; flex-direction: column; gap: 1.25rem; }
+.section-head { display: flex; flex-direction: column; gap: 0.6rem; }
+.section-head p:not(.eyebrow) { color: var(--muted); }
+
+/* ---- Hero ---- */
+.hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 3rem; align-items: center; }
+.hero-copy { display: flex; flex-direction: column; gap: 1.4rem; min-width: 0; }
 .lede { font-size: 1.15rem; color: var(--muted); }
-
-header { display: flex; flex-direction: column; gap: 1.1rem; border-bottom: 1px solid var(--rule); padding-bottom: 2rem; }
-.meta { display: flex; flex-wrap: wrap; gap: 0.5rem 1.5rem; font-size: 0.9rem; color: var(--muted); }
-.meta strong { color: var(--ink); font-weight: 600; }
-
-.question {
-  font-family: var(--display); font-size: 1.35rem; line-height: 1.4;
-  border-left: 3px solid var(--accent); padding: 0.25rem 0 0.25rem 1.1rem; max-width: 60ch;
+.meta { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.meta a, .meta span {
+  font-size: 0.88rem; padding: 0.45rem 0.8rem; border-radius: 999px; border: 1px solid var(--rule); background: var(--sheet); color: var(--ink); text-decoration: none;
 }
+.meta a { color: var(--accent); font-weight: 600; }
+.meta a:hover { border-color: var(--accent); }
 
-ul.plain { margin: 0; padding-left: 1.2rem; display: flex; flex-direction: column; gap: 0.4rem; }
+/* The console mock: a small, faithful slice of the agent desk */
+.console {
+  background: var(--console); color: var(--console-ink); border-radius: 14px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.9rem;
+  border: 1px solid var(--console-line); box-shadow: 0 30px 60px -30px rgba(15, 20, 40, 0.55); min-width: 0;
+}
+.console-top { display: flex; justify-content: space-between; align-items: center; gap: 1rem; font: 500 0.72rem/1 var(--mono); color: var(--console-muted); letter-spacing: 0.06em; text-transform: uppercase; }
+.console-top .dots { display: flex; gap: 0.35rem; }
+.console-top .dots i { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--console-line); display: block; }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.5rem; }
+.kpi { border: 1px solid var(--console-line); border-radius: 9px; padding: 0.6rem 0.7rem; display: flex; flex-direction: column; gap: 0.2rem; min-width: 0; }
+.kpi small { font-size: 0.7rem; color: var(--console-muted); line-height: 1.2; }
+.kpi b { font: 700 1.25rem/1.1 var(--display); font-variant-numeric: tabular-nums; }
+.queue { display: flex; flex-direction: column; border: 1px solid var(--console-line); border-radius: 9px; overflow: hidden; }
+.qrow { display: grid; grid-template-columns: 4.2rem minmax(0, 1fr) auto; gap: 0.75rem; align-items: center; padding: 0.6rem 0.75rem; font-size: 0.84rem; }
+.qrow + .qrow { border-top: 1px solid var(--console-line); }
+.qrow .id { font-family: var(--mono); color: var(--console-id); font-size: 0.8rem; }
+.qrow .subj { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.qrow .subj small { display: block; color: var(--console-muted); font-size: 0.72rem; overflow: hidden; text-overflow: ellipsis; }
+.pill { font: 500 0.72rem/1 var(--body); padding: 0.35rem 0.55rem; border-radius: 999px; white-space: nowrap; border: 1px solid currentColor; }
+.pill.ok { color: var(--console-ok); }
+.pill.warn { color: var(--console-warn); }
+.pill.bad { color: var(--console-bad); }
+.pill.paused { color: var(--console-paused); }
+.console-note { font-size: 0.72rem; color: var(--console-muted); }
 
-/* The loop: a real sequence, so the steps are numbered */
-.loop { display: grid; grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr)); gap: 0.75rem; list-style: none; padding: 0; margin: 0; counter-reset: step; }
-.loop li { background: var(--sheet); border: 1px solid var(--rule); border-radius: 8px; padding: 1rem; display: flex; flex-direction: column; gap: 0.35rem; min-width: 0; counter-increment: step; }
-.loop li::before { content: counter(step); font: 500 0.8rem/1 var(--mono); color: var(--accent); }
-.loop li p { font-size: 0.9rem; color: var(--muted); }
+/* ---- The question ---- */
+.question { font: 500 clamp(1.5rem, 3.2vw, 2.15rem)/1.22 var(--display); letter-spacing: -0.01em; max-width: 30ch; }
+.question em { font-style: normal; color: var(--accent); }
 
-/* Example chat */
-.chat { background: var(--sheet); border: 1px solid var(--rule); border-radius: 10px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
-.msg { max-width: 85%; padding: 0.65rem 0.9rem; border-radius: 12px; font-size: 0.93rem; }
-.msg.customer { align-self: flex-end; background: var(--accent); color: var(--sheet); }
-.msg.bot { align-self: flex-start; background: var(--paper); }
-.chip { align-self: flex-start; font: 500 0.75rem/1 var(--mono); padding: 0.4rem 0.6rem; border-radius: 999px; }
-.chip.handover { background: var(--handover-soft); color: var(--handover); }
-.chip.solved { background: var(--solved-soft); color: var(--solved); }
-.caption { font-size: 0.85rem; color: var(--muted); }
+/* ---- Modules, grouped by the job they do ---- */
+.groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+.group { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+.group-label { display: flex; align-items: center; gap: 0.5rem; font: 500 0.72rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--accent); }
+.group-label svg { width: 1.05rem; height: 1.05rem; stroke: currentColor; fill: none; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+.group dl { margin: 0; display: flex; flex-direction: column; gap: 0.8rem; }
+.group dt { font-weight: 600; font-size: 0.97rem; }
+.group dd { margin: 0.1rem 0 0; font-size: 0.88rem; line-height: 1.5; color: var(--muted); }
+
+/* ---- Loops: real sequences, so steps are numbered and joined ---- */
+.loops { display: flex; flex-direction: column; gap: 1rem; }
+.loop { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 1.2rem 1.2rem 1.3rem; display: flex; flex-direction: column; gap: 1.1rem; }
+.loop-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 0.4rem 0.9rem; }
+.loop-head .tag { font: 500 0.72rem/1 var(--mono); letter-spacing: 0.08em; text-transform: uppercase; padding: 0.35rem 0.55rem; border-radius: 6px; background: var(--accent-soft); color: var(--accent); }
+.steps { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); counter-reset: step; }
+.steps li { position: relative; padding-right: 1.1rem; display: flex; flex-direction: column; gap: 0.3rem; counter-increment: step; min-width: 0; }
+.steps li::before {
+  content: counter(step); font: 500 0.75rem/1 var(--mono); width: 1.7rem; height: 1.7rem; border-radius: 50%; display: grid; place-items: center;
+  border: 1.5px solid var(--accent); color: var(--accent); background: var(--sheet); position: relative; z-index: 1; margin-bottom: 0.35rem;
+}
+/* The line joining one step to the next */
+.steps li:not(:last-child)::after { content: ""; position: absolute; top: 0.85rem; left: 1.7rem; right: 0; height: 1.5px; background: var(--rule); }
+.steps li:last-child::before { background: var(--accent); color: var(--sheet); }
+.steps b { font-size: 0.92rem; }
+.steps span { font-size: 0.84rem; line-height: 1.45; color: var(--muted); }
+
+/* ---- Charts from the demo workspace ---- */
+.charts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
+.chart { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 1.2rem; display: flex; flex-direction: column; gap: 0.9rem; min-width: 0; }
+.chart-head { display: flex; flex-direction: column; gap: 0.25rem; }
+.chart-head p { font-size: 0.86rem; color: var(--muted); }
+.chart-wide { grid-column: 1 / -1; }
+.volume { position: relative; }
+.volume svg { width: 100%; height: auto; display: block; }
+.volume .grid { stroke: var(--rule); stroke-width: 1; }
+.volume .axis { fill: var(--faint); font: 400 11px var(--mono); }
+.volume .col { fill: var(--bar); }
+.volume .col.spike { fill: var(--bar-hi); }
+.volume .col.on { opacity: 0.75; }
+.volume .hit { fill: transparent; cursor: default; }
+.volume .note-text { fill: var(--ink); font: 600 11px var(--body); }
+.volume .note-line { stroke: var(--bar-hi); stroke-width: 1.5; }
+.tip {
+  position: absolute; pointer-events: none; background: var(--ink); color: var(--paper); font-size: 0.78rem; padding: 0.35rem 0.55rem;
+  border-radius: 6px; white-space: nowrap; transform: translate(-50%, -120%);
+}
+.legend { display: flex; flex-wrap: wrap; gap: 1rem; font-size: 0.8rem; color: var(--muted); }
+.legend i { display: inline-block; width: 0.7rem; height: 0.7rem; border-radius: 3px; margin-right: 0.35rem; vertical-align: -0.05rem; }
+.legend .k-base { background: var(--bar); }
+.legend .k-hi { background: var(--bar-hi); }
+
+.hbars { display: flex; flex-direction: column; gap: 0.6rem; margin: 0; padding: 0; list-style: none; }
+.hbars li { display: grid; grid-template-columns: 8.5rem minmax(0, 1fr) 2.8rem; gap: 0.7rem; align-items: center; font-size: 0.86rem; }
+.hbars .track { height: 0.6rem; background: var(--paper); border-radius: 0 4px 4px 0; overflow: hidden; }
+.hbars .fill { display: block; height: 100%; border-radius: 0 4px 4px 0; background: var(--bar); }
+.hbars .fill.low { background: var(--bar-hi); }
+.hbars .val { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); }
+.chart-foot { font-size: 0.8rem; color: var(--faint); }
+
+/* ---- Chat examples ---- */
 .examples { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; }
-.examples > div { display: flex; flex-direction: column; gap: 0.5rem; min-width: 0; }
+.example { display: flex; flex-direction: column; gap: 0.55rem; min-width: 0; }
+.chat { background: var(--sheet); border: 1px solid var(--rule); border-radius: 12px; padding: 1.1rem; display: flex; flex-direction: column; gap: 0.7rem; }
+.msg { max-width: 86%; padding: 0.65rem 0.9rem; border-radius: 14px; font-size: 0.92rem; line-height: 1.5; }
+.msg.customer { align-self: flex-end; background: var(--accent); color: var(--sheet); border-bottom-right-radius: 4px; }
+.msg.bot { align-self: flex-start; background: var(--paper); border-bottom-left-radius: 4px; }
+.chip { align-self: flex-start; font: 500 0.72rem/1 var(--mono); padding: 0.4rem 0.6rem; border-radius: 999px; }
+.chip.ok { background: var(--ok-soft); color: var(--ok); }
+.chip.warn { background: var(--warn-soft); color: var(--warn); }
+.caption { font-size: 0.85rem; color: var(--muted); }
 
-/* Tables */
-.table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 8px; background: var(--sheet); }
+/* ---- Decisions: claim and reason ---- */
+.decisions { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 0 2.5rem; margin: 0; }
+.decisions div { border-top: 1px solid var(--rule); padding-block: 1rem; display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+.decisions dt { font-weight: 600; }
+.decisions dd { margin: 0; font-size: 0.92rem; color: var(--muted); }
+
+/* ---- Metrics ---- */
+.table-wrap { overflow-x: auto; border: 1px solid var(--rule); border-radius: 12px; background: var(--sheet); }
 table { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
-th, td { text-align: left; padding: 0.7rem 0.9rem; vertical-align: top; border-top: 1px solid var(--rule); }
-thead th { border-top: 0; font: 500 0.75rem/1.2 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-td code, .mono { font-family: var(--mono); font-size: 0.85em; }
-td:first-child { font-weight: 500; }
+th, td { text-align: left; padding: 0.75rem 1rem; vertical-align: top; border-top: 1px solid var(--rule); }
+thead th { border-top: 0; font: 500 0.72rem/1.2 var(--mono); letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); }
+td:first-child { font-weight: 600; }
+td .where { display: block; font: 400 0.78rem/1.3 var(--mono); color: var(--faint); margin-top: 0.15rem; }
 
-/* Modules: a ruled two-column list, since they are peers, not a sequence */
-.modules { display: grid; grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr)); gap: 0 2rem; margin: 0; }
-.modules div { border-top: 1px solid var(--rule); padding-block: 0.85rem; display: flex; flex-direction: column; gap: 0.25rem; min-width: 0; }
-.modules dt { font-weight: 600; }
-.modules dd { margin: 0; font-size: 0.92rem; color: var(--muted); }
-.loops { display: flex; flex-direction: column; gap: 1.75rem; }
-.loops > div { display: flex; flex-direction: column; gap: 0.75rem; }
-.loops > div > h3 { font: 500 0.8rem/1 var(--mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.note { background: var(--accent-soft); border-radius: 12px; padding: 1.1rem 1.2rem; font-size: 0.93rem; max-width: none; }
 
-.note { background: var(--accent-soft); border-radius: 8px; padding: 1rem 1.1rem; font-size: 0.93rem; }
+.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(19rem, 1fr)); gap: 2.5rem; }
+.split > section { min-width: 0; }
+ul.plain { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.5rem; }
+ul.plain li::marker { color: var(--accent); }
 
-footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.4rem; }
+footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85rem; color: var(--muted); display: flex; flex-direction: column; gap: 0.35rem; }
 
+@media (max-width: 880px) {
+  .hero { grid-template-columns: 1fr; gap: 2rem; }
+  .charts { grid-template-columns: 1fr; }
+}
+@media (max-width: 720px) {
+  .steps { grid-template-columns: 1fr; gap: 0.9rem; }
+  .steps li { padding: 0 0 0 2.6rem; }
+  .steps li::before { position: absolute; left: 0; top: 0; margin: 0; }
+  .steps li:not(:last-child)::after { top: 1.7rem; bottom: -0.9rem; left: 0.85rem; right: auto; width: 1.5px; height: auto; }
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .hbars li { grid-template-columns: 7rem minmax(0, 1fr) 2.6rem; }
+  .qrow { grid-template-columns: 3.8rem minmax(0, 1fr); }
+  .qrow .pill { grid-column: 2; justify-self: start; }
+}
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 </style>
 
 <main class="page">
-  <header>
-    <p class="eyebrow">Case study · Customer experience</p>
-    <h1>Running support as one system: channels, quality, people and planning</h1>
-    <p class="lede">A working, multi-company support platform for a fictional smart-ring brand. It covers what a CX lead runs every day: an AI chatbot and email, SLAs, quality checks, training, rosters, capacity and reporting.</p>
-    <div class="meta">
-      <span><strong>Vishal Misal</strong></span>
-      <span>Next.js · Supabase · Google Gemini</span>
-      <span><a href="https://project-atlas-pied.vercel.app/support/atlas-ring">Try the customer chat</a></span>
-      <span><a href="https://github.com/misal23071995-debug/project-atlas">Source on GitHub</a></span>
+  <header class="hero">
+    <div class="hero-copy">
+      <p class="eyebrow">Case study · Customer experience operations</p>
+      <h1>Running support as one system</h1>
+      <p class="lede">Project Atlas is a working, multi-company support platform. It brings together what a CX lead runs every day: an AI chatbot and email, SLAs, quality checks, training, rosters, capacity and reporting. Each part feeds the next.</p>
+      <div class="meta">
+        <a href="https://project-atlas-pied.vercel.app/support/atlas-ring">Try the customer chat</a>
+        <a href="https://github.com/misal23071995-debug/project-atlas">Source on GitHub</a>
+        <span>Vishal Misal</span>
+      </div>
+    </div>
+
+    <div class="console" role="img" aria-label="The agent desk in the demo workspace: SLA met 90%, median first reply 55 minutes, CSAT 4.4, bot solved 61%, and four tickets with their SLA status">
+      <div class="console-top"><span class="dots"><i></i><i></i><i></i></span><span>Atlas Ring · Tickets</span></div>
+      <div class="kpis">
+        <div class="kpi"><small>SLA met</small><b>90%</b></div>
+        <div class="kpi"><small>First reply</small><b>55m</b></div>
+        <div class="kpi"><small>CSAT</small><b>4.4★</b></div>
+        <div class="kpi"><small>Bot solved</small><b>61%</b></div>
+      </div>
+      <div class="queue">
+        <div class="qrow"><span class="id">#10512</span><span class="subj">Charged twice for Atlas+<small>Email · High · Priya Sharma</small></span><span class="pill bad">Reply overdue 12m</span></div>
+        <div class="qrow"><span class="id">#10509</span><span class="subj">Ring not syncing<small>AI Chatbot · Medium · Unassigned</small></span><span class="pill warn">Reply in 22m</span></div>
+        <div class="qrow"><span class="id">#10497</span><span class="subj">Exchange for a different size<small>Chat · Low · Kabir Singh</small></span><span class="pill paused">Paused · waiting</span></div>
+        <div class="qrow"><span class="id">#10488</span><span class="subj">Battery draining fast<small>Phone · Medium · Meera Iyer</small></span><span class="pill ok">Resolve in 6h</span></div>
+      </div>
+      <p class="console-note">Recreated from the demo workspace. All customers and agents are fictional.</p>
     </div>
   </header>
 
-  <section>
+  <section class="read">
     <p class="eyebrow">The question</p>
-    <p class="question">How do you handle more customers, faster, without the quality of support slipping?</p>
-    <p>Most teams answer that question with separate tools: one for tickets, a spreadsheet for the roster, another for QC scores, a slide deck for the monthly report. The links between them live in the lead’s head. A low QC score doesn’t reach the training plan until the next review. The forecast doesn’t reach the roster until someone notices the queue is on fire. I wanted to see what it looks like when those links are built in.</p>
+    <p class="question">How do you handle more customers, faster, <em>without the quality of support slipping?</em></p>
+    <p>Most teams answer that question with separate tools: one for tickets, a spreadsheet for the roster, another for QC scores, a slide deck for the monthly report. The links between them live in the lead’s head. A low QC score doesn’t reach the training plan until the next review. The forecast doesn’t reach the roster until the queue is already on fire. Atlas builds those links in.</p>
   </section>
 
-  <section class="wide">
-    <p class="eyebrow">What I built</p>
-    <h2>Eleven modules, one workspace</h2>
-    <dl class="modules">
-      <div><dt>AI chatbot</dt><dd>Answers only from published help articles and cites them. Hands over to a person with the full transcript when it can’t help.</dd></div>
-      <div><dt>Email</dt><dd>Incoming emails become tickets that the AI has already read. Replies thread back onto the same ticket and reopen it. Customers get an automatic acknowledgement and a survey link.</dd></div>
-      <div><dt>Ticket desk</dt><dd>Queue, assignment, internal notes, an AI copilot that drafts replies, and saved replies with the customer’s name filled in.</dd></div>
-      <div><dt>SLA tracking</dt><dd>First-reply and resolution targets per priority, with live on-track, at-risk and breached labels. The clock pauses while waiting on the customer.</dd></div>
-      <div><dt>CSAT</dt><dd>A private survey link on every ticket, plus ratings at the end of bot chats. Results show per agent and over time.</dd></div>
-      <div><dt>Quality (QC)</dt><dd>A weighted scorecard. The AI scores first; a QA analyst finalises. Results by agent and criterion.</dd></div>
-      <div><dt>Training</dt><dd>Courses with a lesson and an AI-written quiz. A low QC score assigns the linked course automatically.</dd></div>
-      <div><dt>Rostering</dt><dd>Weekly shifts with breaks and overnight cover. Agents request leave and leads approve it.</dd></div>
-      <div><dt>Capacity planning</dt><dd>An hourly forecast from ticket history, Erlang C staffing with shrinkage, and a heat map of roster gaps.</dd></div>
-      <div><dt>Reports</dt><dd>Any date range against the period before: response and resolution times, SLA, CSAT, agents, channels, contact reasons, QC, deflection, training. CSV for every table.</dd></div>
-      <div><dt>Workspaces and roles</dt><dd>Each company has its own private workspace, with Admin, Team Lead, Agent and QA Analyst roles.</dd></div>
-    </dl>
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">What I built</p>
+      <h2>Eleven modules, four jobs</h2>
+    </div>
+    <div class="groups">
+      <div class="group">
+        <p class="group-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H8l-4 4z"/></svg>Channels</p>
+        <dl>
+          <div><dt>AI chatbot</dt><dd>Answers only from help articles and cites them. When it can’t help, it hands over to a person with the transcript.</dd></div>
+          <div><dt>Email</dt><dd>Incoming emails become tickets; replies thread back and reopen them. Automatic acknowledgement and survey emails.</dd></div>
+          <div><dt>Workspaces and roles</dt><dd>A private space for each company, with Admin, Team Lead, Agent and QA roles.</dd></div>
+        </dl>
+      </div>
+      <div class="group">
+        <p class="group-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 2M9 3h6"/></svg>The desk</p>
+        <dl>
+          <div><dt>Ticket desk</dt><dd>Queue, assignment, notes, an AI copilot and saved replies with the customer’s details filled in.</dd></div>
+          <div><dt>SLA tracking</dt><dd>Reply and resolve targets per priority, with a live countdown that pauses while waiting on the customer.</dd></div>
+          <div><dt>CSAT</dt><dd>A private survey link on every ticket, plus ratings at the end of bot chats.</dd></div>
+        </dl>
+      </div>
+      <div class="group">
+        <p class="group-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3l2.6 5.3 5.9.9-4.3 4.1 1 5.8L12 16.4 6.8 19.1l1-5.8L3.5 9.2l5.9-.9z"/></svg>Quality and people</p>
+        <dl>
+          <div><dt>Quality (QC)</dt><dd>A weighted scorecard. The AI scores first; a person finalises.</dd></div>
+          <div><dt>Training</dt><dd>Lessons with AI-written quizzes. A low QC score assigns the linked course.</dd></div>
+          <div><dt>Rostering</dt><dd>Weekly shifts with breaks and overnight cover, and a leave approval flow.</dd></div>
+        </dl>
+      </div>
+      <div class="group">
+        <p class="group-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>Planning and insight</p>
+        <dl>
+          <div><dt>Capacity planning</dt><dd>An hourly forecast from ticket history, Erlang C staffing with shrinkage, and a heat map of roster gaps.</dd></div>
+          <div><dt>Reports</dt><dd>Any date range against the period before. Every table downloads as CSV.</dd></div>
+        </dl>
+      </div>
+    </div>
   </section>
 
-  <section class="wide">
-    <p class="eyebrow">How it connects</p>
-    <h2>Three loops a CX lead runs</h2>
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">How it connects</p>
+      <h2>Three loops a CX lead runs</h2>
+    </div>
     <div class="loops">
-      <div>
-        <h3>Content: the bot shows the team what to teach it</h3>
-        <ol class="loop">
-          <li><h3>Customer asks</h3><p>The bot searches published articles.</p></li>
-          <li><h3>Bot can’t answer</h3><p>It hands over with the transcript and a reason.</p></li>
-          <li><h3>Gap is logged</h3><p>The Knowledge Gaps report groups it by topic.</p></li>
-          <li><h3>Article written</h3><p>One click from the gap, category filled in.</p></li>
-          <li><h3>Next customer answered</h3><p>Deflection rises on that topic.</p></li>
+      <div class="loop">
+        <div class="loop-head"><span class="tag">Content</span><h3>The bot shows the team what to teach it next</h3></div>
+        <ol class="steps">
+          <li><b>Customer asks</b><span>The bot searches published articles.</span></li>
+          <li><b>Bot can’t answer</b><span>Hands over with the transcript and a reason.</span></li>
+          <li><b>Gap is logged</b><span>Knowledge Gaps groups it by topic.</span></li>
+          <li><b>Article written</b><span>One click from the gap, category filled in.</span></li>
+          <li><b>Next customer answered</b><span>Deflection rises on that topic.</span></li>
         </ol>
       </div>
-      <div>
-        <h3>Quality: coaching happens when the gap is found</h3>
-        <ol class="loop">
-          <li><h3>Ticket resolved</h3><p>The customer rates it from the survey link.</p></li>
-          <li><h3>AI scores it</h3><p>Against the team’s own weighted scorecard.</p></li>
-          <li><h3>Reviewer finalises</h3><p>A person adjusts the scores and adds feedback.</p></li>
-          <li><h3>Low score on a criterion</h3><p>The linked course is assigned, due in a week.</p></li>
-          <li><h3>Agent passes the quiz</h3><p>Reports track it alongside their QC trend.</p></li>
+      <div class="loop">
+        <div class="loop-head"><span class="tag">Quality</span><h3>Coaching happens when the gap is found</h3></div>
+        <ol class="steps">
+          <li><b>Ticket resolved</b><span>The customer rates it from their survey link.</span></li>
+          <li><b>AI scores it</b><span>Against the team’s weighted scorecard.</span></li>
+          <li><b>Reviewer finalises</b><span>Adjusts scores and adds feedback.</span></li>
+          <li><b>Low score found</b><span>The linked course is assigned, due in a week.</span></li>
+          <li><b>Agent passes</b><span>Reports track it next to their QC trend.</span></li>
         </ol>
       </div>
-      <div>
-        <h3>Planning: demand sets the staffing target</h3>
-        <ol class="loop">
-          <li><h3>Ticket history</h3><p>Averaged into contacts per hour of the week.</p></li>
-          <li><h3>Erlang C</h3><p>Agents needed to hit the service level, plus shrinkage.</p></li>
-          <li><h3>Roster overlay</h3><p>People on shift, minus breaks and leave.</p></li>
-          <li><h3>Gap heat map</h3><p>Shows exactly which hours are short.</p></li>
-          <li><h3>SLA results</h3><p>Show whether the fix worked.</p></li>
+      <div class="loop">
+        <div class="loop-head"><span class="tag">Planning</span><h3>Demand sets the staffing target</h3></div>
+        <ol class="steps">
+          <li><b>Ticket history</b><span>Averaged into contacts per hour of the week.</span></li>
+          <li><b>Erlang C</b><span>Agents needed for the service level, plus shrinkage.</span></li>
+          <li><b>Roster overlay</b><span>People on shift, minus breaks and leave.</span></li>
+          <li><b>Gap heat map</b><span>Shows exactly which hours are short.</span></li>
+          <li><b>SLA results</b><span>Show whether the fix worked.</span></li>
         </ol>
       </div>
     </div>
   </section>
 
-  <section class="wide">
-    <p class="eyebrow">What the bot looks like</p>
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">Inside the demo workspace</p>
+      <h2>What a lead sees in Reports</h2>
+      <p>Charts from Atlas’s one-click demo dataset: 90 days of made-up activity across six fictional agents. It’s there so every report can be walked through; it isn’t customer data.</p>
+    </div>
+    <div class="charts">
+      <div class="chart chart-wide">
+        <div class="chart-head">
+          <h3>Tickets created per day, four weeks</h3>
+          <p>A firmware release causes a sync-issue spike. Sync questions become over a third of contacts for the month, which points at an article to write and a product fix to push for.</p>
+        </div>
+        <div class="volume" id="volume">
+          <svg id="volume-svg" viewBox="0 0 720 210" role="img" aria-label="Tickets per day over four weeks, mostly 7 to 16 a day, rising to 20 to 27 a day for five days during the sync issue"></svg>
+          <div class="tip" id="volume-tip" hidden></div>
+        </div>
+        <div class="legend"><span><i class="k-base"></i>Tickets created</span><span><i class="k-hi"></i>During the sync issue</span></div>
+      </div>
+
+      <div class="chart">
+        <div class="chart-head">
+          <h3>QC score by agent</h3>
+          <p>Final scores in the last 30 days. Below 70% shows in amber.</p>
+        </div>
+        <ul class="hbars">
+          <li><span>Meera Iyer</span><span class="track"><span class="fill" style="width: 89%"></span></span><span class="val">89%</span></li>
+          <li><span>Priya Sharma</span><span class="track"><span class="fill" style="width: 87%"></span></span><span class="val">87%</span></li>
+          <li><span>Kabir Singh</span><span class="track"><span class="fill" style="width: 75%"></span></span><span class="val">75%</span></li>
+          <li><span>Arjun Mehta</span><span class="track"><span class="fill" style="width: 71%"></span></span><span class="val">71%</span></li>
+          <li><span>Rahul Das</span><span class="track"><span class="fill low" style="width: 64%"></span></span><span class="val">64%</span></li>
+          <li><span>Sara Thomas</span><span class="track"><span class="fill low" style="width: 54%"></span></span><span class="val">54%</span></li>
+        </ul>
+        <p class="chart-foot">Rahul is fast but weak on empathy; Sara is new and less accurate. In a live workspace, a low score on a criterion assigns the course linked to it.</p>
+      </div>
+
+      <div class="chart">
+        <div class="chart-head">
+          <h3>Why the bot handed over</h3>
+          <p>155 of 398 chats went to an agent; 61% were solved without one.</p>
+        </div>
+        <ul class="hbars">
+          <li><span>Needs staff action</span><span class="track"><span class="fill" style="width: 100%"></span></span><span class="val">64</span></li>
+          <li><span>No article</span><span class="track"><span class="fill" style="width: 64%"></span></span><span class="val">41</span></li>
+          <li><span>Asked for a person</span><span class="track"><span class="fill" style="width: 56%"></span></span><span class="val">36</span></li>
+          <li><span>Customer upset</span><span class="track"><span class="fill" style="width: 22%"></span></span><span class="val">14</span></li>
+        </ul>
+        <p class="chart-foot">“Needs staff action” is mostly order lookups. That’s a tooling fix, not a content one.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <div class="section-head">
+      <p class="eyebrow">The chatbot</p>
+      <h2>It answers what it knows, and hands over what it doesn’t</h2>
+    </div>
     <div class="examples">
-      <div>
+      <div class="example">
         <div class="chat" aria-label="Example chat solved by the bot">
           <div class="msg customer">How long does the battery last?</div>
           <div class="msg bot">A full charge lasts 5 to 7 days. Battery drains faster with continuous heart-rate mode, frequent manual syncs, or very cold temperatures…</div>
-          <span class="chip solved">Solved by AI · source: Improving battery life</span>
+          <span class="chip ok">Solved by AI · source: Improving battery life</span>
         </div>
         <p class="caption">Covered by an article: the bot answers and cites it.</p>
       </div>
-      <div>
+      <div class="example">
         <div class="chat" aria-label="Example chat handed to an agent">
           <div class="msg customer">Can I swim or shower with the Atlas Ring? Is it waterproof?</div>
           <div class="msg bot">My help articles don’t cover whether the ring is waterproof. A support agent will follow up with you by email.</div>
-          <span class="chip handover">Handed over · no article covers it</span>
+          <span class="chip warn">Handed over · no article covers it</span>
         </div>
         <p class="caption">Not covered: no guessing. A ticket is created and the question goes onto the gaps report.</p>
       </div>
     </div>
-    <p class="caption">Both are real replies from test runs of the bot.</p>
   </section>
 
   <section>
-    <p class="eyebrow">Design decisions</p>
-    <h2>Choices a support lead would make</h2>
-    <div class="table-wrap">
-      <table>
-        <thead><tr><th>Decision</th><th>Why</th></tr></thead>
-        <tbody>
-          <tr><td>The bot answers only from articles</td><td>A confident wrong answer costs more trust than “let me get a person”.</td></tr>
-          <tr><td>Handovers are grouped by reason</td><td>“No article” is a content fix; “needs staff” is a process or tooling fix. They need different owners.</td></tr>
-          <tr><td>SLA due times are fixed at creation</td><td>Changing targets later shouldn’t rewrite last month’s results.</td></tr>
-          <tr><td>The clock pauses on Waiting on Customer</td><td>Agents aren’t penalised for time the customer takes.</td></tr>
-          <tr><td>Medians next to averages</td><td>One ticket stuck for a week drags an average; the median shows the typical customer’s wait.</td></tr>
-          <tr><td>The AI scores QC, a person finalises it</td><td>The AI makes it fast enough to review more conversations, and a person stays accountable for each score. The report tracks how far the AI’s scores differ from the final ones.</td></tr>
-          <tr><td>Erlang C, not tickets ÷ agents</td><td>Queues don’t scale linearly; the standard contact-centre model shows the real headcount.</td></tr>
-          <tr><td>Only the ticket’s customer can reply onto it</td><td>A guessed ticket number in an email subject can’t post into someone else’s case.</td></tr>
-          <tr><td>Agents don’t see team reports</td><td>Agents see their own results without a leaderboard of their colleagues.</td></tr>
-        </tbody>
-      </table>
+    <div class="section-head">
+      <p class="eyebrow">Design decisions</p>
+      <h2>Choices a support lead would make</h2>
     </div>
+    <dl class="decisions">
+      <div><dt>The bot answers only from articles</dt><dd>A confident wrong answer costs more trust than “let me get a person”.</dd></div>
+      <div><dt>Handovers are grouped by reason</dt><dd>“No article” is a content fix; “needs staff” is a process or tooling fix. They need different owners.</dd></div>
+      <div><dt>SLA due times are fixed at creation</dt><dd>Changing targets later shouldn’t rewrite last month’s results.</dd></div>
+      <div><dt>The clock pauses on Waiting on Customer</dt><dd>Agents aren’t penalised for time the customer takes.</dd></div>
+      <div><dt>Medians next to averages</dt><dd>One ticket stuck for a week drags an average; the median shows the typical customer’s wait.</dd></div>
+      <div><dt>The AI scores QC, a person finalises it</dt><dd>The AI makes it fast enough to review more conversations, and a person stays accountable for each score. The report tracks how far the AI’s scores differ from the final ones.</dd></div>
+      <div><dt>Erlang C, not tickets ÷ agents</dt><dd>Queues don’t scale linearly. The standard contact-centre model shows the real headcount.</dd></div>
+      <div><dt>Only the ticket’s customer can reply onto it</dt><dd>A guessed ticket number in an email subject can’t post into someone else’s case.</dd></div>
+    </dl>
   </section>
 
   <section>
-    <p class="eyebrow">Measurement</p>
-    <h2>What the reports track</h2>
+    <div class="section-head">
+      <p class="eyebrow">Measurement</p>
+      <h2>What the reports track</h2>
+    </div>
     <div class="table-wrap">
       <table>
         <thead><tr><th>Metric</th><th>Why it matters</th></tr></thead>
         <tbody>
-          <tr><td>First reply and resolution time</td><td>The customer’s experience of speed, as a median and an average.</td></tr>
-          <tr><td>SLA met %, breached and at risk</td><td>Whether the team keeps its promises, and what needs attention right now.</td></tr>
-          <tr><td>CSAT, from tickets and from bot chats</td><td>Shows whether faster or automated handling is costing satisfaction.</td></tr>
-          <tr><td>Bot deflection and handover reasons</td><td>The volume the bot takes off the queue, and what stops it taking more.</td></tr>
+          <tr><td>First reply and resolution time<span class="where">median and average</span></td><td>The customer’s experience of speed.</td></tr>
+          <tr><td>SLA met %<span class="where">plus breached and at risk now</span></td><td>Whether the team keeps its promises, and what needs attention right now.</td></tr>
+          <tr><td>CSAT<span class="where">tickets and bot chats</span></td><td>Shows whether faster or automated handling is costing satisfaction.</td></tr>
+          <tr><td>Bot deflection<span class="where">with handover reasons</span></td><td>The volume the bot takes off the queue, and what stops it taking more.</td></tr>
           <tr><td>Contact reasons</td><td>What to fix at the source with product and ops, so contacts don’t happen at all.</td></tr>
           <tr><td>QC by agent and criterion</td><td>Where coaching is needed, and for whom.</td></tr>
           <tr><td>Training passed and overdue</td><td>Whether the coaching actually happened.</td></tr>
-          <tr><td>Agents needed vs rostered, per hour</td><td>Where the next shift change should go.</td></tr>
+          <tr><td>Agents needed vs rostered<span class="where">per hour</span></td><td>Where the next shift change should go.</td></tr>
         </tbody>
       </table>
     </div>
-    <p class="note">There is no live customer traffic yet, so there are no real results to report. A one-click demo dataset fills a workspace with 90 days of made-up activity, including a sync-issue spike and agents with different strengths, so every report can be walked through. In a pilot I’d take two weeks as a baseline, then judge success on SLA met % and first reply time improving while CSAT holds steady or rises.</p>
+    <p class="note">There is no live customer traffic yet, so there are no real results to report. In a pilot I’d take two weeks as a baseline. I’d then judge success on SLA met % and first reply time improving while CSAT holds steady or rises.</p>
   </section>
 
-  <section>
-    <p class="eyebrow">Built to be adopted</p>
-    <h2>Runs at no cost, and upgrades by configuration</h2>
-    <ul class="plain">
-      <li>The AI runs on Gemini’s free tier, and moving to a paid model is a small code change.</li>
-      <li>Email works end to end in demo mode. Sending real mail is two environment variables once the company’s domain is verified.</li>
-      <li>Incoming mail arrives through a private webhook for each workspace. It accepts Postmark’s format, or simple JSON from any other provider.</li>
-      <li>A test inbox in Settings sends pretend customer emails through the same steps as real ones.</li>
-    </ul>
-  </section>
-
-  <section>
-    <p class="eyebrow">Next</p>
-    <h2>What I’d build next</h2>
-    <ul class="plain">
-      <li><strong>Social and voice channels:</strong> Meta, X and a calling tool, feeding the same queue, SLAs and reports.</li>
-      <li><strong>Order lookup inside the bot</strong>, to remove the most common staff-action handover.</li>
-      <li><strong>Business-hours SLAs</strong> and automatic escalation rules.</li>
-      <li><strong>Invite-only sign-up</strong> for company deployments.</li>
-    </ul>
-  </section>
+  <div class="split">
+    <section>
+      <p class="eyebrow">Built to be adopted</p>
+      <h2>Free to run, upgraded by configuration</h2>
+      <ul class="plain">
+        <li>The AI runs on Gemini’s free tier, and moving to a paid model is a small code change.</li>
+        <li>Email works end to end in demo mode. Sending real mail needs two environment variables once the company’s domain is verified.</li>
+        <li>Incoming mail arrives through a private webhook for each workspace. It accepts Postmark’s format or simple JSON from any other provider.</li>
+        <li>A test inbox sends pretend customer emails through the same steps as real ones.</li>
+      </ul>
+    </section>
+    <section>
+      <p class="eyebrow">Next</p>
+      <h2>What I’d build next</h2>
+      <ul class="plain">
+        <li><strong>Social and voice channels:</strong> Meta, X and a calling tool, feeding the same queue, SLAs and reports.</li>
+        <li><strong>Order lookup inside the bot</strong>, to remove the most common handover.</li>
+        <li><strong>Business-hours SLAs</strong> and automatic escalation rules.</li>
+        <li><strong>Invite-only sign-up</strong> for company deployments.</li>
+      </ul>
+    </section>
+  </div>
 
   <footer>
-    <p>Atlas Ring is a fictional brand; all help articles, customers, agents and demo data are made up.</p>
+    <p>Atlas Ring is a fictional brand. All help articles, customers, agents and demo data are made up.</p>
     <p>Built with Next.js, Supabase and Google Gemini, using Claude Code as an AI pair programmer.</p>
   </footer>
 </main>
+
+<script>
+// Tickets per day in the demo workspace, 6 Oct to 3 Nov 2026; days 7 to 11 are the sync-issue spike
+(function () {
+  var counts = [12, 11, 14, 14, 7, 8, 20, 26, 24, 27, 23, 9, 7, 11, 14, 15, 15, 16, 8, 9, 15, 12, 13, 15, 14, 9, 9, 15, 15];
+  var spikeFrom = 6, spikeTo = 10;
+  var start = Date.UTC(2026, 9, 6);
+  var svg = document.getElementById("volume-svg");
+  var tip = document.getElementById("volume-tip");
+  if (!svg || !tip) return;
+
+  var W = 720, H = 210, left = 28, right = 6, top = 28, bottom = 24;
+  var plotW = W - left - right, plotH = H - top - bottom, max = 30;
+  var slot = plotW / counts.length, bar = Math.min(16, slot - 6);
+  var y = function (v) { return top + plotH - (v / max) * plotH; };
+  var ns = "http://www.w3.org/2000/svg";
+  var el = function (name, attrs, text) {
+    var node = document.createElementNS(ns, name);
+    for (var k in attrs) node.setAttribute(k, attrs[k]);
+    if (text) node.textContent = text;
+    svg.appendChild(node);
+    return node;
+  };
+  var day = function (i) {
+    return new Date(start + i * 86400000).toLocaleDateString("en-GB", { day: "numeric", month: "short", timeZone: "UTC" });
+  };
+
+  [0, 10, 20, 30].forEach(function (t) {
+    el("line", { x1: left, x2: W - right, y1: y(t), y2: y(t), "class": "grid" });
+    el("text", { x: left - 6, y: y(t) + 4, "text-anchor": "end", "class": "axis" }, String(t));
+  });
+
+  counts.forEach(function (v, i) {
+    var x = left + i * slot + (slot - bar) / 2, t = y(v), b = top + plotH, r = Math.min(4, bar / 2, b - t);
+    // Rounded at the data end, square at the baseline
+    var d = "M" + x + "," + b + "V" + (t + r) + "Q" + x + "," + t + " " + (x + r) + "," + t + "H" + (x + bar - r) +
+      "Q" + (x + bar) + "," + t + " " + (x + bar) + "," + (t + r) + "V" + b + "Z";
+    var col = el("path", { d: d, "class": i >= spikeFrom && i <= spikeTo ? "col spike" : "col" });
+    if (i % 7 === 0) el("text", { x: x + bar / 2, y: H - 6, "text-anchor": "middle", "class": "axis" }, day(i));
+    // The whole day's slot is the hover target, wider and taller than the bar
+    var hit = el("rect", { x: left + i * slot, y: top, width: slot, height: plotH, "class": "hit" });
+    hit.addEventListener("mouseenter", function () {
+      var scale = svg.getBoundingClientRect().width / W;
+      tip.textContent = day(i) + " · " + v + " tickets";
+      tip.style.left = (x + bar / 2) * scale + "px";
+      tip.style.top = t * scale + "px";
+      tip.hidden = false;
+      col.classList.add("on");
+    });
+    hit.addEventListener("mouseleave", function () { tip.hidden = true; col.classList.remove("on"); });
+  });
+
+  // One direct label, on the event the chart is about
+  var sx = left + spikeFrom * slot, ex = left + (spikeTo + 1) * slot;
+  el("line", { x1: sx + 4, x2: ex - 4, y1: 16, y2: 16, "class": "note-line" });
+  el("text", { x: (sx + ex) / 2, y: 10, "text-anchor": "middle", "class": "note-text" }, "Firmware sync issue");
+})();
+</script>
