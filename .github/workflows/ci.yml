@@ -1,0 +1,37 @@
+# Checks every push and pull request: types, lint, tests and a production build.
+# A red check on GitHub means the change shouldn't go live.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Type check
+        run: npm run typecheck
+      - name: Lint
+        run: npm run lint
+      - name: Tests
+        run: npm test
+      - name: Build
+        run: npx next build
+        env:
+          # Placeholders: the build doesn't connect to anything, it only needs the settings to exist
+          SUPABASE_URL: https://placeholder.supabase.co
+          SUPABASE_SECRET_KEY: sb_secret_placeholder
+          GEMINI_API_KEY: placeholder
+          NEXT_TELEMETRY_DISABLED: "1"

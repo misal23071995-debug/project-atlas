@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { TOO_MANY, allow, visitorId } from "@/app/lib/rate-limit";
 import { redirect } from "next/navigation";
 import { getAuthClient, getCurrentAgent, WORKSPACE_COOKIE } from "@/app/lib/auth/session";
 import { createLogin, createWorkspace, findUserByEmail } from "@/app/lib/db/workspaces";
@@ -25,6 +26,7 @@ async function chooseWorkspace(orgId: string) {
 
 // New company: creates the login, the workspace with that person as admin, then signs them in
 export async function signupAction(_previous: SignupState, formData: FormData): Promise<SignupState> {
+  if (!(await allow("signup", await visitorId()))) return { error: TOO_MANY };
   const field = (name: string) => String(formData.get(name) ?? "").trim();
   const company = field("company").slice(0, 80);
   const name = field("name").slice(0, 100);

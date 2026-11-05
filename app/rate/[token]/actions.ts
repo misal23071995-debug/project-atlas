@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { TOO_MANY, allow, visitorId } from "@/app/lib/rate-limit";
 import { saveSurveyRating } from "@/app/lib/db/tickets";
 
 export interface SurveyState {
@@ -14,6 +15,7 @@ export async function rateTicketAction(token: string, _previous: SurveyState, fo
   const comment = String(formData.get("comment") ?? "").trim().slice(0, 1000);
   if (!Number.isInteger(rating) || rating < 1 || rating > 5) return { error: "Choose from 1 to 5 stars." };
   if (!/^[0-9a-f-]{36}$/i.test(token)) return { error: "This survey link isn't valid." };
+  if (!(await allow("survey", await visitorId()))) return { error: TOO_MANY };
 
   try {
     await saveSurveyRating(token, rating, comment);

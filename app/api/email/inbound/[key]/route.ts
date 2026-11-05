@@ -1,4 +1,5 @@
 import { NextResponse, type NextRequest } from "next/server";
+import { allow } from "@/app/lib/rate-limit";
 import { findOrgByInboundKey, receiveEmail } from "@/app/lib/db/email";
 import { normalizeInbound } from "@/app/lib/email/parse";
 
@@ -12,6 +13,10 @@ export const maxDuration = 60;
 export async function POST(request: NextRequest, { params }: { params: Promise<{ key: string }> }) {
   const org = await findOrgByInboundKey((await params).key);
   if (!org) return NextResponse.json({ ok: false, error: "Unknown address" }, { status: 404 });
+  // 429 tells the email provider to retry later instead of dropping the email
+  if (!(await allow("inboundEmail", org.id))) {
+    return NextResponse.json({ ok: false, error: "Too many emails this hour" }, { status: 429, headers: { "Retry-After": "600" } });
+  }
 
   const raw = await request.text();
   if (raw.length > MAX_BYTES) return NextResponse.json({ ok: false, error: "Email too large" }, { status: 413 });

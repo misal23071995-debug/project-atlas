@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { TOO_MANY, allow, visitorId } from "@/app/lib/rate-limit";
 import { onTicketCreated } from "@/app/lib/db/automation";
 import { askBot, type OrderContext } from "@/app/lib/bot/service";
 import { findCustomerOrder } from "@/app/lib/db/orders";
@@ -43,6 +44,7 @@ export async function startSupportChatAction(
   const customerName = String(name ?? "").trim().slice(0, 100);
   const customerEmail = String(email ?? "").trim().toLowerCase().slice(0, 320);
 
+  if (!(await allow("chatStart", await visitorId()))) return { ok: false, error: TOO_MANY };
   if (!customerName) return { ok: false, error: "Please enter your name." };
   if (!EMAIL_PATTERN.test(customerEmail)) return { ok: false, error: "Please enter a valid email." };
 
@@ -66,6 +68,8 @@ export async function sendSupportMessageAction(
 ): Promise<SendResult> {
   const text = String(message ?? "").trim();
   if (!text) return { ok: false, error: "Please type a message." };
+  // Each message is an AI call, so this also protects the AI quota
+  if (!(await allow("chatMessage", await visitorId()))) return { ok: false, error: TOO_MANY };
   if (text.length > MAX_MESSAGE_LENGTH) {
     return { ok: false, error: `Please keep messages under ${MAX_MESSAGE_LENGTH} characters.` };
   }

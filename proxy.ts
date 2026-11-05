@@ -5,7 +5,7 @@ import { getSupabaseConfig } from "@/app/lib/supabase-config";
 // Pages anyone can open: login, creating a company workspace, each company's customer chat, survey links
 const PUBLIC_PATHS = ["/login", "/signup"];
 // The incoming-mail webhook checks its own secret key instead of a sign-in
-const PUBLIC_PREFIXES = ["/support", "/rate", "/api/email/inbound"];
+const PUBLIC_PREFIXES = ["/support", "/rate", "/api/email/inbound", "/api/health"];
 
 function isPublic(pathname: string) {
   return (
