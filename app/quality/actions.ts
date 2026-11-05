@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
 import { requireSession } from "@/app/lib/auth/session";
 import { getTicket } from "@/app/lib/db/tickets";
 import { agentForTicket, finaliseReview, getScorecard, saveAiScores, saveScorecard } from "@/app/lib/db/quality";
@@ -103,7 +104,7 @@ export async function finaliseReviewAction(
 export async function saveScorecardAction(
   criteria: Partial<Criterion>[]
 ): Promise<{ ok: boolean; error?: string }> {
-  const { org } = await requireSession("quality.scorecard");
+  const { agent, org } = await requireSession("quality.scorecard");
 
   if (!Array.isArray(criteria) || criteria.length === 0) return { ok: false, error: "Add at least one criterion." };
   if (criteria.length > MAX_CRITERIA) return { ok: false, error: `Use at most ${MAX_CRITERIA} criteria.` };
@@ -133,6 +134,7 @@ export async function saveScorecardAction(
 
   try {
     await saveScorecard(org.id, cleaned);
+    await audit(org.id, agent, "quality.scorecard_saved", null, { criteria: cleaned.map((c) => `${c.label} (${c.weight})`) });
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : "Could not save the scorecard." };
   }

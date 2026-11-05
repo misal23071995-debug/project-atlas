@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
 import { requireSession } from "@/app/lib/auth/session";
 import { saveCapacitySettings } from "@/app/lib/db/capacity";
 
@@ -22,7 +23,7 @@ export async function saveCapacitySettingsAction(
   _previous: SettingsFormState,
   formData: FormData
 ): Promise<SettingsFormState> {
-  const { org } = await requireSession("capacity.manage");
+  const { agent, org } = await requireSession("capacity.manage");
   const number = (name: string) => Number(formData.get(name));
 
   const timezone = String(formData.get("timezone") ?? "");
@@ -53,6 +54,7 @@ export async function saveCapacitySettingsAction(
     return { error: err instanceof Error ? err.message : "Could not save settings." };
   }
 
+  await audit(org.id, agent, "capacity.settings_saved", null, { timezone, ahtMinutes, targetPercent, targetSeconds, shrinkagePercent, historyWeeks });
   revalidatePath("/capacity");
   return { success: "Settings saved." };
 }

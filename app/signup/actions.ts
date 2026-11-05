@@ -1,6 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
+import { SIGNUP_CLOSED_MESSAGE, signupOpen } from "@/app/lib/auth/signup";
 import { TOO_MANY, allow, visitorId } from "@/app/lib/rate-limit";
 import { redirect } from "next/navigation";
 import { getAuthClient, getCurrentAgent, WORKSPACE_COOKIE } from "@/app/lib/auth/session";
@@ -26,6 +27,7 @@ async function chooseWorkspace(orgId: string) {
 
 // New company: creates the login, the workspace with that person as admin, then signs them in
 export async function signupAction(_previous: SignupState, formData: FormData): Promise<SignupState> {
+  if (!signupOpen()) return { error: SIGNUP_CLOSED_MESSAGE };
   if (!(await allow("signup", await visitorId()))) return { error: TOO_MANY };
   const field = (name: string) => String(formData.get(name) ?? "").trim();
   const company = field("company").slice(0, 80);
@@ -72,6 +74,7 @@ export async function createWorkspaceAction(
 ): Promise<WorkspaceFormState> {
   const agent = await getCurrentAgent();
   if (!agent) redirect("/login");
+  if (!signupOpen()) return { error: SIGNUP_CLOSED_MESSAGE };
 
   const company = String(formData.get("company") ?? "").trim().slice(0, 80);
   if (!company) return { error: "Enter your company name." };

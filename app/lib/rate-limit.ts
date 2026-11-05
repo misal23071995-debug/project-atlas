@@ -17,6 +17,10 @@ export const LIMITS = {
   signup: { limit: 5, windowSeconds: 3600 },
   // Incoming emails per workspace per hour
   inboundEmail: { limit: 300, windowSeconds: 3600 },
+  // Password reset emails per visitor per hour
+  passwordReset: { limit: 5, windowSeconds: 3600 },
+  // Two-step sign-in code attempts per person per 10 minutes
+  twoFactor: { limit: 10, windowSeconds: 600 },
   // Alert emails per distinct error per hour
   errorAlert: { limit: 1, windowSeconds: 3600 },
 } as const;

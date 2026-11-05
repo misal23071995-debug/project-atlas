@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
 import { requireSession } from "@/app/lib/auth/session";
 import { receiveEmail, regenerateInboundKey, saveEmailSettings } from "@/app/lib/db/email";
 import { normalizeInbound } from "@/app/lib/email/parse";
@@ -12,7 +13,7 @@ export interface EmailFormState {
 }
 
 export async function saveEmailSettingsAction(_previous: EmailFormState, formData: FormData): Promise<EmailFormState> {
-  const { org } = await requireSession("email.manage");
+  const { agent, org } = await requireSession("email.manage");
   try {
     await saveEmailSettings(org.id, {
       fromName: String(formData.get("fromName") ?? "").trim().slice(0, 80) || null,
@@ -23,13 +24,15 @@ export async function saveEmailSettingsAction(_previous: EmailFormState, formDat
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not save." };
   }
+  await audit(org.id, agent, "email.settings_saved", null, { autoAcknowledge: formData.get("autoAcknowledge") === "on", surveyOnResolve: formData.get("surveyOnResolve") === "on" });
   revalidatePath("/settings/email");
   return { success: "Email settings saved." };
 }
 
 export async function regenerateInboundKeyAction() {
-  const { org } = await requireSession("workspace.manage");
+  const { agent, org } = await requireSession("workspace.manage");
   await regenerateInboundKey(org.id);
+  await audit(org.id, agent, "email.address_changed");
   revalidatePath("/settings/email");
 }
 

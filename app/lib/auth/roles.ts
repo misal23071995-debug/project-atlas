@@ -43,6 +43,8 @@ const PERMISSIONS = {
   // Write courses, assign them and see everyone's results. Everyone can take training.
   "training.manage": ["admin", "lead", "qa"],
   "team.manage": ["admin"],
+  // Read the audit log of who changed what
+  "audit.view": ["admin"],
   "workspace.manage": ["admin"],
 } as const satisfies Record<string, readonly Role[]>;
 

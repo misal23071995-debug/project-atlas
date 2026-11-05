@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
+import { siteOrigin } from "@/app/lib/auth/origin";
 import { getSupabase } from "@/app/lib/db/supabase";
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { isRole, type Role } from "@/app/lib/auth/roles";
@@ -43,7 +45,7 @@ export async function updateProfileAction(_previous: FormState, formData: FormDa
 }
 
 export async function changePasswordAction(_previous: FormState, formData: FormData): Promise<FormState> {
-  const { agent } = await requireSession();
+  const { agent, org } = await requireSession();
   const password = String(formData.get("password") ?? "");
   const confirm = String(formData.get("confirm") ?? "");
 
@@ -54,6 +56,7 @@ export async function changePasswordAction(_previous: FormState, formData: FormD
 
   const { error } = await getSupabase().auth.admin.updateUserById(agent.id, { password });
   if (error) return { error: error.message };
+  await audit(org.id, agent, "security.password_changed", agent.name);
 
   return { success: "Password changed." };
 }
@@ -61,12 +64,13 @@ export async function changePasswordAction(_previous: FormState, formData: FormD
 // ---- Workspace (admins only) ----
 
 export async function renameWorkspaceAction(_previous: FormState, formData: FormData): Promise<FormState> {
-  const { org } = await requireSession("workspace.manage");
+  const { agent, org } = await requireSession("workspace.manage");
   const name = String(formData.get("name") ?? "").trim().slice(0, 80);
   if (!name) return { error: "Enter the company name." };
 
   try {
     await renameWorkspace(org.id, name);
+    await audit(org.id, agent, "workspace.renamed", name, { from: org.name });
   } catch (err) {
     return { error: message(err, "Could not rename the workspace.") };
   }
@@ -79,13 +83,15 @@ export async function renameWorkspaceAction(_previous: FormState, formData: Form
 
 // Adds an existing login to the workspace, or creates a new login with a temporary password
 export async function addMemberAction(_previous: FormState, formData: FormData): Promise<FormState> {
-  const { org } = await requireSession("team.manage");
+  const { agent, org } = await requireSession("team.manage");
   const field = (name: string) => String(formData.get(name) ?? "").trim();
 
   const name = field("name").slice(0, 100);
   const email = field("email").toLowerCase().slice(0, 320);
   const password = String(formData.get("password") ?? "");
   const role = field("role");
+  // "invite": Supabase emails them a link to choose a password; "password": the admin sets a temporary one
+  const method = field("method") === "password" ? "password" : "invite";
 
   if (!EMAIL_PATTERN.test(email)) return { error: "Enter a valid email." };
   if (!isRole(role)) return { error: "Choose a role." };
@@ -96,17 +102,31 @@ export async function addMemberAction(_previous: FormState, formData: FormData):
     if (existing) {
       const added = await addMembership(org.id, existing.id, role);
       if (!added) return { error: `${email} is already in this workspace.` };
+      await audit(org.id, agent, "member.added", existing.email ?? email, { role });
       revalidatePath("/settings/team");
       return { success: `${email} already had an account and has been added. They can sign in as usual.` };
     }
 
     if (!name) return { error: "Enter their name." };
+
+    if (method === "invite") {
+      const { data, error } = await getSupabase().auth.admin.inviteUserByEmail(email, {
+        data: { full_name: name },
+        redirectTo: `${await siteOrigin()}/auth/callback`,
+      });
+      if (error) return { error: `Couldn't send the invite: ${error.message}` };
+      await addMembership(org.id, data.user.id, role);
+      await audit(org.id, agent, "member.invited", `${name} <${email}>`, { role });
+      revalidatePath("/settings/team");
+      return { success: `Invite sent to ${email}. They'll choose their own password from the email link.` };
+    }
+
     if (password.length < MIN_PASSWORD_LENGTH) {
       return { error: `Give them a temporary password of at least ${MIN_PASSWORD_LENGTH} characters.` };
     }
-
     const user = await createLogin(email, password, name);
     await addMembership(org.id, user.id, role);
+    await audit(org.id, agent, "member.added", `${name} <${email}>`, { role, method: "temporary password" });
   } catch (err) {
     return { error: message(err, "Could not add the member.") };
   }
@@ -127,19 +147,23 @@ async function assertKeepsAnAdmin(orgId: string, userId: string, newRole: Role |
 }
 
 export async function changeRoleAction(userId: string, role: string) {
-  const { org } = await requireSession("team.manage");
+  const { agent, org } = await requireSession("team.manage");
   if (!isRole(role)) throw new Error("Choose a role.");
 
+  const member = (await listMembers(org.id)).find((m) => m.id === userId);
   await assertKeepsAnAdmin(org.id, userId, role);
   await updateMembershipRole(org.id, userId, role);
+  await audit(org.id, agent, "member.role_changed", member?.name ?? userId, { from: member?.role, to: role });
   revalidatePath("/settings/team");
 }
 
 // Removes access to this workspace only; the login itself stays, in case they're in other workspaces
 export async function removeMemberAction(userId: string) {
-  const { org } = await requireSession("team.manage");
+  const { agent, org } = await requireSession("team.manage");
 
+  const member = (await listMembers(org.id)).find((m) => m.id === userId);
   await assertKeepsAnAdmin(org.id, userId, null);
   await removeMembership(org.id, userId);
+  await audit(org.id, agent, "member.removed", member?.name ?? userId, { role: member?.role });
   revalidatePath("/settings/team");
 }

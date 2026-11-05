@@ -1,7 +1,6 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import {
   addActivity,
@@ -20,15 +19,9 @@ import {
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { analyzeWithAI } from "@/app/lib/ai/service";
 import { emailAgentReply, emailSurveyIfDue } from "@/app/lib/db/email";
+import { siteOrigin } from "@/app/lib/auth/origin";
 import { onTicketCreated } from "@/app/lib/db/automation";
 
-// This site's address, for links in emails (the survey page)
-async function siteOrigin() {
-  const h = await headers();
-  const host = h.get("x-forwarded-host") ?? h.get("host") ?? "localhost:3000";
-  const protocol = h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https");
-  return `${protocol}://${host}`;
-}
 
 // Every action checks the signed-in agent and their role itself; the proxy alone isn't enough.
 // Data calls pass the agent's current workspace, so nobody can touch another company's tickets.

@@ -33,7 +33,12 @@ export async function signInAction(
     return { error: "Wrong email or password.", email };
   }
 
-  redirect(safeNext(formData.get("next")));
+  const next = safeNext(formData.get("next"));
+  // With two-step sign-in on, the password alone isn't enough
+  const { data: level } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  if (level?.currentLevel === "aal1" && level?.nextLevel === "aal2") redirect(`/login/verify?next=${encodeURIComponent(next)}`);
+
+  redirect(next);
 }
 
 export async function signOutAction() {

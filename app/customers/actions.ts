@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
 import { requireSession } from "@/app/lib/auth/session";
 import { closeOrder, createOrder, getOrder } from "@/app/lib/db/orders";
 import { addActivity, addNote } from "@/app/lib/db/tickets";
@@ -22,6 +23,7 @@ export async function closeOrderAction(orderId: string, to: "cancelled" | "refun
 
   try {
     await closeOrder(org.id, orderId, to, agent.name);
+    await audit(org.id, agent, to === "cancelled" ? "order.cancelled" : "order.refunded", order.orderNumber, { total: order.total, currency: order.currency, ticketId });
     if (ticketId) {
       const verb = to === "cancelled" ? "Cancelled" : "Refunded";
       await addActivity(org.id, ticketId, `${verb} order ${order.orderNumber} (${formatMoney(order.total, order.currency)}) · ${agent.name}`, "bg-rose-500");

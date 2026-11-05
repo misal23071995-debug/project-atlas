@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { analyzeWithAI } from "@/app/lib/ai/service";
-import { getSession } from "@/app/lib/auth/session";
+import { getSession, needsSecondStep } from "@/app/lib/auth/session";
 
 export async function POST(request: NextRequest) {
   const session = await getSession();
-  if (!session || !("org" in session)) {
+  if (!session || !("org" in session) || (await needsSecondStep())) {
     return NextResponse.json({ success: false, error: "Not signed in" }, { status: 401 });
   }
 

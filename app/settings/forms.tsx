@@ -106,8 +106,9 @@ export function CopyLink({ url }: { url: string }) {
 }
 
 export function AddMemberForm() {
+  const [method, setMethod] = useState<"invite" | "password">("invite");
   return (
-    <ActionForm action={addMemberAction} submitLabel="Add member" resetOnSuccess>
+    <ActionForm action={addMemberAction} submitLabel={method === "invite" ? "Send invite" : "Add member"} resetOnSuccess>
       <div className="grid gap-4 sm:grid-cols-2">
         <label className={labelClass}>
           Name
@@ -127,13 +128,31 @@ export function AddMemberForm() {
             ))}
           </select>
         </label>
-        <label className={labelClass}>
-          Temporary password
-          <input type="text" name="password" minLength={8} autoComplete="off" className={inputClass} />
-        </label>
+        <fieldset className="text-sm text-zinc-400">
+          <legend>How they get in</legend>
+          <div className="mt-2 flex flex-col gap-1.5">
+            <label className="flex items-center gap-2 text-zinc-200">
+              <input type="radio" name="method" value="invite" checked={method === "invite"} onChange={() => setMethod("invite")} />
+              Email them an invite link
+            </label>
+            <label className="flex items-center gap-2 text-zinc-200">
+              <input type="radio" name="method" value="password" checked={method === "password"} onChange={() => setMethod("password")} />
+              Set a temporary password
+            </label>
+          </div>
+        </fieldset>
+        {method === "password" && (
+          <label className={labelClass}>
+            Temporary password
+            <input type="text" name="password" minLength={8} autoComplete="off" className={inputClass} />
+          </label>
+        )}
       </div>
       <p className="text-xs text-zinc-500">
-        If they already have an Atlas login, only the email and role are needed.
+        {method === "invite"
+          ? "They get an email with a link to choose their own password. You never see it."
+          : "Share the password with them privately; they can change it in Settings."}{" "}
+        If they already have an Atlas login, they&apos;re simply added.
       </p>
     </ActionForm>
   );

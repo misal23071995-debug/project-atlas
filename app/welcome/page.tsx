@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { signupOpen } from "@/app/lib/auth/signup";
 import { getSession } from "@/app/lib/auth/session";
 import { signOutAction } from "@/app/login/actions";
 import CreateWorkspaceForm from "./CreateWorkspaceForm";
@@ -17,12 +18,12 @@ export default async function WelcomePage() {
         <div className="text-center">
           <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">You&apos;re not in a workspace</h1>
           <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
-            Signed in as {session.agent.email}. Ask your team&apos;s admin to add you, or start a workspace for
-            your own company.
+            Signed in as {session.agent.email}. Ask your team&apos;s admin to add you
+            {signupOpen() ? ", or start a workspace for your own company" : ""}.
           </p>
         </div>
 
-        <CreateWorkspaceForm />
+        {signupOpen() && <CreateWorkspaceForm />}
 
         <form action={signOutAction} className="text-center">
           <button type="submit" className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">

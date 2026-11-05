@@ -6,6 +6,8 @@ import { can, ROLE_LABELS } from "@/app/lib/auth/roles";
 import { CopyLink, PasswordForm, ProfileForm, WorkspaceForm } from "./forms";
 import { countDemoTickets } from "@/app/lib/db/demo";
 import DemoData from "./DemoData";
+import TwoFactorCard from "./TwoFactorCard";
+import { getAuthClient } from "@/app/lib/auth/session";
 
 export const dynamic = "force-dynamic";
 // Loading demo data writes a few thousand rows, which takes longer than the default limit
@@ -29,6 +31,8 @@ export default async function SettingsPage() {
   const chatUrl = `${protocol}://${host}/support/${org.slug}`;
   const canManageWorkspace = can(role, "workspace.manage");
   const demoTickets = canManageWorkspace ? await countDemoTickets(org.id) : 0;
+  const { data: factors } = await (await getAuthClient()).auth.mfa.listFactors();
+  const twoFactorOn = (factors?.totp?.length ?? 0) > 0;
 
   return (
     <DashboardLayout>
@@ -94,12 +98,24 @@ export default async function SettingsPage() {
           </Section>
         )}
 
+        {can(role, "audit.view") && (
+          <Section title="Audit log" description="Who changed the team, sign-in security, settings, rules and orders.">
+            <Link href="/settings/audit" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+              Open audit log →
+            </Link>
+          </Section>
+        )}
+
         <Section title="Your profile" description={agent.email}>
           <ProfileForm name={agent.name} />
         </Section>
 
         <Section title="Password">
           <PasswordForm />
+        </Section>
+
+        <Section title="Two-step sign-in" description="A code from your phone each time you sign in, on top of your password.">
+          <TwoFactorCard enabled={twoFactorOn} />
         </Section>
       </div>
     </DashboardLayout>

@@ -1,7 +1,10 @@
 import Link from "next/link";
+import { SIGNUP_CLOSED_MESSAGE, signupOpen } from "@/app/lib/auth/signup";
 import SignupForm from "./SignupForm";
 
 export const metadata = { title: "Create your workspace · Atlas" };
+
+export const dynamic = "force-dynamic";
 
 export default function SignupPage() {
   return (
@@ -14,7 +17,11 @@ export default function SignupPage() {
           </p>
         </div>
 
-        <SignupForm />
+        {signupOpen() ? (
+          <SignupForm />
+        ) : (
+          <p className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center text-sm text-zinc-300">{SIGNUP_CLOSED_MESSAGE}</p>
+        )}
 
         <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
           Already have an account?{" "}

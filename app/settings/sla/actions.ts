@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
 import { requireSession } from "@/app/lib/auth/session";
 import { saveSlaTargets } from "@/app/lib/db/sla";
 import {
@@ -18,7 +19,7 @@ export interface SlaFormState {
 }
 
 export async function saveSlaTargetsAction(_previous: SlaFormState, formData: FormData): Promise<SlaFormState> {
-  const { org } = await requireSession("sla.manage");
+  const { agent, org } = await requireSession("sla.manage");
   const targets = {} as SlaTargets;
 
   for (const priority of TICKET_PRIORITIES) {
@@ -39,6 +40,7 @@ export async function saveSlaTargetsAction(_previous: SlaFormState, formData: Fo
 
   try {
     await saveSlaTargets(org.id, targets);
+    await audit(org.id, agent, "sla.saved", null, targets);
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not save the targets." };
   }

@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import {
+  listRules,
   addStarterRules,
   deleteRule,
   moveRule,
@@ -20,6 +22,7 @@ export interface ActionResult {
 
 const done = () => revalidatePath("/settings/automation");
 const isId = (id: string) => /^\d+$/.test(id);
+const ruleName = async (orgId: string, id: string) => (await listRules(orgId))?.find((r) => r.id === id)?.name ?? `Rule ${id}`;
 
 export async function saveRuleAction(
   id: string | null,
@@ -51,6 +54,7 @@ export async function saveRuleAction(
 
   try {
     await saveRule(org.id, id, rule, agent.name);
+    await audit(org.id, agent, "automation.rule_saved", rule.name, { enabled: rule.enabled, trigger: rule.trigger, new: !id });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not save the rule." };
   }
@@ -59,9 +63,10 @@ export async function saveRuleAction(
 }
 
 export async function setRuleEnabledAction(id: string, enabled: boolean) {
-  const { org } = await requireSession("automation.manage");
+  const { agent, org } = await requireSession("automation.manage");
   if (!isId(id)) throw new Error("Rule not found");
   await setRuleEnabled(org.id, id, enabled);
+  await audit(org.id, agent, "automation.rule_toggled", await ruleName(org.id, id), { enabled });
   done();
 }
 
@@ -73,20 +78,23 @@ export async function moveRuleAction(id: string, direction: "up" | "down") {
 }
 
 export async function deleteRuleAction(id: string) {
-  const { org } = await requireSession("automation.manage");
+  const { agent, org } = await requireSession("automation.manage");
   if (!isId(id)) throw new Error("Rule not found");
+  const name = await ruleName(org.id, id);
   await deleteRule(org.id, id);
+  await audit(org.id, agent, "automation.rule_deleted", name);
   done();
 }
 
 export async function addStarterRulesAction() {
   const { agent, org } = await requireSession("automation.manage");
   await addStarterRules(org.id, agent.name);
+  await audit(org.id, agent, "automation.starters_added");
   done();
 }
 
 export async function saveAssignmentAction(_previous: ActionResult, formData: FormData): Promise<ActionResult> {
-  const { org } = await requireSession("automation.manage");
+  const { agent, org } = await requireSession("automation.manage");
   const mode = String(formData.get("mode") ?? "off") as AssignmentMode;
   if (!ASSIGNMENT_MODES.includes(mode)) return { error: "Choose how tickets are assigned." };
 
@@ -97,6 +105,7 @@ export async function saveAssignmentAction(_previous: ActionResult, formData: Fo
 
   try {
     await saveAssignmentSettings(org.id, { mode, onlyOnShift: formData.get("onlyOnShift") === "on", userIds: everyone ? [] : userIds });
+    await audit(org.id, agent, "automation.assignment_saved", null, { mode, onlyOnShift: formData.get("onlyOnShift") === "on", people: everyone ? "everyone" : userIds.length });
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not save." };
   }

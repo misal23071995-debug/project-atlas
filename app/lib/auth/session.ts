@@ -78,11 +78,21 @@ export const getSession = cache(async (): Promise<Session | { agent: Agent; work
   };
 });
 
+// True when the person has two-step sign-in turned on but hasn't entered a code in this session yet.
+// Read from the session token, so it's quick and needs no network call.
+export const needsSecondStep = cache(async (): Promise<boolean> => {
+  const supabase = await getAuthClient();
+  const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  return data?.currentLevel === "aal1" && data?.nextLevel === "aal2";
+});
+
 // For pages and Server Actions. Sends visitors who aren't signed in to /login and people
 // without a workspace to /welcome. With a permission, refuses roles that don't have it.
 export async function requireSession(permission?: Permission): Promise<Session> {
   const session = await getSession();
   if (!session) redirect("/login");
+  // Two-step sign-in is enforced here, so every page and action needs the code, not just the login screen
+  if (await needsSecondStep()) redirect("/login/verify");
   if (!("org" in session)) redirect("/welcome");
   if (permission && !can(session.role, permission)) {
     throw new Error("Your role doesn't allow this. Ask a workspace admin.");

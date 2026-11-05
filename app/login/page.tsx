@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signupOpen } from "@/app/lib/auth/signup";
 import LoginForm from "./LoginForm";
 
 export default async function LoginPage({
@@ -27,12 +28,12 @@ export default async function LoginPage({
 
         <LoginForm next={next ?? "/"} />
 
-        <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
+        {signupOpen() && <p className="mt-6 text-center text-sm text-zinc-500 dark:text-zinc-400">
           New company?{" "}
           <Link href="/signup" className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400">
             Create a workspace
           </Link>
-        </p>
+        </p>}
       </div>
     </main>
   );

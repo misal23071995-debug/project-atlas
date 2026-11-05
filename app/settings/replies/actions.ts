@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { audit } from "@/app/lib/audit";
 import { requireSession } from "@/app/lib/auth/session";
 import { addStarterReplies, deleteSavedReply, saveSavedReply } from "@/app/lib/db/replies";
 import { KB_CATEGORIES } from "@/app/lib/bot/types";
@@ -37,15 +38,17 @@ export async function saveReplyAction(_previous: ReplyFormState, formData: FormD
   } catch (err) {
     return { error: err instanceof Error ? err.message : "Could not save the reply." };
   }
+  await audit(org.id, agent, "replies.saved", title, { new: !id });
 
   done();
   return { success: id ? "Saved." : "Reply added." };
 }
 
 export async function deleteReplyAction(id: string) {
-  const { org } = await requireSession("replies.manage");
+  const { agent, org } = await requireSession("replies.manage");
   if (!/^\d+$/.test(id)) throw new Error("Reply not found");
   await deleteSavedReply(org.id, id);
+  await audit(org.id, agent, "replies.deleted", `Reply ${id}`);
   done();
 }
 
