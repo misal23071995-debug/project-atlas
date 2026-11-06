@@ -1,3 +1,5 @@
+import type { Attachment } from "./attachments";
+
 // Keep in sync with the check constraints in supabase/schema.sql
 export const TICKET_STATUSES = [
   "Open",
@@ -33,6 +35,8 @@ export interface Customer {
 }
 
 export interface ConversationMessage {
+  id?: string;
+
   sender: string;
 
   role: "customer" | "agent";
@@ -129,6 +133,8 @@ export interface TicketDetail extends Ticket {
   activities: TicketActivity[];
 
   notes: TicketNote[];
+
+  attachments: Attachment[];
 }
 
 // Fixed locale and time zone so server and browser render the same text

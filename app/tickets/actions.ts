@@ -1,12 +1,15 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { confirmUploads, createUploadSlot } from "@/app/lib/db/attachments";
+import { MAX_FILES_PER_MESSAGE } from "@/app/lib/attachments";
 import { redirect } from "next/navigation";
 import {
   addActivity,
   addMessage,
   addNote,
   createTicket,
+  getTicket,
   updateTicket,
   type NewTicket,
 } from "@/app/lib/db/tickets";
@@ -105,13 +108,27 @@ export async function createManualTicketAction(
   redirect(`/tickets/${id}`);
 }
 
-export async function sendReplyAction(ticketId: string, message: string) {
+// Step 1 of attaching a file: a one-time link the browser uploads it to directly
+export async function requestUploadAction(ticketId: string, fileName: string, contentType: string, size: number) {
+  const { org } = await requireSession("tickets.work");
+  if (!(await getTicket(org.id, ticketId))) return { error: "Ticket not found." };
+  try {
+    return await createUploadSlot(org.id, ticketId, String(fileName), String(contentType), Number(size));
+  } catch (err) {
+    return { error: err instanceof Error ? err.message : "Couldn't prepare the upload." };
+  }
+}
+
+export async function sendReplyAction(ticketId: string, message: string, uploads: { path: string; fileName: string }[] = []) {
   const { agent, org } = await requireSession("tickets.work");
-  const text = requireText(message, "Reply");
+  const files = (Array.isArray(uploads) ? uploads : []).slice(0, MAX_FILES_PER_MESSAGE).map((u) => ({ path: String(u.path), fileName: String(u.fileName) }));
+  // A reply can be just files
+  const text = files.length && !String(message ?? "").trim() ? `Sent ${files.length === 1 ? "a file" : `${files.length} files`}.` : requireText(message, "Reply");
 
   const messageId = await addMessage(org.id, ticketId, { sender: agent.name, role: "agent", message: text });
-  // On email tickets the reply also goes to the customer's inbox
-  const email = await emailAgentReply(org.id, org.name, ticketId, messageId, text);
+  const attached = await confirmUploads(org.id, ticketId, files, messageId, agent.name);
+  // On email tickets the reply also goes to the customer's inbox, with the files attached
+  const email = await emailAgentReply(org.id, org.name, ticketId, messageId, text, attached);
   await addActivity(
     org.id,
     ticketId,

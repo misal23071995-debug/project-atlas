@@ -32,8 +32,22 @@ describe("email parsing", () => {
         TextBody: "Works now\n\nOn Tue wrote:\n> x",
         Headers: [{ Name: "Message-ID", Value: "<m1@mail>" }, { Name: "In-Reply-To", Value: "<a@b>" }],
       })
-    ).toEqual({ fromEmail: "aanya@example.com", fromName: "Aanya Rao", subject: "Re: Sync [#5003]", text: "Works now", messageId: "<m1@mail>", replyTo: ["<a@b>"] });
+    ).toEqual({ fromEmail: "aanya@example.com", fromName: "Aanya Rao", subject: "Re: Sync [#5003]", text: "Works now", messageId: "<m1@mail>", replyTo: ["<a@b>"], attachments: [] });
     expect(normalizeInbound({ from: "Rohan <rohan@example.com>", subject: "Hi", text: "Help" })?.fromName).toBe("Rohan");
+  });
+
+  it("reads attachments from both shapes, skipping empty ones", () => {
+    const postmark = normalizeInbound({
+      FromFull: { Email: "a@b.co" },
+      TextBody: "See photo",
+      Attachments: [
+        { Name: "crack.jpg", ContentType: "image/jpeg; name=crack.jpg", Content: "aGVsbG8=" },
+        { Name: "", ContentType: "image/png", Content: "eA==" },
+      ],
+    });
+    expect(postmark?.attachments).toEqual([{ name: "crack.jpg", contentType: "image/jpeg", base64: "aGVsbG8=" }]);
+    const simple = normalizeInbound({ from: "a@b.co", text: "x", attachments: [{ filename: "a.pdf", contentType: "application/pdf", content: "eA==" }] });
+    expect(simple?.attachments).toEqual([{ name: "a.pdf", contentType: "application/pdf", base64: "eA==" }]);
   });
 
   it("rejects mail without a sender or any text", () => {

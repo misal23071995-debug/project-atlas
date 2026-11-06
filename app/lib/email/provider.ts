@@ -11,6 +11,8 @@ export interface OutgoingEmail {
   fromName?: string | null;
   // Message-ID of the customer's email we're answering, so mail apps thread it
   inReplyTo?: string | null;
+  // Files the provider downloads from these links and attaches
+  attachments?: { filename: string; url: string }[];
 }
 
 export type SendResult = { status: "sent"; id: string | null } | { status: "not_sent" | "failed"; note: string };
@@ -36,6 +38,7 @@ export async function sendEmail(email: OutgoingEmail): Promise<SendResult> {
         text: email.text,
         ...(process.env.EMAIL_REPLY_TO && { reply_to: process.env.EMAIL_REPLY_TO }),
         ...(email.inReplyTo && { headers: { "In-Reply-To": email.inReplyTo, References: email.inReplyTo } }),
+        ...(email.attachments?.length && { attachments: email.attachments.map((a) => ({ filename: a.filename, path: a.url })) }),
       }),
       signal: AbortSignal.timeout(15000),
     });

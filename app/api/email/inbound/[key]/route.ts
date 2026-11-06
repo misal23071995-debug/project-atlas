@@ -6,7 +6,8 @@ import { normalizeInbound } from "@/app/lib/email/parse";
 // Incoming mail webhook. The email provider posts each email here; the secret key in the
 // address says which workspace it's for (Settings → Email). No sign-in, so it's public in proxy.ts.
 
-const MAX_BYTES = 2 * 1024 * 1024;
+// Emails with attachments can be large; Vercel accepts up to 4.5 MB per request
+const MAX_BYTES = 4.5 * 1024 * 1024;
 // Reading an email with the AI can take a few seconds
 export const maxDuration = 60;
 

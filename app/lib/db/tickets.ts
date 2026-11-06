@@ -1,6 +1,7 @@
 import "server-only";
 import { getSupabase } from "./supabase";
 import { getSlaTargets } from "./sla";
+import { listTicketAttachments } from "./attachments";
 import { DEFAULT_SLA_TARGETS, dueTimes, isDone } from "@/app/lib/sla";
 import type {
   ConversationMessage,
@@ -131,7 +132,7 @@ export async function getTicket(orgId: string, id: string): Promise<TicketDetail
       .maybeSingle(),
     supabase
       .from("ticket_messages")
-      .select("sender, role, body, created_at, delivery, delivery_note")
+      .select("id, sender, role, body, created_at, delivery, delivery_note")
       .eq("ticket_id", id)
       .order("created_at", { ascending: true }),
     supabase
@@ -156,6 +157,7 @@ export async function getTicket(orgId: string, id: string): Promise<TicketDetail
   if (!ticketRes.data) return null;
 
   const conversation: ConversationMessage[] = messagesRes.data.map((m) => ({
+    id: String(m.id),
     sender: m.sender,
     role: m.role,
     message: m.body,
@@ -176,7 +178,8 @@ export async function getTicket(orgId: string, id: string): Promise<TicketDetail
     time: n.created_at,
   }));
 
-  return { ...toTicket(ticketRes.data), csatToken: ticketRes.data.csat_token, conversation, activities, notes };
+  const attachments = await listTicketAttachments(orgId, id);
+  return { ...toTicket(ticketRes.data), csatToken: ticketRes.data.csat_token, conversation, activities, notes, attachments };
 }
 
 export type NewTicket = {

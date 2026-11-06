@@ -1,4 +1,5 @@
 import "server-only";
+import { saveCustomerFile, signedLink } from "./attachments";
 import { getSupabase } from "./supabase";
 import { getSlaTargets } from "./sla";
 import { addActivity, addMessage, createTicket, updateTicket } from "./tickets";
@@ -169,7 +170,8 @@ export async function receiveEmail(org: { id: string; name: string }, mail: Inbo
   const thread = await findThread(org.id, mail);
   if (thread) {
     const ticketId = String(thread.id);
-    await addMessage(org.id, ticketId, { sender: mail.fromName, role: "customer", message: mail.text }, { emailMessageId: mail.messageId });
+    const messageId = await addMessage(org.id, ticketId, { sender: mail.fromName, role: "customer", message: mail.text }, { emailMessageId: mail.messageId });
+    await saveEmailFiles(org.id, ticketId, messageId, mail);
     // A reply brings the ticket back to the queue, which also restarts or resumes its SLA clock
     if (thread.status !== "Open" && thread.status !== "Escalated") {
       await updateTicket(org.id, ticketId, { status: "Open" });
@@ -206,6 +208,10 @@ export async function receiveEmail(org: { id: string; name: string }, mail: Inbo
       .eq("ticket_id", ticketId)
       .eq("role", "customer");
   }
+  if (mail.attachments.length) {
+    const { data: first } = await getSupabase().from("ticket_messages").select("id").eq("ticket_id", ticketId).eq("role", "customer").limit(1).maybeSingle();
+    await saveEmailFiles(org.id, ticketId, first?.id ?? null, mail);
+  }
 
   await onTicketCreated(org.id, ticketId);
 
@@ -227,6 +233,24 @@ export async function receiveEmail(org: { id: string; name: string }, mail: Inbo
     await addActivity(org.id, ticketId, `Acknowledgement email ${describe(result)}`, result.status === "sent" ? "bg-green-500" : "bg-zinc-500");
   }
   return { ticketId, outcome: "created" };
+}
+
+// Stores the files that came with a customer's email. A file that can't be stored is noted, not fatal.
+async function saveEmailFiles(orgId: string, ticketId: string, messageId: number | null, mail: InboundEmail) {
+  let saved = 0;
+  const skipped: string[] = [];
+  for (const file of mail.attachments) {
+    try {
+      const ok = await saveCustomerFile(orgId, ticketId, messageId, { name: file.name, contentType: file.contentType, bytes: Buffer.from(file.base64, "base64") }, mail.fromName);
+      if (ok) saved += 1;
+      else skipped.push(file.name);
+    } catch (err) {
+      console.error("Email attachment failed:", err);
+      skipped.push(file.name);
+    }
+  }
+  if (saved) await addActivity(orgId, ticketId, `${saved} file${saved === 1 ? "" : "s"} attached by the customer`, "bg-sky-500");
+  if (skipped.length) await addActivity(orgId, ticketId, `Not attached (type or size not allowed): ${skipped.join(", ").slice(0, 200)}`, "bg-zinc-500");
 }
 
 function describe(result: SendResult) {
@@ -272,12 +296,25 @@ async function lastCustomerMessageId(ticketId: string) {
 }
 
 // Sends an agent's reply on an email ticket and records whether it went out. Does nothing for other channels.
-export async function emailAgentReply(orgId: string, orgName: string, ticketId: string, messageId: number, text: string) {
+export async function emailAgentReply(
+  orgId: string,
+  orgName: string,
+  ticketId: string,
+  messageId: number,
+  text: string,
+  files: { id: string; fileName: string }[] = []
+) {
   const ticket = await emailTicket(orgId, ticketId);
   if (!ticket) return null;
 
+  // The email provider fetches each file from a link that expires in an hour
+  const attachments = (
+    await Promise.all(files.map((f) => signedLink(orgId, f.id, { seconds: 3600 }).then((l) => (l ? { filename: f.fileName, url: l.url } : null))))
+  ).filter((a): a is { filename: string; url: string } => a !== null);
+
   const settings = await getEmailSettings(orgId);
   const result = await sendEmail({
+    attachments,
     to: ticket.customer!.email,
     fromName: settings?.fromName || `${orgName} Support`,
     subject: subjectWithRef(ticket.subject, ticketId),

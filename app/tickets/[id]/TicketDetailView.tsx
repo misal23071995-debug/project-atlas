@@ -25,9 +25,13 @@ import {
   type TicketPriority,
   type TicketStatus,
 } from "@/app/lib/tickets";
+import AttachmentList from "@/app/components/ui/AttachmentList";
+import type { PendingFile } from "@/app/components/ui/ReplyEditor";
+import { MAX_FILES_PER_MESSAGE, checkFile } from "@/app/lib/attachments";
 import {
   addNoteAction,
   assignTicketAction,
+  requestUploadAction,
   sendReplyAction,
   updatePriorityAction,
   updateStatusAction,
@@ -74,9 +78,39 @@ export default function TicketDetailView({
     });
   }
 
+  const [files, setFiles] = useState<PendingFile[]>([]);
+  const updateFile = (key: string, changes: Partial<PendingFile>) =>
+    setFiles((list) => list.map((f) => (f.key === key ? { ...f, ...changes } : f)));
+
+  // Each file goes straight to storage through a one-time link, then is attached when the reply is sent
+  function attach(picked: File[]) {
+    const room = MAX_FILES_PER_MESSAGE - files.length;
+    for (const file of picked.slice(0, Math.max(0, room))) {
+      const key = `${file.name}-${file.size}-${Math.random()}`;
+      const problem = checkFile(file.name, file.type, file.size);
+      setFiles((list) => [...list, { key, fileName: file.name, size: file.size, status: problem ? "error" : "uploading", error: problem ?? undefined }]);
+      if (problem) continue;
+
+      (async () => {
+        const slot = await requestUploadAction(ticket.id, file.name, file.type, file.size);
+        if ("error" in slot) return updateFile(key, { status: "error", error: slot.error });
+        const res = await fetch(slot.signedUrl, { method: "PUT", body: file, headers: { "Content-Type": file.type } });
+        if (!res.ok) return updateFile(key, { status: "error", error: `${file.name} didn't upload. Try again.` });
+        updateFile(key, { status: "ready", path: slot.path });
+      })().catch(() => updateFile(key, { status: "error", error: `${file.name} didn't upload. Check your connection.` }));
+    }
+  }
+
   function handleSendReply() {
-    if (!reply.trim() || isPending) return;
-    run(() => sendReplyAction(ticket.id, reply), () => setReply(""));
+    const ready = files.filter((f) => f.status === "ready" && f.path).map((f) => ({ path: f.path!, fileName: f.fileName }));
+    if ((!reply.trim() && !ready.length) || isPending || files.some((f) => f.status === "uploading")) return;
+    run(
+      () => sendReplyAction(ticket.id, reply, ready),
+      () => {
+        setReply("");
+        setFiles([]);
+      }
+    );
   }
 
   const latestCustomerMessage =
@@ -154,6 +188,7 @@ export default function TicketDetailView({
                         {fromAgent && <span className="font-normal text-zinc-500"> · agent</span>}
                       </p>
                       <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-zinc-100">{message.message}</p>
+                      <AttachmentList attachments={ticket.attachments.filter((a) => a.messageId === message.id)} />
                       <p className="mt-2 text-xs text-zinc-500">
                         {formatDateTime(message.time)}
                         {message.delivery === "sent" && <span className="ml-2 text-emerald-400">· Emailed</span>}
@@ -182,6 +217,9 @@ export default function TicketDetailView({
               title={ticket.channel === "Email" ? "Reply by email" : undefined}
               note={ticket.channel === "Email" ? `Sent to ${ticket.customer.email}` : undefined}
               savedReplies={savedReplies}
+              files={files}
+              onAttach={attach}
+              onRemoveFile={(key) => setFiles((list) => list.filter((f) => f.key !== key))}
               placeholders={{
                 customer_first_name: ticket.customer.name.split(" ")[0],
                 customer_name: ticket.customer.name,
@@ -243,6 +281,15 @@ export default function TicketDetailView({
           )}
 
           <SlaCard ticket={ticket} />
+
+          {ticket.attachments.length > 0 && (
+            <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6">
+              <h2 className="text-lg font-semibold text-zinc-50">
+                Files <span className="text-sm font-normal text-zinc-500">· {ticket.attachments.length}</span>
+              </h2>
+              <AttachmentList attachments={ticket.attachments} compact />
+            </div>
+          )}
 
           <CsatCard
             rating={ticket.csatRating}

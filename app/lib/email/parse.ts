@@ -9,6 +9,8 @@ export interface InboundEmail {
   messageId: string | null;
   // Message-IDs this email replies to (In-Reply-To and References)
   replyTo: string[];
+  // Files sent with it, base64 encoded as the provider sends them
+  attachments: { name: string; contentType: string; base64: string }[];
 }
 
 export const MAX_EMAIL_TEXT = 20000;
@@ -55,6 +57,7 @@ export function normalizeInbound(payload: unknown): InboundEmail | null {
   let text: string;
   let messageId: string | null;
   let replyTo: string[] = [];
+  let files: { name: string; contentType: string; base64: string }[] = [];
 
   if ("FromFull" in p || "TextBody" in p) {
     // Postmark
@@ -66,6 +69,11 @@ export function normalizeInbound(payload: unknown): InboundEmail | null {
     const header = (name: string) => str(headers.find((h) => str(h.Name).toLowerCase() === name)?.Value);
     messageId = header("message-id") || str(p.MessageID) || null;
     replyTo = [...messageIds(header("in-reply-to")), ...messageIds(header("references"))];
+    files = (Array.isArray(p.Attachments) ? (p.Attachments as Json[]) : []).map((a) => ({
+      name: str(a.Name),
+      contentType: str(a.ContentType).split(";")[0].trim().toLowerCase(),
+      base64: str(a.Content),
+    }));
   } else {
     const raw = p.from;
     from =
@@ -77,6 +85,11 @@ export function normalizeInbound(payload: unknown): InboundEmail | null {
     text = str(p.text) || htmlToText(str(p.html));
     messageId = str(p.messageId) || null;
     replyTo = [...messageIds(str(p.inReplyTo)), ...(Array.isArray(p.references) ? p.references.map(str) : messageIds(str(p.references)))];
+    files = (Array.isArray(p.attachments) ? (p.attachments as Json[]) : []).map((a) => ({
+      name: str(a.filename ?? a.name),
+      contentType: str(a.contentType ?? a.content_type).split(";")[0].trim().toLowerCase(),
+      base64: str(a.content),
+    }));
   }
 
   if (!EMAIL.test(from.email)) return null;
@@ -90,6 +103,8 @@ export function normalizeInbound(payload: unknown): InboundEmail | null {
     text: text || subject.trim(),
     messageId: messageId?.slice(0, 300) ?? null,
     replyTo: [...new Set(replyTo.filter(Boolean))].slice(0, 20),
+    // Inline images in signatures come through as attachments too; anything without a name or content is skipped
+    attachments: files.filter((f) => f.name && f.base64).slice(0, 5),
   };
 }
 
