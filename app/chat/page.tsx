@@ -87,7 +87,7 @@ async function handleCreateTicket(message: ChatMessage) {
     <div className="min-h-screen bg-zinc-50 text-white flex justify-center py-10">
       <div className="w-full max-w-3xl rounded-xl border border-zinc-200 bg-white p-6 shadow-lg">
 
-        <h1 className="text-3xl font-bold">
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
           Atlas AI Assistant
         </h1>
 

@@ -9,7 +9,7 @@ const input =
 export default function ResetForm() {
   const [state, action, pending] = useActionState(setNewPasswordAction, {});
   return (
-    <form action={action} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+    <form action={action} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <label className="block text-sm font-medium text-zinc-700">
         New password
         <input type="password" name="password" autoComplete="new-password" minLength={8} required className={input} />

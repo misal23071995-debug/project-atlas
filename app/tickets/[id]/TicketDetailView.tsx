@@ -1,33 +1,18 @@
 "use client";
 
-import { useState, useSyncExternalStore, useTransition } from "react";
 import Link from "next/link";
-
+import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import DashboardLayout from "@/app/components/dashboard-layout";
-import { useCan } from "@/app/components/AgentProvider";
-import ReplyEditor from "@/app/components/ui/ReplyEditor";
-import CustomerCard from "@/app/components/ui/CustomerCard";
-import TicketInfoCard from "@/app/components/ui/TicketInfoCard";
-import SlaCard from "@/app/components/ui/SlaCard";
-import CsatCard from "@/app/components/ui/CsatCard";
-import { useAgent } from "@/app/components/AgentProvider";
-import { ChannelLabel, PriorityBadge, StatusBadge } from "@/app/components/ui/Badges";
-import { initials } from "@/app/lib/auth/agent";
-import type { SavedReply } from "@/app/lib/replies";
-import OrdersPanel from "@/app/components/ui/OrdersPanel";
-import { findOrderNumbers, type Order } from "@/app/lib/orders";
-import InternalNotes from "@/app/components/ui/InternalNotes";
-import ActivityTimeline from "@/app/components/ui/ActivityTimeline";
-import AICopilot from "@/app/components/ui/AICopilot";
-import {
-  formatDateTime,
-  type TicketDetail,
-  type TicketPriority,
-  type TicketStatus,
-} from "@/app/lib/tickets";
-import AttachmentList from "@/app/components/ui/AttachmentList";
-import type { PendingFile } from "@/app/components/ui/ReplyEditor";
+import { useAgent, useCan } from "@/app/components/AgentProvider";
+import { PriorityBadge, StatusBadge } from "@/app/components/ui/Badges";
 import { MAX_FILES_PER_MESSAGE, checkFile } from "@/app/lib/attachments";
+import type { Order } from "@/app/lib/orders";
+import type { SavedReply } from "@/app/lib/replies";
+import { formatDateTime, type TicketDetail, type TicketPriority, type TicketStatus } from "@/app/lib/tickets";
+import Composer, { type ComposerMode, type PendingFile } from "./Composer";
+import ContextPanel from "./ContextPanel";
+import PropertiesPanel from "./PropertiesPanel";
+import Timeline from "./Timeline";
 import {
   addNoteAction,
   assignTicketAction,
@@ -42,6 +27,8 @@ const subscribeNever = () => () => {};
 const browserOrigin = () => window.location.origin;
 const serverOrigin = () => null;
 
+// Three panels, like most support desks: ticket properties, the conversation with the reply box
+// docked under it, and what we know about the customer
 export default function TicketDetailView({
   ticket,
   agentNames,
@@ -57,13 +44,25 @@ export default function TicketDetailView({
   otherTickets: number;
 }) {
   const agent = useAgent();
-  const origin = useSyncExternalStore(subscribeNever, browserOrigin, serverOrigin);
-  const surveyLink = origin ? `${origin}/rate/${ticket.csatToken}` : null;
-  const [reply, setReply] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [isPending, startTransition] = useTransition();
   const canWork = useCan("tickets.work");
   const canReview = useCan("quality.review");
+  const origin = useSyncExternalStore(subscribeNever, browserOrigin, serverOrigin);
+  const surveyLink = origin ? `${origin}/rate/${ticket.csatToken}` : null;
+
+  const [mode, setMode] = useState<ComposerMode>(canWork ? "reply" : "note");
+  const [reply, setReply] = useState("");
+  const [note, setNote] = useState("");
+  const [statusAfter, setStatusAfter] = useState<TicketStatus | "">("");
+  const [files, setFiles] = useState<PendingFile[]>([]);
+  const [error, setError] = useState<string | null>(null);
+  const [isPending, startTransition] = useTransition();
+  const stream = useRef<HTMLDivElement>(null);
+
+  // Newest at the bottom, like an email thread: open scrolled to the latest
+  const size = ticket.conversation.length + ticket.notes.length;
+  useEffect(() => {
+    stream.current?.scrollTo({ top: stream.current.scrollHeight });
+  }, [size]);
 
   // Run a server action; the page re-renders with fresh data when it finishes
   function run(action: () => Promise<void>, onSuccess?: () => void) {
@@ -78,7 +77,6 @@ export default function TicketDetailView({
     });
   }
 
-  const [files, setFiles] = useState<PendingFile[]>([]);
   const updateFile = (key: string, changes: Partial<PendingFile>) =>
     setFiles((list) => list.map((f) => (f.key === key ? { ...f, ...changes } : f)));
 
@@ -101,125 +99,81 @@ export default function TicketDetailView({
     }
   }
 
-  function handleSendReply() {
+  function send() {
     const ready = files.filter((f) => f.status === "ready" && f.path).map((f) => ({ path: f.path!, fileName: f.fileName }));
-    if ((!reply.trim() && !ready.length) || isPending || files.some((f) => f.status === "uploading")) return;
+    const next = statusAfter;
     run(
-      () => sendReplyAction(ticket.id, reply, ready),
+      async () => {
+        await sendReplyAction(ticket.id, reply, ready);
+        if (next) await updateStatusAction(ticket.id, next);
+      },
       () => {
         setReply("");
         setFiles([]);
+        setStatusAfter("");
       }
     );
   }
 
-  const latestCustomerMessage =
-    [...ticket.conversation]
-      .reverse()
-      .find((message) => message.role === "customer")
-      ?.message ?? "";
-
-  const activities = ticket.activities.map((activity) => ({
-    title: activity.title,
-    color: activity.color,
-    time: formatDateTime(activity.time),
-  }));
+  const insertReply = (text: string) => {
+    setMode("reply");
+    setReply((r) => (r.trim() ? `${r.trimEnd()}\n\n${text}` : text));
+  };
 
   return (
-    <DashboardLayout>
-      <div className="grid gap-6 lg:grid-cols-3">
-        {/* LEFT SIDE */}
-        <div className="space-y-6 lg:col-span-2">
-          {/* Header */}
-          <div className="flex flex-wrap items-start justify-between gap-3">
-            <div className="min-w-0">
-              <p className="font-mono text-sm text-indigo-700">#{ticket.id}</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">{ticket.subject}</h1>
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <StatusBadge status={ticket.status} />
-                <PriorityBadge priority={ticket.priority} />
-                <ChannelLabel channel={ticket.channel} />
-                <span className="text-xs text-zinc-500">Opened {formatDateTime(ticket.createdAt)}</span>
-              </div>
-            </div>
-
-            {canReview && ticket.conversation.some((m) => m.role === "agent") && (
-              <Link
-                href={`/quality/${ticket.id}`}
-                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
-              >
-                Review quality
+    <DashboardLayout fullBleed>
+      <div className="flex flex-col lg:h-[calc(100vh-3.5rem)]">
+        <header className="flex flex-wrap items-start justify-between gap-3 border-b border-zinc-200 bg-white px-5 py-3">
+          <div className="min-w-0">
+            <p className="text-xs text-zinc-500">
+              <Link href="/tickets" className="hover:text-zinc-800">
+                Tickets
               </Link>
-            )}
-          </div>
-
-          {error && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-600">
-              {error}
+              <span className="mx-1.5 text-zinc-300">/</span>
+              <span className="font-mono">#{ticket.id}</span>
+            </p>
+            <h1 className="mt-0.5 truncate text-lg font-semibold text-zinc-900">{ticket.subject}</h1>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs text-zinc-500">
+              <StatusBadge status={ticket.status} />
+              <PriorityBadge priority={ticket.priority} />
+              <span>
+                {ticket.customer.name} via {ticket.channel}
+              </span>
+              <span>· Opened {formatDateTime(ticket.createdAt)}</span>
             </div>
+          </div>
+          {canReview && ticket.conversation.some((m) => m.role === "agent") && (
+            <Link href={`/quality/${ticket.id}`} className="inline-flex h-8 items-center rounded-md border border-zinc-200 bg-white px-3 text-sm text-zinc-700 hover:bg-zinc-50">
+              Review quality
+            </Link>
           )}
+        </header>
 
-          {/* Conversation */}
-          <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
-            <h2 className="mb-5 text-sm font-medium uppercase tracking-wide text-zinc-500">
-              Conversation
-            </h2>
+        <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
+          <aside className="order-2 border-t border-zinc-200 bg-white lg:order-1 lg:w-64 lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-t-0">
+            <PropertiesPanel
+              ticket={ticket}
+              agentNames={agentNames}
+              readOnly={!canWork}
+              onStatus={(s) => run(() => updateStatusAction(ticket.id, s as TicketStatus))}
+              onPriority={(p) => run(() => updatePriorityAction(ticket.id, p as TicketPriority))}
+              onAssign={(a) => run(() => assignTicketAction(ticket.id, a))}
+            />
+          </aside>
 
-            <div className="space-y-4">
-              {ticket.conversation.map((message, index) => {
-                const fromAgent = message.role === "agent";
-                return (
-                  <div key={index} className={`flex gap-3 ${fromAgent ? "flex-row-reverse" : ""}`}>
-                    <span
-                      className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                        fromAgent ? "bg-indigo-500/20 text-indigo-700" : "bg-zinc-100 text-zinc-700"
-                      }`}
-                      aria-hidden
-                    >
-                      {initials(message.sender)}
-                    </span>
-                    <div
-                      className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                        fromAgent ? "rounded-tr-md bg-indigo-500/15 ring-1 ring-inset ring-indigo-500/20" : "rounded-tl-md bg-zinc-100"
-                      }`}
-                    >
-                      <p className="text-xs font-medium text-zinc-600">
-                        {message.sender}
-                        {fromAgent && <span className="font-normal text-zinc-500"> · agent</span>}
-                      </p>
-                      <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-zinc-900">{message.message}</p>
-                      <AttachmentList attachments={ticket.attachments.filter((a) => a.messageId === message.id)} />
-                      <p className="mt-2 text-xs text-zinc-500">
-                        {formatDateTime(message.time)}
-                        {message.delivery === "sent" && <span className="ml-2 text-emerald-600">· Emailed</span>}
-                        {message.delivery === "not_sent" && (
-                          <span className="ml-2 text-amber-600" title={message.deliveryNote ?? undefined}>
-                            · Not emailed: {message.deliveryNote ?? "email isn't connected"}
-                          </span>
-                        )}
-                        {message.delivery === "failed" && (
-                          <span className="ml-2 text-rose-600">· Email failed: {message.deliveryNote ?? "unknown error"}</span>
-                        )}
-                      </p>
-                    </div>
-                  </div>
-                );
-              })}
+          <section className="order-1 flex min-w-0 flex-1 flex-col lg:order-2">
+            <div ref={stream} className="flex-1 px-4 py-4 sm:px-6 lg:overflow-y-auto">
+              {error && <p className="mb-3 rounded-md border border-rose-200 bg-rose-50 px-3 py-2 text-sm text-rose-700">{error}</p>}
+              <Timeline messages={ticket.conversation} notes={ticket.notes} activities={ticket.activities} attachments={ticket.attachments} channel={ticket.channel} />
             </div>
-          </div>
-
-          {/* Reply Editor */}
-          {canWork ? (
-            <ReplyEditor
-              value={reply}
-              onChange={setReply}
-              onSend={handleSendReply}
-              title={ticket.channel === "Email" ? "Reply by email" : undefined}
-              note={ticket.channel === "Email" ? `Sent to ${ticket.customer.email}` : undefined}
+            <Composer
+              mode={mode}
+              onModeChange={setMode}
+              value={mode === "note" ? note : reply}
+              onChange={mode === "note" ? setNote : setReply}
+              canReply={canWork}
+              replyTo={ticket.channel === "Email" ? `Email to ${ticket.customer.email}` : `Reply to ${ticket.customer.name}`}
               savedReplies={savedReplies}
-              files={files}
-              onAttach={attach}
-              onRemoveFile={(key) => setFiles((list) => list.filter((f) => f.key !== key))}
               placeholders={{
                 customer_first_name: ticket.customer.name.split(" ")[0],
                 customer_name: ticket.customer.name,
@@ -227,105 +181,29 @@ export default function TicketDetailView({
                 ticket_id: ticket.id,
                 survey_link: surveyLink ?? undefined,
               }}
+              files={files}
+              onAttach={attach}
+              onRemoveFile={(key) => setFiles((list) => list.filter((f) => f.key !== key))}
+              statusAfter={statusAfter}
+              onStatusAfterChange={setStatusAfter}
+              currentStatus={ticket.status}
+              onSend={send}
+              onAddNote={() => run(() => addNoteAction(ticket.id, note), () => setNote(""))}
+              pending={isPending}
             />
-          ) : (
-            <p className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
-              Your role can read this ticket and leave internal notes, but not reply or change it.
-            </p>
-          )}
+          </section>
 
-          {/* Internal Notes */}
-          <InternalNotes
-            notes={ticket.notes.map((note) => ({
-              author: note.author,
-              note: note.body,
-              time: formatDateTime(note.time),
-            }))}
-            onAdd={(note, onSaved) => run(() => addNoteAction(ticket.id, note), onSaved)}
-            disabled={isPending}
-          />
-
-          {/* Activity Timeline */}
-          <ActivityTimeline
-            activities={activities}
-          />
-        </div>
-
-        {/* RIGHT SIDE */}
-        <div className="space-y-6">
-          <CustomerCard
-            id={ticket.customer.id}
-            name={ticket.customer.name}
-            email={ticket.customer.email}
-            customerSince={new Date(ticket.customer.customerSince).toLocaleDateString("en-IN", {
-              month: "short",
-              year: "numeric",
-            })}
-            location={ticket.customer.location}
-            device={ticket.customer.device}
-            otherTickets={otherTickets}
-          />
-
-          {orders && (
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
-              <h2 className="mb-4 text-lg font-semibold text-zinc-900">Orders</h2>
-              <OrdersPanel
-                orders={orders}
-                ticketId={ticket.id}
-                // Orders the customer quoted in this conversation go first
-                mentioned={findOrderNumbers(`${ticket.subject} ${ticket.conversation.map((m) => m.message).join(" ")}`)}
-                canAct={canWork}
-                limit={3}
-              />
-            </div>
-          )}
-
-          <SlaCard ticket={ticket} />
-
-          {ticket.attachments.length > 0 && (
-            <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-zinc-900">
-                Files <span className="text-sm font-normal text-zinc-500">· {ticket.attachments.length}</span>
-              </h2>
-              <AttachmentList attachments={ticket.attachments} compact />
-            </div>
-          )}
-
-          <CsatCard
-            rating={ticket.csatRating}
-            comment={ticket.csatComment}
-            ratedAt={ticket.csatRatedAt}
-            surveyLink={surveyLink}
-            onInsert={canWork ? (link) => setReply((r) => (r.trim() ? `${r.trimEnd()}\n\nHow did we do? ${link}` : `How did we do? ${link}`)) : undefined}
-          />
-
-          <TicketInfoCard
-            status={ticket.status}
-            priority={ticket.priority}
-            assignedTo={ticket.assignedTo}
-            agentNames={agentNames}
-            channel={ticket.channel}
-            category={ticket.category}
-            created={formatDateTime(ticket.createdAt)}
-            tags={ticket.tags}
-            readOnly={!canWork}
-            onStatusChange={(status) =>
-              run(() => updateStatusAction(ticket.id, status as TicketStatus))
-            }
-            onPriorityChange={(priority) =>
-              run(() => updatePriorityAction(ticket.id, priority as TicketPriority))
-            }
-            onAssignedChange={(assignedTo) =>
-              run(() => assignTicketAction(ticket.id, assignedTo))
-            }
-          />
-
-          {canWork && (
-            <AICopilot
-              customerMessage={latestCustomerMessage}
-              onUseReply={setReply}
+          <aside className="order-3 border-t border-zinc-200 bg-white lg:w-80 lg:shrink-0 lg:overflow-y-auto lg:border-l lg:border-t-0">
+            <ContextPanel
+              ticket={ticket}
+              orders={orders}
+              otherTickets={otherTickets}
+              canWork={canWork}
+              surveyLink={surveyLink}
+              onUseReply={insertReply}
+              onInsertSurvey={canWork ? (link) => insertReply(`How did we do? ${link}`) : undefined}
             />
-          )}
+          </aside>
         </div>
       </div>
     </DashboardLayout>

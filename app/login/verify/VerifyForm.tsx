@@ -6,7 +6,7 @@ import { verifySecondStepAction } from "./actions";
 export default function VerifyForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState(verifySecondStepAction, {});
   return (
-    <form action={action} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+    <form action={action} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <input type="hidden" name="next" value={next} />
       <label className="block text-sm font-medium text-zinc-700">
         Code

@@ -28,12 +28,12 @@ export default async function EditArticlePage({
           <>
             {canEdit ? (
               <>
-                <h1 className="mt-2 text-3xl font-bold">Edit article</h1>
+                <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Edit article</h1>
                 <ArticleForm article={article} />
               </>
             ) : (
               <article className="mt-2">
-                <h1 className="text-3xl font-bold">{article.title}</h1>
+                <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{article.title}</h1>
                 <p className="mt-1 text-sm text-zinc-500">{article.category}</p>
                 <p className="mt-6 whitespace-pre-line text-zinc-800">{article.body}</p>
               </article>

@@ -16,9 +16,9 @@ function Score({ value }: { value: number | null }) {
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
       <p className="text-sm text-zinc-600">{label}</p>
-      <p className="mt-2 text-3xl font-bold">{value}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">{value}</p>
       <p className="mt-1 text-xs text-zinc-500">{hint}</p>
     </div>
   );
@@ -34,7 +34,7 @@ export default async function QualityPage() {
     <DashboardLayout>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">{isReviewer ? "Quality" : "My quality"}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{isReviewer ? "Quality" : "My quality"}</h1>
           <p className="mt-1 max-w-3xl text-zinc-600">
             {isReviewer
               ? "AI scores each conversation against your scorecard. A reviewer checks the score, adjusts it and gives the agent feedback."
@@ -122,7 +122,7 @@ export default async function QualityPage() {
 
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {isReviewer && (
-              <section className="rounded-xl border border-zinc-200 bg-white p-6">
+              <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
                 <h2 className="text-lg font-semibold">By agent</h2>
                 {overview.byAgent.length === 0 ? (
                   <p className="mt-4 text-sm text-zinc-500">No reviews yet.</p>
@@ -153,7 +153,7 @@ export default async function QualityPage() {
               </section>
             )}
 
-            <section className="rounded-xl border border-zinc-200 bg-white p-6">
+            <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
               <h2 className="text-lg font-semibold">By criterion</h2>
               <p className="mt-1 text-xs text-zinc-500">Lowest first: where coaching helps most</p>
               {overview.byCriterion.length === 0 ? (

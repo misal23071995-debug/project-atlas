@@ -40,7 +40,7 @@ export default async function CustomersPage({ searchParams }: { searchParams: Pr
         </form>
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         {items.length === 0 ? (
           <p className="px-6 py-16 text-center text-sm text-zinc-500">{search ? "Nobody matches that search." : "No customers yet."}</p>
         ) : (

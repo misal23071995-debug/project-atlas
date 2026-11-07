@@ -18,13 +18,13 @@ export default async function TeamPage() {
           <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-3xl font-bold">Team</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Team</h1>
           <p className="mt-1 text-zinc-600">
             {members.length} {members.length === 1 ? "person" : "people"} in {org.name}
           </p>
         </div>
 
-        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+        <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
           <table className="min-w-full text-sm">
             <thead className="bg-white text-left text-zinc-600">
               <tr>
@@ -42,7 +42,7 @@ export default async function TeamPage() {
         </div>
 
         {canManage && (
-          <section className="rounded-xl border border-zinc-200 bg-white p-6">
+          <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
             <h2 className="text-lg font-semibold">Add a team member</h2>
             <p className="mt-1 text-sm text-zinc-600">
               Creates their login with a temporary password. Share it with them privately.

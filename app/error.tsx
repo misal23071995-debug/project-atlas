@@ -6,7 +6,7 @@ import Link from "next/link";
 export default function ErrorPage({ error, reset }: { error: Error & { digest?: string }; reset: () => void }) {
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-4 font-sans">
-      <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 text-center">
+      <div className="w-full max-w-md rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
         <h1 className="text-xl font-semibold text-zinc-900">Something went wrong</h1>
         <p className="mt-2 text-sm text-zinc-600">
           This has been recorded. Try again, and if it keeps happening, tell your workspace admin

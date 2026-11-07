@@ -25,7 +25,7 @@ export default async function KnowledgeGapsPage() {
       <Link href="/knowledge" className="text-sm text-zinc-600 hover:text-zinc-800">
         ← Knowledge Base
       </Link>
-      <h1 className="mt-2 text-3xl font-bold">Knowledge gaps</h1>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Knowledge gaps</h1>
       <p className="mt-1 max-w-3xl text-zinc-600">
         Why the AI chatbot handed customers to an agent in the last 30 days. Questions with no matching article
         are the quickest wins: write the article, and the bot answers next time.
@@ -42,7 +42,7 @@ export default async function KnowledgeGapsPage() {
       ) : (
         <>
           <section className="mt-8 grid gap-3 sm:grid-cols-3 lg:grid-cols-5">
-            <div className="rounded-xl border border-zinc-200 bg-white p-4">
+            <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
               <p className="text-xs text-zinc-600">Handovers</p>
               <p className="mt-1 text-2xl font-bold">
                 {gaps.handoffs}
@@ -50,7 +50,7 @@ export default async function KnowledgeGapsPage() {
               </p>
             </div>
             {gaps.byType.map((item) => (
-              <div key={item.type} className="rounded-xl border border-zinc-200 bg-white p-4">
+              <div key={item.type} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
                 <p className="text-xs text-zinc-600">{typeLabel(item.type)}</p>
                 <p
                   className={`mt-1 text-2xl font-bold ${
@@ -77,7 +77,7 @@ export default async function KnowledgeGapsPage() {
             ) : (
               <div className="mt-4 space-y-4">
                 {gaps.missingArticles.map((group) => (
-                  <div key={group.topic} className="rounded-xl border border-zinc-200 bg-white p-5">
+                  <div key={group.topic} className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <h3 className="font-semibold">
                         {group.topic}

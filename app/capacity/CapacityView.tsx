@@ -104,7 +104,7 @@ export default function CapacityView({
     <>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Capacity planning</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Capacity planning</h1>
           <p className="mt-1 max-w-3xl text-zinc-600">
             How many agents each hour needs to answer {settings.targetPercent}% of contacts within{" "}
             {settings.targetSeconds >= 60 ? `${Math.round(settings.targetSeconds / 60)} min` : `${settings.targetSeconds}s`},
@@ -260,7 +260,7 @@ export default function CapacityView({
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
       <p className="text-sm text-zinc-600">{label}</p>
       <p className="mt-2 text-2xl font-bold">{value}</p>
       <p className="mt-1 text-xs text-zinc-500">{hint}</p>
@@ -272,7 +272,7 @@ function SettingsForm({ settings, timeZones }: { settings: CapacitySettings; tim
   const [state, action, pending] = useActionState<SettingsFormState, FormData>(saveCapacitySettingsAction, {});
 
   return (
-    <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6">
+    <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold">Planning settings</h2>
       <form action={action} className="mt-4 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

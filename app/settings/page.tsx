@@ -15,7 +15,7 @@ export const maxDuration = 120;
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-6">
+    <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold">{title}</h2>
       {description && <p className="mt-1 text-sm text-zinc-600">{description}</p>}
       <div className="mt-5">{children}</div>
@@ -38,7 +38,7 @@ export default async function SettingsPage() {
     <DashboardLayout>
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
-          <h1 className="text-3xl font-bold">Settings</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Settings</h1>
           <p className="mt-1 text-zinc-600">
             {org.name} · you&apos;re {role === "admin" ? "an" : "a"} {ROLE_LABELS[role]}
           </p>

@@ -42,7 +42,7 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
   return (
     <div className="mt-8 space-y-4">
       {rows.map((row, index) => (
-        <div key={row.key} className="rounded-xl border border-zinc-200 bg-white p-4">
+        <div key={row.key} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="flex gap-3">
             <span className="mt-2 text-sm text-zinc-500">{index + 1}.</span>
             <div className="flex-1 space-y-2">

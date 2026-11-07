@@ -31,7 +31,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
       {course ? (
         <>
           <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
-            <h1 className="text-3xl font-bold">Edit course</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Edit course</h1>
             {course.published && (
               <Link href={`/training/${course.id}`} className="text-sm text-indigo-600 hover:underline">
                 Preview as an agent ↗

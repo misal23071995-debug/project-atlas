@@ -18,7 +18,7 @@ export default async function AutomationPage() {
           <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-3xl font-bold">Automation</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Automation</h1>
           <p className="mt-1 text-zinc-600">
             Let the desk do the routine work: give new tickets an owner, set priority, tag, escalate SLA breaches and
             close tickets the customer stopped answering.

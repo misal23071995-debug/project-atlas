@@ -328,13 +328,14 @@ function ProfileMenu() {
   );
 }
 
-export default function DashboardLayout({ children }: { children: ReactNode }) {
+// fullBleed: the page fills the space under the top bar edge to edge (the ticket workspace)
+export default function DashboardLayout({ children, fullBleed = false }: { children: ReactNode; fullBleed?: boolean }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const canWork = useCan("tickets.work");
 
   return (
-    <div className="flex min-h-screen bg-[#f4f6fa] font-sans text-zinc-900">
+    <div className="flex min-h-screen bg-[#f5f6f8] font-sans text-zinc-900">
       {sidebarOpen && (
         <button
           type="button"
@@ -383,7 +384,11 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
           </div>
         </header>
 
-        <main className="mx-auto w-full max-w-[96rem] flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        {fullBleed ? (
+          <main className="min-w-0 flex-1">{children}</main>
+        ) : (
+          <main className="mx-auto w-full max-w-[96rem] flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+        )}
       </div>
     </div>
   );

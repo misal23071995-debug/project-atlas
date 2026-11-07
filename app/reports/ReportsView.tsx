@@ -33,7 +33,7 @@ function Section({
 }) {
   return (
     // min-w-0 lets wide tables scroll inside the card instead of stretching the page
-    <section className="min-w-0 rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
+    <section className="min-w-0 rounded-xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">{title}</h2>
@@ -104,7 +104,7 @@ function Delta({ now, before, better }: { now: number | null; before: number | n
 
 function Tile({ label, value, sub, delta }: { label: string; value: string; sub?: string; delta: ReactNode }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
       <p className="text-sm text-zinc-600">{label}</p>
       <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
       {sub && <p className="mt-1 text-xs text-zinc-500">{sub}</p>}
@@ -275,7 +275,7 @@ export default function ReportsView({
       <div className="space-y-6">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-3xl font-bold">Reports</h1>
+            <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Reports</h1>
             <p className="mt-1 text-zinc-600">
               {period.label} · {period.fromDate} to {period.toDate} · days in {period.timezone}
             </p>
@@ -345,7 +345,7 @@ export default function ReportsView({
             { label: "Unassigned", value: num(report.backlog.unassigned) },
             { label: "Oldest open", value: duration(report.backlog.oldestOpenMinutes) },
           ].map((item) => (
-            <div key={item.label} className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
+            <div key={item.label} className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
               <p className="text-xs text-zinc-500">{item.label}</p>
               <p className={`mt-1 text-lg font-semibold tabular-nums ${item.tone ?? ""}`}>{item.value}</p>
             </div>

@@ -84,7 +84,7 @@ export default function ReviewForm({
   }
 
   return (
-    <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-6">
+    <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Scorecard</h2>
@@ -97,7 +97,7 @@ export default function ReviewForm({
           </p>
         </div>
         <div className="text-right">
-          <p className={`text-3xl font-bold ${liveTotal === null ? "text-zinc-500" : scoreBand(liveTotal).className}`}>
+          <p className={`text-3xl font-semibold tabular ${liveTotal === null ? "text-zinc-500" : scoreBand(liveTotal).className}`}>
             {liveTotal === null ? "—" : `${liveTotal}%`}
           </p>
           {liveTotal !== null && <p className="text-xs text-zinc-500">{scoreBand(liveTotal).label}</p>}

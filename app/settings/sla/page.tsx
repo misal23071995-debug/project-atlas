@@ -18,7 +18,7 @@ export default async function SlaSettingsPage() {
           <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-3xl font-bold">SLA targets</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">SLA targets</h1>
           <p className="mt-1 text-zinc-600">
             Each ticket gets its due times when it&apos;s created, from its priority. The clocks run around the
             clock (not business hours), and the resolution clock pauses while a ticket is Waiting on Customer.

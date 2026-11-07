@@ -5,31 +5,24 @@ import SparkleIcon from "./SparkleIcon";
 import type { AIAnalysis } from "@/app/lib/ai";
 import { fetchAnalysis } from "@/app/lib/ai/client";
 
-type AICopilotProps = {
-  customerMessage: string;
-  onUseReply: (reply: string) => void;
+const SENTIMENT_STYLES: Record<string, string> = {
+  Positive: "bg-emerald-50 text-emerald-700 ring-emerald-600/20",
+  Neutral: "bg-zinc-100 text-zinc-700 ring-zinc-500/20",
+  Frustrated: "bg-amber-50 text-amber-800 ring-amber-600/20",
+  Angry: "bg-rose-50 text-rose-700 ring-rose-600/20",
 };
 
-export default function AICopilot({
-  customerMessage,
-  onUseReply,
-}: AICopilotProps) {
-  const [result, setResult] = useState<{
-    message: string;
-    analysis: AIAnalysis;
-  } | null>(null);
-
+// The AI's reading of the latest customer message: summary, intent, mood, and a draft reply
+export default function AICopilot({ customerMessage, onUseReply }: { customerMessage: string; onUseReply: (reply: string) => void }) {
+  const [result, setResult] = useState<{ message: string; analysis: AIAnalysis } | null>(null);
   // Stale until the result for the current message arrives
-  const analysis =
-    result?.message === customerMessage ? result.analysis : null;
+  const analysis = result?.message === customerMessage ? result.analysis : null;
 
   useEffect(() => {
     let cancelled = false;
-
     fetchAnalysis(customerMessage).then((analysis) => {
       if (!cancelled) setResult({ message: customerMessage, analysis });
     });
-
     return () => {
       cancelled = true;
     };
@@ -37,123 +30,47 @@ export default function AICopilot({
 
   if (!analysis) {
     return (
-      <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-white p-6">
-        <p className="flex animate-pulse items-center gap-2 text-sm text-zinc-600">
-          <SparkleIcon className="h-4 w-4 text-indigo-700" />
-          Atlas AI is reading this ticket…
-        </p>
-      </div>
+      <p className="flex animate-pulse items-center gap-2 text-sm text-zinc-500">
+        <SparkleIcon className="h-4 w-4 text-indigo-500" />
+        Reading the latest message…
+      </p>
     );
   }
 
   return (
-    <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-white p-6">
-      <div className="mb-6 flex items-center gap-3">
-        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
-          <SparkleIcon className="h-5 w-5" />
-        </div>
-
-        <div>
-          <h2 className="text-lg font-semibold text-zinc-900">
-            AI copilot
-          </h2>
-
-          <p className="text-sm text-zinc-600">
-            Powered by Atlas AI
-          </p>
-        </div>
-      </div>
-
-      {/* Summary */}
-      <div className="mb-6">
-        <h3 className="mb-2 font-semibold text-indigo-600">
-          Ticket Summary
-        </h3>
-
-        <p className="text-zinc-700">
-          {analysis.summary}
-        </p>
-      </div>
-      <div className="mb-6 rounded-lg bg-zinc-100 p-5">
-        <h3 className="mb-2 font-semibold">
-          Detected Intent
-        </h3>
-
-        <p className="text-lg font-medium text-indigo-600">
-          {analysis.intent}
-        </p>
-      </div>
-      
-      {/* Sentiment */}
-      <div className="mb-6 rounded-lg bg-zinc-100 p-5">
-        <h3 className="mb-3 font-semibold">
-          Detected Sentiment
-        </h3>
-
-        <p className="text-3xl">{analysis.sentiment === "Positive"
-          ? "😊"
-          : analysis.sentiment === "Neutral"
-          ? "😐"
-          : analysis.sentiment === "Frustrated"
-          ? "😟"
-          : "😡"}</p>
-
-        <p className="mt-2 text-zinc-600">
+    <div className="space-y-3 text-sm">
+      <p className="leading-6 text-zinc-800">{analysis.summary}</p>
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="rounded-md bg-indigo-50 px-2 py-0.5 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-600/15">{analysis.intent}</span>
+        <span className={`rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${SENTIMENT_STYLES[analysis.sentiment] ?? SENTIMENT_STYLES.Neutral}`}>
           {analysis.sentiment}
-        </p>
+        </span>
+        <span className="text-xs text-zinc-500">{analysis.confidence}% sure</span>
       </div>
-      <div className="mb-6 rounded-lg bg-zinc-100 p-5">
-        <h3 className="mb-2 font-semibold">
-          AI Confidence
-        </h3>
-
-        <div className="h-3 w-full rounded-full bg-zinc-200">
-          <div
-            className="h-3 rounded-full bg-indigo-500"
-            style={{ width: `${analysis.confidence}%` }}
-          />
-        </div>
-
-        <p className="mt-2 text-sm text-zinc-600">
-          {analysis.confidence}% Confidence
-        </p>
-      </div>
-      {/* Suggested Reply */}
-      <div>
-        <h3 className="mb-3 font-semibold text-indigo-600">
-          Suggested Reply
-        </h3>
-
-        <div className="rounded-lg bg-zinc-100 p-5 whitespace-pre-line">
-          {analysis.suggestedReply}
-        </div>
-
+      <div className="rounded-lg border border-zinc-200 bg-zinc-50 p-3">
+        <p className="mb-1.5 text-xs font-medium text-zinc-500">Suggested reply</p>
+        <p className="line-clamp-6 whitespace-pre-line leading-6 text-zinc-800">{analysis.suggestedReply}</p>
         <button
+          type="button"
           onClick={() => onUseReply(analysis.suggestedReply)}
-          className="mt-4 rounded-lg bg-indigo-600 px-5 py-2 font-medium transition hover:bg-indigo-500"
+          className="mt-2.5 inline-flex h-7 items-center gap-1.5 rounded-md bg-indigo-600 px-2.5 text-xs font-medium text-white hover:bg-indigo-500"
         >
-          Use Reply
+          <SparkleIcon className="h-3.5 w-3.5" />
+          Use in reply
         </button>
       </div>
-
-      {/* Articles */}
-      <div className="mt-8">
-        <h3 className="mb-3 font-semibold text-indigo-600">
-          Related Articles
-        </h3>
-
-        <div className="space-y-2">
-          {analysis.relatedArticles.map((article) => (
-            <a
-              key={article}
-              href="#"
-              className="block text-indigo-600 hover:underline"
-            >
-              {article}
-            </a>
-          ))}
+      {analysis.relatedArticles.length > 0 && (
+        <div>
+          <p className="mb-1 text-xs font-medium text-zinc-500">Related articles</p>
+          <ul className="space-y-0.5">
+            {analysis.relatedArticles.map((a) => (
+              <li key={a} className="truncate text-indigo-700">
+                {a}
+              </li>
+            ))}
+          </ul>
         </div>
-      </div>
+      )}
     </div>
   );
 }

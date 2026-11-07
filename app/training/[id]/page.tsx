@@ -31,7 +31,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
         <div className="mx-auto max-w-3xl">
           <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
             <div>
-              <h1 className="text-3xl font-bold">{course.title}</h1>
+              <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{course.title}</h1>
               {course.description && <p className="mt-1 text-zinc-600">{course.description}</p>}
             </div>
             <div className="flex items-center gap-3">
@@ -54,7 +54,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
           )}
           {!course.published && <p className="mt-3 text-sm text-amber-700">Draft: agents can&apos;t see this yet.</p>}
 
-          <article className="mt-6 whitespace-pre-line rounded-xl border border-zinc-200 bg-white p-6 leading-relaxed text-zinc-800">
+          <article className="mt-6 whitespace-pre-line rounded-xl border border-zinc-200 bg-white p-6 leading-relaxed text-zinc-800 shadow-sm">
             {course.body || "This course has no lesson text."}
           </article>
 

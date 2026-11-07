@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { AgentProvider } from "./components/AgentProvider";
 import { getSession } from "./lib/auth/session";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+// Inter: the standard face for dense product UI, with tabular figures for counts and times
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -29,7 +30,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      className={`${inter.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <AgentProvider session={session && "org" in session ? session : null}>{children}</AgentProvider>

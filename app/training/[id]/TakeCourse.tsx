@@ -65,7 +65,7 @@ export default function TakeCourse({
         {questions.map((q, index) => {
           const graded = outcome.get(q.id);
           return (
-            <li key={q.id} className="rounded-xl border border-zinc-200 bg-white p-5">
+            <li key={q.id} className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
               <p className="font-medium text-zinc-900">
                 {index + 1}. {q.question}
               </p>

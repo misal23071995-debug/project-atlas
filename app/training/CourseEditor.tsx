@@ -109,7 +109,7 @@ export default function CourseEditor({
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <label className={labelClass}>
             Title
             <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} className={`mt-1 ${inputClass}`} />
@@ -150,7 +150,7 @@ export default function CourseEditor({
           </label>
         </section>
 
-        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Quiz</h2>
@@ -238,7 +238,7 @@ export default function CourseEditor({
       </div>
 
       <div className="space-y-6">
-        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <label className={labelClass}>
             Pass mark (%)
             <input
@@ -331,7 +331,7 @@ function AssignPanel({
   }
 
   return (
-    <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+    <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold">Assign</h2>
       {!published ? (
         <p className="text-sm text-zinc-500">Publish and save the course first.</p>

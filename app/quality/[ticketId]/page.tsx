@@ -50,7 +50,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
       </Link>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
         <div>
-          <h1 className="text-3xl font-bold">Review ticket #{ticket.id}</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Review ticket #{ticket.id}</h1>
           <p className="mt-1 text-zinc-600">
             {ticket.subject} · agent <span className="text-zinc-800">{agentName}</span>
           </p>
@@ -61,7 +61,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
-        <section className="rounded-xl border border-zinc-200 bg-white p-6 lg:col-span-3">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 lg:col-span-3 shadow-sm">
           <h2 className="mb-4 text-lg font-semibold">Conversation</h2>
           <div className="space-y-4">
             {ticket.conversation.map((message, index) => (
@@ -90,7 +90,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
               readOnly={!isReviewer}
             />
           ) : (
-            <p className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600">
+            <p className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600 shadow-sm">
               No agent has replied on this ticket yet, so there&apos;s nothing to score.
             </p>
           )}

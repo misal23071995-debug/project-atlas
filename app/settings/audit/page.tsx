@@ -38,7 +38,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   if (!can(role, "audit.view")) {
     return (
       <DashboardLayout>
-        <p className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-600">The audit log is for workspace admins.</p>
+        <p className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-600 shadow-sm">The audit log is for workspace admins.</p>
       </DashboardLayout>
     );
   }
@@ -54,7 +54,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
           <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-3xl font-bold">Audit log</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Audit log</h1>
           <p className="mt-1 text-zinc-600">Who changed what in {org.name}: the team, sign-in security, settings, rules and orders. Latest 200.</p>
         </div>
 
@@ -75,9 +75,9 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
             The audit log isn&apos;t set up yet. Run supabase/migrations/017_audit_log.sql in the Supabase SQL Editor.
           </p>
         ) : entries.length === 0 ? (
-          <p className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">Nothing recorded yet.</p>
+          <p className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500 shadow-sm">Nothing recorded yet.</p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[40rem] text-left text-sm">
                 <thead>

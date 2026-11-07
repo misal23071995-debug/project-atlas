@@ -3,58 +3,52 @@
 import { useState } from "react";
 import { formatDateTime } from "@/app/lib/tickets";
 
-type Props = {
+// The customer's rating of this ticket, and their survey link
+export default function CsatCard({
+  rating,
+  comment,
+  ratedAt,
+  surveyLink,
+  onInsert,
+}: {
   rating: number | null;
   comment: string | null;
   ratedAt: string | null;
   surveyLink: string | null;
   // Adds the link to the reply box
   onInsert?: (link: string) => void;
-};
-
-export default function CsatCard({ rating, comment, ratedAt, surveyLink, onInsert }: Props) {
+}) {
   const [copied, setCopied] = useState(false);
 
-  async function copy() {
-    if (!surveyLink) return;
-    await navigator.clipboard.writeText(surveyLink);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  }
-
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-6">
-      <h2 className="mb-4 text-xl font-semibold">Customer rating</h2>
-
+    <div className="space-y-2.5 text-sm">
       {rating ? (
-        <div>
-          <p className="text-2xl" aria-label={`${rating} out of 5 stars`}>
-            <span className="text-amber-600">{"★".repeat(rating)}</span>
-            <span className="text-zinc-300">{"★".repeat(5 - rating)}</span>
-            <span className="ml-2 align-middle text-sm text-zinc-600">{rating}/5</span>
+        <>
+          <p className="flex items-center gap-2" aria-label={`${rating} out of 5 stars`}>
+            <span className="text-lg leading-none text-amber-500">{"★".repeat(rating)}</span>
+            <span className="text-lg leading-none text-zinc-200">{"★".repeat(5 - rating)}</span>
+            <span className="text-xs text-zinc-500">{ratedAt && formatDateTime(ratedAt)}</span>
           </p>
-          {comment && <p className="mt-3 whitespace-pre-line rounded-lg bg-zinc-100 p-3 text-sm">&ldquo;{comment}&rdquo;</p>}
-          {ratedAt && <p className="mt-2 text-xs text-zinc-500">Rated {formatDateTime(ratedAt)}</p>}
-        </div>
+          {comment && <p className="rounded-md bg-zinc-50 px-3 py-2 text-zinc-700">&ldquo;{comment}&rdquo;</p>}
+        </>
       ) : (
-        <p className="text-sm text-zinc-600">Not rated yet. Send the customer their survey link when the issue is sorted.</p>
+        <p className="text-zinc-500">Not rated yet.</p>
       )}
-
       {surveyLink && (
-        <div className="mt-4 flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             type="button"
-            onClick={copy}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
+            onClick={async () => {
+              await navigator.clipboard.writeText(surveyLink);
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}
+            className="h-7 rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-700 hover:bg-zinc-50"
           >
             {copied ? "Copied" : "Copy survey link"}
           </button>
           {onInsert && (
-            <button
-              type="button"
-              onClick={() => onInsert(surveyLink)}
-              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-800 hover:bg-zinc-100"
-            >
+            <button type="button" onClick={() => onInsert(surveyLink)} className="h-7 rounded-md border border-zinc-200 px-2.5 text-xs text-zinc-700 hover:bg-zinc-50">
               Add to reply
             </button>
           )}

@@ -23,7 +23,7 @@ export default async function LeavePage() {
       <Link href="/roster" className="text-sm text-zinc-600 hover:text-zinc-800">
         ← Roster
       </Link>
-      <h1 className="mt-2 text-3xl font-bold">Leave</h1>
+      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Leave</h1>
       <p className="mt-1 text-zinc-600">
         {canManage
           ? "Approve or reject requests. Approved leave shows on the roster, and any shift on those days is flagged."

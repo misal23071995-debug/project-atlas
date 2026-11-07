@@ -17,7 +17,7 @@ export default function NewTicketForm() {
   );
 
   return (
-    <form action={action} className="mt-6 space-y-5 rounded-xl border border-zinc-200 bg-white p-6">
+    <form action={action} className="mt-6 space-y-5 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className={labelClass}>
           Customer name

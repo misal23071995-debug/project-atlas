@@ -38,7 +38,7 @@ function Editor({ reply, canEdit, onDone }: { reply: SavedReply | null; canEdit:
   }
 
   return (
-    <form action={formAction} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+    <form action={formAction} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <input type="hidden" name="id" value={reply?.id ?? ""} />
       <div className="grid gap-4 sm:grid-cols-3">
         <label className="block text-sm text-zinc-600 sm:col-span-2">

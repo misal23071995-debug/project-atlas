@@ -19,7 +19,7 @@ export default function ArticleForm({
   const [deleting, startDelete] = useTransition();
 
   return (
-    <form action={action} className="mt-6 space-y-5 rounded-xl border border-zinc-200 bg-white p-6">
+    <form action={action} className="mt-6 space-y-5 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <input type="hidden" name="id" value={article?.id ?? ""} />
 
       <label className={labelClass}>

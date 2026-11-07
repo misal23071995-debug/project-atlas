@@ -18,7 +18,7 @@ export default async function SavedRepliesPage() {
           <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-3xl font-bold">Saved replies</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Saved replies</h1>
           <p className="mt-1 text-zinc-600">
             Ready-made answers agents insert from the reply box on a ticket. Placeholders like {"{{customer_first_name}}"}{" "}
             are filled in for each ticket.

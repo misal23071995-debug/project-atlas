@@ -12,7 +12,7 @@ export default function SlaTargetsForm({ targets, canEdit }: { targets: SlaTarge
 
   return (
     <form action={formAction} className="space-y-5">
-      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
         <table className="min-w-full text-sm">
           <thead className="text-left text-zinc-600">
             <tr>

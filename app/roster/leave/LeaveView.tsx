@@ -114,7 +114,7 @@ export default function LeaveView({
 
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-3">
-      <section className="rounded-xl border border-zinc-200 bg-white p-6">
+      <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
         <h2 className="text-lg font-semibold">Request leave</h2>
         <form action={action} key={state.success} className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
@@ -158,7 +158,7 @@ export default function LeaveView({
       <div className="space-y-6 lg:col-span-2">
         {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
-        <section className="rounded-xl border border-zinc-200 bg-white p-6">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">
             Waiting for approval <span className="text-sm font-normal text-zinc-500">({waiting.length})</span>
           </h2>
@@ -169,7 +169,7 @@ export default function LeaveView({
           )}
         </section>
 
-        <section className="rounded-xl border border-zinc-200 bg-white p-6">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
           <h2 className="text-lg font-semibold">{canManage ? "Team leave" : "Your leave"}</h2>
           {others.length === 0 ? (
             <p className="mt-3 text-sm text-zinc-500">No leave in the last 90 days or coming up.</p>

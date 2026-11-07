@@ -15,7 +15,7 @@ export const dynamic = "force-dynamic";
 
 function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
       <p className="text-xs text-zinc-500">{label}</p>
       <p className="mt-1 text-xl font-semibold text-zinc-900 tabular">{value}</p>
       {sub && <p className="mt-0.5 text-xs text-zinc-500">{sub}</p>}
@@ -102,7 +102,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
-        <section className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6 lg:col-span-2">
+        <section className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6 lg:col-span-2 shadow-sm">
           <h2 className="text-lg font-semibold text-zinc-900">History</h2>
           <p className="mt-1 text-sm text-zinc-600">Every ticket, chat and order, newest first.</p>
           {timeline.length === 0 ? (
@@ -116,7 +116,7 @@ export default async function CustomerPage({ params }: { params: Promise<{ id: s
           )}
         </section>
 
-        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm">
           <div>
             <h2 className="text-lg font-semibold text-zinc-900">Orders</h2>
             <p className="mt-1 text-xs text-zinc-500">From the Atlas order store. A Shopify store can be connected later.</p>

@@ -13,7 +13,7 @@ export const maxDuration = 60;
 
 function Section({ title, description, children }: { title: string; description?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-6">
+    <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <h2 className="text-lg font-semibold">{title}</h2>
       {description && <div className="mt-1 text-sm text-zinc-600">{description}</div>}
       <div className="mt-5">{children}</div>
@@ -28,7 +28,7 @@ export default async function EmailSettingsPage() {
   if (!canManage) {
     return (
       <DashboardLayout>
-        <div className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-8 text-center">
+        <div className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-8 text-center shadow-sm">
           <h1 className="text-2xl font-bold">Email</h1>
           <p className="mt-2 text-zinc-600">Email settings are for admins and team leads.</p>
         </div>
@@ -49,7 +49,7 @@ export default async function EmailSettingsPage() {
           <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-3xl font-bold">Email</h1>
+          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Email</h1>
           <p className="mt-1 text-zinc-600">
             Customer emails become tickets in the inbox. Replies on email tickets go back to the customer by email,
             and a customer&apos;s reply lands on the same ticket.

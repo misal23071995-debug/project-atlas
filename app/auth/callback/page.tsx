@@ -41,7 +41,7 @@ export default function AuthCallbackPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-4 font-sans">
-      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6 text-center">
+      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6 text-center shadow-sm">
         {error ? (
           <>
             <h1 className="text-lg font-semibold text-zinc-900">{error}</h1>

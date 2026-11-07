@@ -20,7 +20,7 @@ export default function SignupPage() {
         {signupOpen() ? (
           <SignupForm />
         ) : (
-          <p className="rounded-xl border border-zinc-200 bg-white p-6 text-center text-sm text-zinc-700">{SIGNUP_CLOSED_MESSAGE}</p>
+          <p className="rounded-xl border border-zinc-200 bg-white p-6 text-center text-sm text-zinc-700 shadow-sm">{SIGNUP_CLOSED_MESSAGE}</p>
         )}
 
         <p className="mt-6 text-center text-sm text-zinc-600">

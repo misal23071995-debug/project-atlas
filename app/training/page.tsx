@@ -13,9 +13,9 @@ export const dynamic = "force-dynamic";
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
       <p className="text-sm text-zinc-600">{label}</p>
-      <p className="mt-2 text-3xl font-bold">{value}</p>
+      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">{value}</p>
       <p className="mt-1 text-xs text-zinc-500">{hint}</p>
     </div>
   );
@@ -29,7 +29,7 @@ function MyTraining({ assignments, today }: { assignments: Assignment[]; today: 
   });
 
   return (
-    <ul className="mt-4 divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white">
+    <ul className="mt-4 divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white shadow-sm">
       {sorted.map((a) => (
         <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div className="min-w-0">
@@ -100,7 +100,7 @@ export default async function TrainingPage() {
     <DashboardLayout>
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold">Training</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Training</h1>
           <p className="mt-1 max-w-3xl text-zinc-600">
             Short lessons with a quiz. Courses linked to a quality criterion are assigned automatically when a review
             scores an agent low on it.
@@ -129,7 +129,7 @@ export default async function TrainingPage() {
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {others.map((c) => (
               <li key={c.id}>
-                <Link href={`/training/${c.id}`} className="block rounded-xl border border-zinc-200 bg-white p-4 hover:border-zinc-300">
+                <Link href={`/training/${c.id}`} className="block rounded-xl border border-zinc-200 bg-white p-4 hover:border-zinc-300 shadow-sm">
                   <p className="font-medium text-zinc-900">{c.title}</p>
                   {c.description && <p className="mt-1 text-sm text-zinc-600">{c.description}</p>}
                   <p className="mt-2 text-xs text-zinc-500">{c.questions.length} questions</p>

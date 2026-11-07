@@ -8,7 +8,7 @@ export default function ForgotForm() {
 
   if (state.sent) {
     return (
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-700">
+      <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-700 shadow-sm">
         If that email has an Atlas account, a reset link is on its way. It works once and expires within an hour. Check
         your spam folder if it doesn&apos;t arrive in a few minutes.
       </div>
@@ -16,7 +16,7 @@ export default function ForgotForm() {
   }
 
   return (
-    <form action={action} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
+    <form action={action} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
       <label className="block text-sm font-medium text-zinc-700">
         Email
         <input

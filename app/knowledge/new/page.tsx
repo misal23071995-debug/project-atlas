@@ -20,7 +20,7 @@ export default async function NewArticlePage({
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-bold">New article</h1>
+        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">New article</h1>
 
         {question && (
           <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm">
