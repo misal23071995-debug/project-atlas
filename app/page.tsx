@@ -12,6 +12,7 @@ import { localDate } from "./lib/reports/period";
 import DayOverview from "./components/ui/DayOverview";
 import type { TicketPriority } from "./lib/tickets";
 import { ChannelLabel, StatusBadge } from "./components/ui/Badges";
+import { initials } from "./lib/auth/agent";
 
 // Always show the current state of the queue
 export const dynamic = "force-dynamic";
@@ -43,8 +44,29 @@ function timeAgo(iso: string, now: number) {
   return `${Math.floor(minutes / (24 * 60))} d ago`;
 }
 
-function EmptyNote({ children }: { children: React.ReactNode }) {
-  return <p className="mt-6 text-sm text-zinc-600">{children}</p>;
+// A white panel with a titled header bar; flush lets lists and tables run edge to edge
+function Panel({
+  title,
+  action,
+  className = "",
+  flush = false,
+  children,
+}: {
+  title: string;
+  action?: React.ReactNode;
+  className?: string;
+  flush?: boolean;
+  children: React.ReactNode;
+}) {
+  return (
+    <section className={`min-w-0 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm ${className}`}>
+      <div className="flex items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3">
+        <h2 className="text-sm font-semibold text-zinc-900">{title}</h2>
+        {action}
+      </div>
+      <div className={flush ? "" : "p-5"}>{children}</div>
+    </section>
+  );
 }
 
 export default async function Home({ searchParams }: { searchParams: Promise<{ day?: string }> }) {
@@ -76,7 +98,6 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
     { label: "SLA at risk", value: stats.slaAtRisk, href: "/tickets", tone: stats.slaAtRisk ? "text-amber-700" : "text-zinc-900" },
   ];
 
-  const maxChannelTotal = Math.max(1, ...stats.byChannel.map((c) => c.total));
   const maxAgentLoad = Math.max(1, ...stats.byAgent.map((a) => a.open + a.resolved));
 
   return (
@@ -111,243 +132,170 @@ export default async function Home({ searchParams }: { searchParams: Promise<{ d
         </p>
       </section>
 
-      <section className="mt-8 min-w-0 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-        <div className="flex flex-wrap items-start justify-between gap-2">
-          <div>
-            <h2 className="text-lg font-semibold text-zinc-900">AI Chatbot</h2>
-            <p className="text-sm text-zinc-600">
-              Customer chats in the last 30 days, and how many needed an agent
-            </p>
-          </div>
-          <div className="flex gap-4">
-            <Link
-              href="/knowledge/gaps"
-              className="text-sm font-medium hover:text-indigo-500 text-indigo-600"
-            >
-              Knowledge gaps
+      <div className="mt-8 grid gap-4 xl:grid-cols-3">
+        <Panel
+          title="Recently updated"
+          className="xl:col-span-2"
+          action={
+            <Link href="/tickets" className="text-xs font-medium text-indigo-600 hover:text-indigo-700">
+              Open inbox →
             </Link>
-            <Link
-              href={`/support/${org.slug}`}
-              target="_blank"
-              className="text-sm font-medium hover:text-indigo-500 text-indigo-600"
-            >
-              Open customer chat ↗
-            </Link>
-          </div>
-        </div>
-
-        {botStats === null ? (
-          <EmptyNote>
-            Run supabase/migrations/003_support_bot.sql in Supabase to turn on the chatbot.
-          </EmptyNote>
-        ) : botStats.conversations === 0 ? (
-          <EmptyNote>No customer chats yet. Open the customer chat to try it.</EmptyNote>
-        ) : (
-          <div className="mt-6 grid gap-6 lg:grid-cols-3">
-            <div className="grid grid-cols-3 gap-3 lg:col-span-2">
-              {[
-                { label: "Deflection rate", value: `${botStats.deflectionRate}%`, color: "text-emerald-600" },
-                { label: "Handled by AI", value: botStats.resolvedByBot, color: "text-zinc-900" },
-                { label: "Handed to agent", value: botStats.handedOff, color: "text-amber-600" },
-              ].map((item) => (
-                <div key={item.label} className="rounded-xl p-4 bg-zinc-50">
-                  <p className="text-xs text-zinc-600">{item.label}</p>
-                  <p className={`mt-1 text-2xl font-bold ${item.color}`}>{item.value}</p>
-                </div>
+          }
+          flush
+        >
+          {stats.recent.length === 0 ? (
+            <p className="p-5 text-sm text-zinc-500">No tickets yet.</p>
+          ) : (
+            <ul className="divide-y divide-zinc-100">
+              {stats.recent.map((t) => (
+                <li key={t.id}>
+                  <Link href={`/tickets/${t.id}`} className="flex items-center gap-4 px-5 py-3 hover:bg-zinc-50">
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-zinc-900">{t.subject}</p>
+                      <p className="truncate text-xs text-zinc-500">
+                        <span className="font-mono">#{t.id}</span> · {t.customer} · {t.assignedTo}
+                      </p>
+                    </div>
+                    <span className="hidden sm:block">
+                      <ChannelLabel channel={t.channel} />
+                    </span>
+                    <StatusBadge status={t.status} />
+                    <span className="w-16 shrink-0 text-right text-xs text-zinc-500 tabular">{timeAgo(t.updatedAt, now)}</span>
+                  </Link>
+                </li>
               ))}
-              <p className="col-span-3 text-xs text-zinc-500">
-                Deflection rate = chats the AI handled without creating a ticket, out of {botStats.conversations} chats.
+            </ul>
+          )}
+        </Panel>
+
+        <Panel title="Open backlog by priority">
+          {stats.open === 0 ? (
+            <p className="text-sm text-zinc-500">Nothing open. Nice.</p>
+          ) : (
+            <>
+              <p className="text-3xl font-semibold tabular text-zinc-900">
+                {stats.open}
+                <span className="ml-1.5 text-sm font-normal text-zinc-500">open</span>
               </p>
-
-              <div className="col-span-3 grid grid-cols-3 gap-3 border-t pt-4 border-zinc-200">
-                {[
-                  {
-                    label: "Chat CSAT",
-                    value: formatStars(botStats.csat.average),
-                    note: `${botStats.csat.responses} ratings · ${botStats.csat.responseRate}% response rate`,
-                  },
-                  { label: "CSAT when AI solved it", value: formatStars(botStats.csat.averageResolvedByBot) },
-                  { label: "CSAT after handover", value: formatStars(botStats.csat.averageHandedOff) },
-                ].map((item) => (
-                  <div key={item.label}>
-                    <p className="text-xs text-zinc-600">{item.label}</p>
-                    <p className="mt-1 text-xl font-bold text-zinc-900">{item.value}</p>
-                    {item.note && <p className="mt-0.5 text-xs text-zinc-500">{item.note}</p>}
-                  </div>
-                ))}
+              <div className="mt-3 flex h-2.5 gap-0.5 overflow-hidden rounded-full">
+                {stats.backlogByPriority
+                  .filter((b) => b.count)
+                  .map((b) => (
+                    <span key={b.priority} className={priorityColors[b.priority]} style={{ width: `${(b.count / stats.open) * 100}%` }} title={`${b.priority}: ${b.count}`} />
+                  ))}
               </div>
-            </div>
-
-            <div>
-              <p className="text-sm font-medium text-zinc-900">Top topics</p>
-              <ul className="mt-3 space-y-2 text-sm">
-                {botStats.topTopics.map((item) => (
-                  <li key={item.topic} className="flex justify-between text-zinc-700">
-                    <span>{item.topic}</span>
-                    <span className="text-zinc-600">{item.count}</span>
+              <ul className="mt-4 space-y-2 text-sm">
+                {stats.backlogByPriority.map((b) => (
+                  <li key={b.priority} className="flex items-center justify-between">
+                    <span className="flex items-center gap-2 text-zinc-700">
+                      <span className={`h-2 w-2 rounded-full ${priorityColors[b.priority]}`} aria-hidden />
+                      {b.priority}
+                    </span>
+                    <span className="tabular text-zinc-900">{b.count}</span>
                   </li>
                 ))}
               </ul>
-            </div>
-          </div>
-        )}
-      </section>
+            </>
+          )}
+        </Panel>
+      </div>
 
-      <section className="mt-8 grid gap-6 xl:grid-cols-3">
-        <div className="min-w-0 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm xl:col-span-2">
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-lg font-semibold text-zinc-900">Recent tickets</h2>
-              <p className="text-sm text-zinc-600">
-                Most recently updated conversations
-              </p>
-            </div>
-            <Link
-              href="/tickets"
-              className="text-sm font-medium hover:text-indigo-500 text-indigo-600"
-            >
-              View all
-            </Link>
-          </div>
-
-          {stats.recent.length === 0 ? (
-            <EmptyNote>No tickets yet.</EmptyNote>
+      <div className="mt-4 grid gap-4 xl:grid-cols-3">
+        <Panel
+          title="AI chatbot · last 30 days"
+          className="xl:col-span-2"
+          action={
+            <span className="flex gap-3 text-xs font-medium">
+              <Link href="/knowledge/gaps" className="text-indigo-600 hover:text-indigo-700">
+                Knowledge gaps
+              </Link>
+              <a href={`/support/${org.slug}`} target="_blank" rel="noreferrer" className="text-indigo-600 hover:text-indigo-700">
+                Customer chat ↗
+              </a>
+            </span>
+          }
+        >
+          {botStats === null ? (
+            <p className="text-sm text-zinc-500">Run supabase/migrations/003_support_bot.sql in Supabase to turn on the chatbot.</p>
+          ) : botStats.conversations === 0 ? (
+            <p className="text-sm text-zinc-500">No customer chats yet. Open the customer chat to try it.</p>
           ) : (
-            <div className="mt-6 overflow-x-auto">
-              <table className="min-w-full border-separate border-spacing-y-3">
-                <thead>
-                  <tr className="text-left text-xs uppercase tracking-wide text-zinc-600">
-                    <th className="pb-2 font-medium">Ticket</th>
-                    <th className="pb-2 font-medium">Customer</th>
-                    <th className="pb-2 font-medium">Channel</th>
-                    <th className="pb-2 font-medium">Owner</th>
-                    <th className="pb-2 font-medium">Status</th>
-                    <th className="pb-2 font-medium">Updated</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {stats.recent.map((ticket) => (
-                    <tr key={ticket.id} className="rounded-xl bg-zinc-50">
-                      <td className="rounded-l-xl px-4 py-4 align-middle">
-                        <Link href={`/tickets/${ticket.id}`} className="group block">
-                          <p className="text-sm font-semibold text-zinc-900 group-hover:text-indigo-600">
-                            #{ticket.id}
-                          </p>
-                          <p className="text-sm text-zinc-600">{ticket.subject}</p>
-                        </Link>
-                      </td>
-                      <td className="px-4 py-4 text-sm text-zinc-900">{ticket.customer}</td>
-                      <td className="px-4 py-4"><ChannelLabel channel={ticket.channel} /></td>
-                      <td className="px-4 py-4 text-sm text-zinc-900">{ticket.assignedTo}</td>
-                      <td className="px-4 py-4">
-                        <StatusBadge status={ticket.status} />
-                      </td>
-                      <td className="whitespace-nowrap rounded-r-xl px-4 py-4 text-sm text-zinc-600">
-                        {timeAgo(ticket.updatedAt, now)}
-                      </td>
-                    </tr>
+            <div className="grid gap-6 lg:grid-cols-5">
+              <div className="lg:col-span-3">
+                <dl className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  {[
+                    { label: "Chats", value: botStats.conversations.toLocaleString("en-IN") },
+                    { label: "Solved by the bot", value: `${botStats.deflectionRate}%`, tone: "text-emerald-700" },
+                    { label: "Handed to agents", value: botStats.handedOff.toLocaleString("en-IN") },
+                    { label: "Chat CSAT", value: formatStars(botStats.csat.average) },
+                  ].map((item) => (
+                    <div key={item.label}>
+                      <dt className="text-xs text-zinc-500">{item.label}</dt>
+                      <dd className={`mt-1 text-2xl font-semibold tabular ${item.tone ?? "text-zinc-900"}`}>{item.value}</dd>
+                    </div>
                   ))}
-                </tbody>
-              </table>
+                </dl>
+                <p className="mt-4 rounded-lg bg-zinc-50 px-3 py-2 text-xs text-zinc-600">
+                  CSAT when the bot solved it: <span className="font-medium text-zinc-900">{formatStars(botStats.csat.averageResolvedByBot)}</span> · after a handover:{" "}
+                  <span className="font-medium text-zinc-900">{formatStars(botStats.csat.averageHandedOff)}</span> · {botStats.csat.responseRate}% of chats rated
+                </p>
+              </div>
+              <div className="lg:col-span-2">
+                <p className="mb-2 text-xs font-medium text-zinc-500">Top topics</p>
+                <ul className="space-y-2">
+                  {botStats.topTopics.map((item) => {
+                    const top = botStats.topTopics[0]?.count || 1;
+                    return (
+                      <li key={item.topic}>
+                        <span className="flex justify-between text-sm">
+                          <span className="truncate text-zinc-700">{item.topic}</span>
+                          <span className="tabular text-zinc-900">{item.count}</span>
+                        </span>
+                        <span className="mt-1 block h-1.5 rounded-full bg-zinc-100">
+                          <span className="block h-1.5 rounded-full bg-indigo-500" style={{ width: `${(item.count / top) * 100}%` }} />
+                        </span>
+                      </li>
+                    );
+                  })}
+                </ul>
+              </div>
             </div>
           )}
-        </div>
+        </Panel>
 
-        <div className="min-w-0 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-zinc-900">Backlog by priority</h2>
-          <p className="text-sm text-zinc-600">
-            Open tickets by urgency
-          </p>
-
-          <div className="mt-6 space-y-4">
-            {stats.backlogByPriority.map((item) => {
-              const width = stats.open ? (item.count / stats.open) * 100 : 0;
-
-              return (
-                <div key={item.priority}>
-                  <div className="mb-2 flex items-center justify-between text-sm">
-                    <span className="font-medium text-zinc-900">{item.priority}</span>
-                    <span className="text-zinc-600">{item.count}</span>
-                  </div>
-                  <div className="h-2.5 rounded-full bg-zinc-100">
-                    <div
-                      className={`h-2.5 rounded-full ${priorityColors[item.priority]}`}
-                      style={{ width: `${width}%` }}
-                    />
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="mt-8 grid gap-6 lg:grid-cols-2">
-        <div className="min-w-0 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-zinc-900">Channels</h2>
-          <p className="text-sm text-zinc-600">
-            Where tickets come from, and how many are still open
-          </p>
-
-          {stats.byChannel.length === 0 ? (
-            <EmptyNote>No tickets yet.</EmptyNote>
-          ) : (
-            <div className="mt-6 space-y-5">
-              {stats.byChannel.map((item) => (
-                <div key={item.channel}>
-                  <div className="flex items-center justify-between text-sm">
-                    <div>
-                      <p className="font-medium text-zinc-900">{item.channel}</p>
-                      <p className="text-xs text-zinc-600">
-                        {item.total} {item.total === 1 ? "ticket" : "tickets"}
-                      </p>
-                    </div>
-                    <span className="text-sm font-medium text-zinc-900">{item.open} open</span>
-                  </div>
-                  <div className="mt-2 h-2.5 rounded-full bg-zinc-100">
-                    <div
-                      className="h-2.5 rounded-full bg-indigo-500"
-                      style={{ width: `${(item.total / maxChannelTotal) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className="min-w-0 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-zinc-900">Agent workload</h2>
-          <p className="text-sm text-zinc-600">
-            Tickets assigned to each agent
-          </p>
-
+        <Panel title="Agent workload" flush>
           {stats.byAgent.length === 0 ? (
-            <EmptyNote>No tickets are assigned yet.</EmptyNote>
+            <p className="p-5 text-sm text-zinc-500">No tickets are assigned yet.</p>
           ) : (
-            <div className="mt-6 space-y-4">
-              {stats.byAgent.map((item) => (
-                <div key={item.name} className="rounded-xl border p-4 border-zinc-200">
-                  <div className="flex items-start justify-between gap-4">
-                    <p className="font-medium text-zinc-900">{item.name}</p>
-                    <div className="text-right">
-                      <p className="text-sm font-medium text-zinc-900">{item.open} open</p>
-                      <p className="text-xs text-zinc-600">{item.resolved} resolved</p>
-                    </div>
-                  </div>
-
-                  <div className="mt-3 h-2 rounded-full bg-zinc-100">
-                    <div
-                      className="h-2 rounded-full bg-indigo-500"
-                      style={{ width: `${((item.open + item.resolved) / maxAgentLoad) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              ))}
-            </div>
+            <table className="w-full text-sm">
+              <thead className="bg-zinc-50 text-xs text-zinc-500">
+                <tr>
+                  <th className="py-2 pl-5 text-left font-medium">Agent</th>
+                  <th className="px-3 py-2 text-right font-medium">Open</th>
+                  <th className="py-2 pl-3 pr-5 text-right font-medium">Resolved</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-100">
+                {stats.byAgent.map((a) => (
+                  <tr key={a.name}>
+                    <td className="py-2.5 pl-5">
+                      <span className="flex items-center gap-2">
+                        <span className="flex h-6 w-6 items-center justify-center rounded-full bg-zinc-200 text-[0.6rem] font-semibold text-zinc-700">{initials(a.name)}</span>
+                        <span className="truncate text-zinc-800">{a.name}</span>
+                      </span>
+                      <span className="mt-1.5 block h-1 rounded-full bg-zinc-100">
+                        <span className="block h-1 rounded-full bg-indigo-500" style={{ width: `${((a.open + a.resolved) / maxAgentLoad) * 100}%` }} />
+                      </span>
+                    </td>
+                    <td className="px-3 py-2.5 text-right tabular text-zinc-900">{a.open}</td>
+                    <td className="py-2.5 pl-3 pr-5 text-right tabular text-zinc-500">{a.resolved}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
-        </div>
-      </section>
+        </Panel>
+      </div>
     </DashboardLayout>
   );
 }

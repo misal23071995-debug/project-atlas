@@ -33,23 +33,26 @@ function Section({
 }) {
   return (
     // min-w-0 lets wide tables scroll inside the card instead of stretching the page
-    <section className="min-w-0 rounded-xl border border-zinc-200 bg-white p-5 sm:p-6 shadow-sm">
-      <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h2 className="text-lg font-semibold">{title}</h2>
-          {description && <p className="mt-1 text-sm text-zinc-600">{description}</p>}
+    <section className="min-w-0 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3">
+        <div className="min-w-0">
+          <h2 className="text-sm font-semibold text-zinc-900">{title}</h2>
+          {description && <p className="mt-0.5 text-xs text-zinc-500">{description}</p>}
         </div>
         {onExport && (
           <button
             type="button"
             onClick={onExport}
-            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
+            className="inline-flex h-7 items-center gap-1.5 rounded-md border border-zinc-200 px-2.5 text-xs font-medium text-zinc-700 hover:bg-zinc-50"
           >
-            Download CSV
+            <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+              <path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14" strokeLinecap="round" strokeLinejoin="round" />
+            </svg>
+            CSV
           </button>
         )}
       </div>
-      {children}
+      <div className="p-5">{children}</div>
     </section>
   );
 }
@@ -57,12 +60,12 @@ function Section({
 function Table({ header, rows, empty }: { header: string[]; rows: ReactNode[][]; empty: string }) {
   if (!rows.length) return <p className="text-sm text-zinc-500">{empty}</p>;
   return (
-    <div className="-mx-5 overflow-x-auto sm:-mx-6">
+    <div className="-mx-5 -my-5 overflow-x-auto">
       <table className="min-w-full text-sm">
-        <thead className="text-left text-zinc-600">
+        <thead className="bg-zinc-50 text-left text-xs text-zinc-500">
           <tr>
             {header.map((h, i) => (
-              <th key={h} className={`whitespace-nowrap px-5 py-2 font-medium sm:px-6 ${i ? "text-right" : ""}`}>
+              <th key={h} className={`whitespace-nowrap px-5 py-2.5 font-medium ${i ? "text-right" : ""}`}>
                 {h}
               </th>
             ))}
@@ -70,9 +73,9 @@ function Table({ header, rows, empty }: { header: string[]; rows: ReactNode[][];
         </thead>
         <tbody>
           {rows.map((row, r) => (
-            <tr key={r} className="border-t border-zinc-200">
+            <tr key={r} className="border-t border-zinc-100 hover:bg-zinc-50/60">
               {row.map((cell, i) => (
-                <td key={i} className={`whitespace-nowrap px-5 py-2.5 sm:px-6 ${i ? "text-right tabular-nums" : "font-medium"}`}>
+                <td key={i} className={`whitespace-nowrap px-5 py-2.5 ${i ? "text-right tabular-nums text-zinc-700" : "font-medium text-zinc-900"}`}>
                   {cell}
                 </td>
               ))}
@@ -94,9 +97,9 @@ function Delta({ now, before, better }: { now: number | null; before: number | n
 
   const up = change > 0;
   const good = better === undefined ? null : (better === "up") === up;
-  const tone = good === null ? "text-zinc-600" : good ? "text-emerald-600" : "text-rose-600";
+  const tone = good === null ? "bg-zinc-100 text-zinc-600" : good ? "bg-emerald-50 text-emerald-700" : "bg-rose-50 text-rose-700";
   return (
-    <span className={tone}>
+    <span className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 font-medium ${tone}`}>
       <span aria-hidden>{up ? "▲" : "▼"}</span> {Math.abs(change)}%{good === null ? "" : good ? " better" : " worse"}
     </span>
   );
@@ -104,11 +107,11 @@ function Delta({ now, before, better }: { now: number | null; before: number | n
 
 function Tile({ label, value, sub, delta }: { label: string; value: string; sub?: string; delta: ReactNode }) {
   return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
-      <p className="text-sm text-zinc-600">{label}</p>
-      <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
-      {sub && <p className="mt-1 text-xs text-zinc-500">{sub}</p>}
-      <p className="mt-2 text-xs">{delta}</p>
+    <div className="flex flex-col rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
+      <p className="text-xs font-medium text-zinc-500">{label}</p>
+      <p className="mt-1.5 text-2xl font-semibold tracking-tight tabular-nums text-zinc-900">{value}</p>
+      {sub && <p className="mt-0.5 text-xs text-zinc-500">{sub}</p>}
+      <p className="mt-auto pt-2.5 text-xs">{delta}</p>
     </div>
   );
 }
@@ -240,8 +243,6 @@ function TrendChart({ points, step }: { points: Report["trend"]; step: "day" | "
 
 // ---- Page ----
 
-const inputClass =
-  "rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 outline-none focus:border-indigo-500";
 
 export default function ReportsView({
   report,
@@ -255,7 +256,6 @@ export default function ReportsView({
   const { summary: s, previous: p } = report;
   const file = (name: string) => `${workspaceName.toLowerCase().replace(/[^a-z0-9]+/g, "-")}-${name}-${period.fromDate}-to-${period.toDate}.csv`;
   const exportTable = (name: string, header: string[], rows: Cell[][]) => () => downloadCsv(file(name), header, rows);
-  const compare = `vs the ${period.days} days before`;
 
   const summaryRows = (label: string, x: Summary): Cell[] => [
     label,
@@ -276,29 +276,32 @@ export default function ReportsView({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Reports</h1>
-            <p className="mt-1 text-zinc-600">
-              {period.label} · {period.fromDate} to {period.toDate} · days in {period.timezone}
+            <p className="mt-0.5 text-sm text-zinc-500">
+              {period.fromDate} to {period.toDate} · compared with the {period.days} days before · {period.timezone}
             </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2">
-            {PRESETS.map((preset) => (
-              <Link
-                key={preset.id}
-                href={`/reports?range=${preset.id}`}
-                className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                  period.id === preset.id ? "bg-indigo-600 text-white" : "border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
-                }`}
-              >
-                {preset.label.replace("Last ", "")}
-              </Link>
-            ))}
-            <form action="/reports" className="flex flex-wrap items-center gap-2">
+            <nav aria-label="Period" className="inline-flex rounded-lg border border-zinc-200 bg-white p-0.5 shadow-sm">
+              {PRESETS.map((preset) => (
+                <Link
+                  key={preset.id}
+                  href={`/reports?range=${preset.id}`}
+                  aria-current={period.id === preset.id ? "page" : undefined}
+                  className={`rounded-md px-3 py-1 text-sm font-medium ${
+                    period.id === preset.id ? "bg-indigo-600 text-white shadow-sm" : "text-zinc-600 hover:text-zinc-900"
+                  }`}
+                >
+                  {preset.label.replace("Last ", "")}
+                </Link>
+              ))}
+            </nav>
+            <form action="/reports" className="flex flex-wrap items-center gap-1.5 rounded-lg border border-zinc-200 bg-white p-0.5 pl-2 shadow-sm">
               <input type="hidden" name="range" value="custom" />
-              <input type="date" name="from" defaultValue={period.fromDate} aria-label="From" className={inputClass} />
-              <span className="text-zinc-500">to</span>
-              <input type="date" name="to" defaultValue={period.toDate} aria-label="To" className={inputClass} />
-              <button type="submit" className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100">
+              <input type="date" name="from" defaultValue={period.fromDate} aria-label="From" className="h-7 bg-transparent text-sm text-zinc-700 outline-none" />
+              <span className="text-xs text-zinc-400">to</span>
+              <input type="date" name="to" defaultValue={period.toDate} aria-label="To" className="h-7 bg-transparent text-sm text-zinc-700 outline-none" />
+              <button type="submit" className={`h-7 rounded-md px-2.5 text-sm font-medium ${period.id === "custom" ? "bg-indigo-600 text-white" : "bg-zinc-100 text-zinc-700 hover:bg-zinc-200"}`}>
                 Apply
               </button>
             </form>
@@ -334,10 +337,8 @@ export default function ReportsView({
             delta={<Delta now={s.ticketCsatAverage} before={p.ticketCsatAverage} better="up" />}
           />
         </div>
-        <p className="-mt-3 text-xs text-zinc-500">Changes are {compare}.</p>
-
         {/* Right now */}
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+        <div className="grid grid-cols-2 divide-zinc-100 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm sm:grid-cols-5 sm:divide-x">
           {[
             { label: "Open now", value: num(report.backlog.open) },
             { label: "SLA breached", value: num(report.backlog.breached), tone: report.backlog.breached ? "text-rose-600" : "" },
@@ -345,8 +346,8 @@ export default function ReportsView({
             { label: "Unassigned", value: num(report.backlog.unassigned) },
             { label: "Oldest open", value: duration(report.backlog.oldestOpenMinutes) },
           ].map((item) => (
-            <div key={item.label} className="rounded-xl border border-zinc-200 bg-white px-4 py-3 shadow-sm">
-              <p className="text-xs text-zinc-500">{item.label}</p>
+            <div key={item.label} className="px-4 py-3">
+              <p className="text-xs text-zinc-500">{item.label}{item.label === "Open now" && <span className="ml-1 text-zinc-400">· right now</span>}</p>
               <p className={`mt-1 text-lg font-semibold tabular-nums ${item.tone ?? ""}`}>{item.value}</p>
             </div>
           ))}
