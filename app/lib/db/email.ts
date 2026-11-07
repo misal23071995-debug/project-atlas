@@ -230,7 +230,7 @@ export async function receiveEmail(org: { id: string; name: string }, mail: Inbo
         settings.signature || `${org.name} Support`,
       ].join("\n\n"),
     });
-    await addActivity(org.id, ticketId, `Acknowledgement email ${describe(result)}`, result.status === "sent" ? "bg-green-500" : "bg-zinc-500");
+    await addActivity(org.id, ticketId, `Acknowledgement email ${describe(result)}`, result.status === "sent" ? "bg-green-500" : "bg-zinc-400");
   }
   return { ticketId, outcome: "created" };
 }
@@ -250,7 +250,7 @@ async function saveEmailFiles(orgId: string, ticketId: string, messageId: number
     }
   }
   if (saved) await addActivity(orgId, ticketId, `${saved} file${saved === 1 ? "" : "s"} attached by the customer`, "bg-sky-500");
-  if (skipped.length) await addActivity(orgId, ticketId, `Not attached (type or size not allowed): ${skipped.join(", ").slice(0, 200)}`, "bg-zinc-500");
+  if (skipped.length) await addActivity(orgId, ticketId, `Not attached (type or size not allowed): ${skipped.join(", ").slice(0, 200)}`, "bg-zinc-400");
 }
 
 function describe(result: SendResult) {
@@ -354,6 +354,6 @@ export async function emailSurveyIfDue(orgId: string, orgName: string, ticketId:
   if (result.status === "sent") {
     await getSupabase().from("tickets").update({ survey_sent_at: new Date().toISOString() }).eq("org_id", orgId).eq("id", ticketId);
   }
-  await addActivity(orgId, ticketId, `Survey email ${describe(result)}`, result.status === "sent" ? "bg-emerald-500" : "bg-zinc-500");
+  await addActivity(orgId, ticketId, `Survey email ${describe(result)}`, result.status === "sent" ? "bg-emerald-500" : "bg-zinc-400");
   return result;
 }

@@ -20,10 +20,10 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
   if (enabled && !setup) {
     return (
       <div className="space-y-3 text-sm">
-        <p className="text-emerald-300">On. Signing in needs your password and a code from your authenticator app.</p>
+        <p className="text-emerald-700">On. Signing in needs your password and a code from your authenticator app.</p>
         {confirmOff ? (
           <div className="flex flex-wrap items-center gap-3">
-            <span className="text-zinc-300">Turn it off? Your account will only be protected by your password.</span>
+            <span className="text-zinc-700">Turn it off? Your account will only be protected by your password.</span>
             <button
               type="button"
               disabled={pending}
@@ -32,16 +32,16 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
             >
               {pending ? "Turning off…" : "Yes, turn off"}
             </button>
-            <button type="button" onClick={() => setConfirmOff(false)} className="text-zinc-400 hover:text-zinc-200">
+            <button type="button" onClick={() => setConfirmOff(false)} className="text-zinc-600 hover:text-zinc-800">
               Keep it on
             </button>
           </div>
         ) : (
-          <button type="button" onClick={() => setConfirmOff(true)} className="text-rose-300 hover:text-rose-200">
+          <button type="button" onClick={() => setConfirmOff(true)} className="text-rose-700 hover:text-rose-700">
             Turn off two-step sign-in
           </button>
         )}
-        {message.error && <p role="alert" className="text-red-400">{message.error}</p>}
+        {message.error && <p role="alert" className="text-red-600">{message.error}</p>}
       </div>
     );
   }
@@ -49,12 +49,12 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
   if (!setup?.factorId) {
     return (
       <div className="space-y-3 text-sm">
-        <p className="text-zinc-400">
+        <p className="text-zinc-600">
           Off. Turn it on so a stolen password isn&apos;t enough to get into your account. You&apos;ll need an
           authenticator app such as Google Authenticator, Microsoft Authenticator or 1Password.
         </p>
-        {(message.error || setup?.error) && <p role="alert" className="text-red-400">{message.error ?? setup?.error}</p>}
-        {message.success && <p role="status" className="text-emerald-400">{message.success}</p>}
+        {(message.error || setup?.error) && <p role="alert" className="text-red-600">{message.error ?? setup?.error}</p>}
+        {message.success && <p role="status" className="text-emerald-600">{message.success}</p>}
         {!message.success && (
           <button type="button" disabled={pending} onClick={() => run(async () => setSetup(await startTwoFactorAction()))} className={button}>
             {pending ? "Starting…" : "Turn on two-step sign-in"}
@@ -66,7 +66,7 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
 
   return (
     <div className="space-y-4 text-sm">
-      <ol className="list-decimal space-y-1 pl-5 text-zinc-300">
+      <ol className="list-decimal space-y-1 pl-5 text-zinc-700">
         <li>Open your authenticator app and add an account by scanning this code.</li>
         <li>Enter the 6-digit code the app shows to finish.</li>
       </ol>
@@ -76,11 +76,11 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
         <img src={setup.qrCode} alt="QR code for your authenticator app" width={176} height={176} className="rounded-lg bg-white p-2" />
         <div className="min-w-0 space-y-2">
           <p className="text-xs text-zinc-500">Can&apos;t scan it? Type this key into the app instead:</p>
-          <p className="break-all font-mono text-xs text-zinc-200">{setup.secret}</p>
+          <p className="break-all font-mono text-xs text-zinc-800">{setup.secret}</p>
         </div>
       </div>
       <div className="flex flex-wrap items-end gap-3">
-        <label className="text-zinc-400">
+        <label className="text-zinc-600">
           Code from the app
           <input
             value={code}
@@ -88,7 +88,7 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={7}
-            className="mt-1 block w-36 rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-center font-mono tracking-[0.3em] text-zinc-100 outline-none focus:border-indigo-500"
+            className="mt-1 block w-36 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-center font-mono tracking-[0.3em] text-zinc-900 outline-none focus:border-indigo-500"
           />
         </label>
         <button
@@ -105,11 +105,11 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
         >
           {pending ? "Checking…" : "Confirm"}
         </button>
-        <button type="button" onClick={() => setSetup(null)} className="pb-2 text-zinc-400 hover:text-zinc-200">
+        <button type="button" onClick={() => setSetup(null)} className="pb-2 text-zinc-600 hover:text-zinc-800">
           Cancel
         </button>
       </div>
-      {message.error && <p role="alert" className="text-red-400">{message.error}</p>}
+      {message.error && <p role="alert" className="text-red-600">{message.error}</p>}
     </div>
   );
 }

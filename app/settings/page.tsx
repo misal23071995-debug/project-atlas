@@ -15,9 +15,9 @@ export const maxDuration = 120;
 
 function Section({ title, description, children }: { title: string; description?: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <section className="rounded-xl border border-zinc-200 bg-white p-6">
       <h2 className="text-lg font-semibold">{title}</h2>
-      {description && <p className="mt-1 text-sm text-zinc-400">{description}</p>}
+      {description && <p className="mt-1 text-sm text-zinc-600">{description}</p>}
       <div className="mt-5">{children}</div>
     </section>
   );
@@ -39,7 +39,7 @@ export default async function SettingsPage() {
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
           <h1 className="text-3xl font-bold">Settings</h1>
-          <p className="mt-1 text-zinc-400">
+          <p className="mt-1 text-zinc-600">
             {org.name} · you&apos;re {role === "admin" ? "an" : "a"} {ROLE_LABELS[role]}
           </p>
         </div>
@@ -58,27 +58,27 @@ export default async function SettingsPage() {
           title="SLA targets"
           description="How fast the team should reply to and resolve tickets of each priority."
         >
-          <Link href="/settings/sla" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+          <Link href="/settings/sla" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
             {can(role, "sla.manage") ? "Edit SLA targets →" : "See SLA targets →"}
           </Link>
         </Section>
 
         <Section title="Automation" description="Assign new tickets automatically and set rules for priority, tags, escalation and closing.">
-          <Link href="/settings/automation" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+          <Link href="/settings/automation" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
             {can(role, "automation.manage") ? "Set up automation →" : "See automation rules →"}
           </Link>
         </Section>
 
         {can(role, "email.manage") && (
           <Section title="Email" description="Turn customer emails into tickets and reply by email.">
-            <Link href="/settings/email" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+            <Link href="/settings/email" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
               Set up email →
             </Link>
           </Section>
         )}
 
         <Section title="Saved replies" description="Ready-made answers agents insert into tickets.">
-          <Link href="/settings/replies" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+          <Link href="/settings/replies" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
             {can(role, "replies.manage") ? "Edit saved replies →" : "See saved replies →"}
           </Link>
         </Section>
@@ -87,7 +87,7 @@ export default async function SettingsPage() {
           title="Team"
           description={can(role, "team.manage") ? "Add people and choose their roles." : "See who is in this workspace."}
         >
-          <Link href="/settings/team" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+          <Link href="/settings/team" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
             Open team →
           </Link>
         </Section>
@@ -100,7 +100,7 @@ export default async function SettingsPage() {
 
         {can(role, "audit.view") && (
           <Section title="Audit log" description="Who changed the team, sign-in security, settings, rules and orders.">
-            <Link href="/settings/audit" className="text-sm font-medium text-indigo-400 hover:text-indigo-300">
+            <Link href="/settings/audit" className="text-sm font-medium text-indigo-600 hover:text-indigo-700">
               Open audit log →
             </Link>
           </Section>

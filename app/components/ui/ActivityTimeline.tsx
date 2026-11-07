@@ -12,7 +12,7 @@ export default function ActivityTimeline({
   activities,
 }: ActivityTimelineProps) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-xl border border-zinc-200 bg-white p-6">
       <h2 className="mb-6 text-lg font-semibold">
         Activity
       </h2>
@@ -22,7 +22,7 @@ export default function ActivityTimeline({
           <div key={index} className="relative flex gap-4">
             {/* Timeline line */}
             {index !== activities.length - 1 && (
-              <div className="absolute left-[5px] top-4 h-full w-px bg-zinc-700" />
+              <div className="absolute left-[5px] top-4 h-full w-px bg-zinc-200" />
             )}
 
             {/* Timeline dot */}
@@ -32,7 +32,7 @@ export default function ActivityTimeline({
 
             {/* Activity content */}
             <div>
-              <p className="font-medium text-zinc-100">
+              <p className="font-medium text-zinc-900">
                 {activity.title}
               </p>
 

@@ -45,10 +45,10 @@ function Row({ label, clock, now }: { label: string; clock: Clock | null; now: n
             {STATE_LABELS[clock.state]}
           </span>
         ) : (
-          <span className="text-sm text-zinc-600">{clock ? "…" : "Not tracked"}</span>
+          <span className="text-sm text-zinc-400">{clock ? "…" : "Not tracked"}</span>
         )}
       </div>
-      {clock && now !== null && <p className="mt-1 text-xs text-zinc-400">{detail(clock)}</p>}
+      {clock && now !== null && <p className="mt-1 text-xs text-zinc-600">{detail(clock)}</p>}
     </div>
   );
 }
@@ -59,7 +59,7 @@ export default function SlaCard({ ticket }: { ticket: TicketSla }) {
   const at = now ?? Date.parse(ticket.createdAt);
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-xl border border-zinc-200 bg-white p-6">
       <h2 className="mb-5 text-xl font-semibold">SLA</h2>
       <div className="space-y-4">
         <Row label="First reply" clock={firstResponseClock(ticket, at)} now={now} />

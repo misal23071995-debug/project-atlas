@@ -13,8 +13,8 @@ export const dynamic = "force-dynamic";
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-      <p className="text-sm text-zinc-400">{label}</p>
+    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+      <p className="text-sm text-zinc-600">{label}</p>
       <p className="mt-2 text-3xl font-bold">{value}</p>
       <p className="mt-1 text-xs text-zinc-500">{hint}</p>
     </div>
@@ -29,11 +29,11 @@ function MyTraining({ assignments, today }: { assignments: Assignment[]; today: 
   });
 
   return (
-    <ul className="mt-4 divide-y divide-zinc-800 rounded-xl border border-zinc-800 bg-zinc-900">
+    <ul className="mt-4 divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white">
       {sorted.map((a) => (
         <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
           <div className="min-w-0">
-            <Link href={`/training/${a.courseId}`} className="font-medium text-zinc-100 hover:underline">
+            <Link href={`/training/${a.courseId}`} className="font-medium text-zinc-900 hover:underline">
               {a.courseTitle}
             </Link>
             <p className="text-xs text-zinc-500">
@@ -74,7 +74,7 @@ export default async function TrainingPage() {
   if (courses === null || assignments === null) {
     return (
       <DashboardLayout>
-        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
           Run supabase/migrations/010_training.sql in the Supabase SQL Editor to turn on training.
         </p>
       </DashboardLayout>
@@ -101,7 +101,7 @@ export default async function TrainingPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">Training</h1>
-          <p className="mt-1 max-w-3xl text-zinc-400">
+          <p className="mt-1 max-w-3xl text-zinc-600">
             Short lessons with a quiz. Courses linked to a quality criterion are assigned automatically when a review
             scores an agent low on it.
           </p>
@@ -125,13 +125,13 @@ export default async function TrainingPage() {
       {!canManage && others.length > 0 && (
         <section className="mt-10">
           <h2 className="text-xl font-semibold">More courses</h2>
-          <p className="mt-1 text-sm text-zinc-400">Take any of these for practice.</p>
+          <p className="mt-1 text-sm text-zinc-600">Take any of these for practice.</p>
           <ul className="mt-4 grid gap-3 sm:grid-cols-2">
             {others.map((c) => (
               <li key={c.id}>
-                <Link href={`/training/${c.id}`} className="block rounded-xl border border-zinc-800 bg-zinc-900 p-4 hover:border-zinc-600">
-                  <p className="font-medium text-zinc-100">{c.title}</p>
-                  {c.description && <p className="mt-1 text-sm text-zinc-400">{c.description}</p>}
+                <Link href={`/training/${c.id}`} className="block rounded-xl border border-zinc-200 bg-white p-4 hover:border-zinc-300">
+                  <p className="font-medium text-zinc-900">{c.title}</p>
+                  {c.description && <p className="mt-1 text-sm text-zinc-600">{c.description}</p>}
                   <p className="mt-2 text-xs text-zinc-500">{c.questions.length} questions</p>
                 </Link>
               </li>
@@ -150,7 +150,7 @@ export default async function TrainingPage() {
             />
             <Stat
               label="Overdue"
-              value={<span className={overdue.length ? "text-red-400" : "text-emerald-400"}>{overdue.length}</span>}
+              value={<span className={overdue.length ? "text-red-600" : "text-emerald-600"}>{overdue.length}</span>}
               hint="past the due date and not passed"
             />
             <Stat label="Average quiz score" value={averageScore === null ? "—" : `${averageScore}%`} hint="best attempt per person" />
@@ -169,9 +169,9 @@ export default async function TrainingPage() {
                 needed.
               </p>
             ) : (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-800">
+              <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-zinc-900 text-left text-zinc-400">
+                  <thead className="bg-white text-left text-zinc-600">
                     <tr>
                       <th className="px-4 py-3 font-medium">Course</th>
                       <th className="px-4 py-3 font-medium">Linked to</th>
@@ -184,23 +184,23 @@ export default async function TrainingPage() {
                     {courses.map((course) => {
                       const forCourse = assignments.filter((a) => a.courseId === course.id);
                       return (
-                        <tr key={course.id} className="border-t border-zinc-800">
+                        <tr key={course.id} className="border-t border-zinc-200">
                           <td className="px-4 py-3">
-                            <Link href={`/training/${course.id}/edit`} className="font-medium text-indigo-400 hover:underline">
+                            <Link href={`/training/${course.id}/edit`} className="font-medium text-indigo-600 hover:underline">
                               {course.title}
                             </Link>
                           </td>
-                          <td className="px-4 py-3 text-zinc-300">
+                          <td className="px-4 py-3 text-zinc-700">
                             {course.linkedCriterion ? criterionLabels.get(course.linkedCriterion) ?? "Removed criterion" : "—"}
                           </td>
-                          <td className="px-4 py-3 text-zinc-400">{course.questions.length}</td>
-                          <td className="px-4 py-3 text-zinc-400">
+                          <td className="px-4 py-3 text-zinc-600">{course.questions.length}</td>
+                          <td className="px-4 py-3 text-zinc-600">
                             {forCourse.filter((a) => a.status === "passed").length} / {forCourse.length}
                           </td>
                           <td className="px-4 py-3">
                             <span
                               className={`rounded-full px-2.5 py-1 text-xs ${
-                                course.published ? "bg-emerald-500/15 text-emerald-400" : "bg-zinc-700 text-zinc-300"
+                                course.published ? "bg-emerald-500/15 text-emerald-600" : "bg-zinc-200 text-zinc-700"
                               }`}
                             >
                               {course.published ? "Published" : "Draft"}
@@ -220,9 +220,9 @@ export default async function TrainingPage() {
             {assignments.length === 0 ? (
               <p className="mt-2 text-sm text-zinc-500">Nobody has been assigned a course yet.</p>
             ) : (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-800">
+              <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-zinc-900 text-left text-zinc-400">
+                  <thead className="bg-white text-left text-zinc-600">
                     <tr>
                       <th className="px-4 py-3 font-medium">Person</th>
                       <th className="px-4 py-3 font-medium">Course</th>
@@ -236,13 +236,13 @@ export default async function TrainingPage() {
                     {[...assignments]
                       .sort((a, b) => Number(isOverdue(b, today)) - Number(isOverdue(a, today)))
                       .map((a) => (
-                        <tr key={a.id} className="border-t border-zinc-800">
-                          <td className="px-4 py-3 text-zinc-100">{names.get(a.userId) ?? "Former member"}</td>
-                          <td className="px-4 py-3 text-zinc-300">{a.courseTitle}</td>
+                        <tr key={a.id} className="border-t border-zinc-200">
+                          <td className="px-4 py-3 text-zinc-900">{names.get(a.userId) ?? "Former member"}</td>
+                          <td className="px-4 py-3 text-zinc-700">{a.courseTitle}</td>
                           <td className="max-w-xs px-4 py-3 text-xs text-zinc-500">
                             {a.reason ?? (a.assignedBy ? `Assigned by ${a.assignedBy}` : "Self-study")}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-3 text-zinc-400">{a.dueDate ? formatDay(a.dueDate) : "—"}</td>
+                          <td className="whitespace-nowrap px-4 py-3 text-zinc-600">{a.dueDate ? formatDay(a.dueDate) : "—"}</td>
                           <td className="px-4 py-3">
                             <AssignmentStatusBadge assignment={a} today={today} />
                           </td>

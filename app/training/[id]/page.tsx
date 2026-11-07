@@ -21,23 +21,23 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
 
   return (
     <DashboardLayout>
-      <Link href="/training" className="text-sm text-zinc-400 hover:text-zinc-200">
+      <Link href="/training" className="text-sm text-zinc-600 hover:text-zinc-800">
         ← Training
       </Link>
 
       {!visible ? (
-        <p className="mt-6 text-zinc-400">This course doesn&apos;t exist or isn&apos;t published yet.</p>
+        <p className="mt-6 text-zinc-600">This course doesn&apos;t exist or isn&apos;t published yet.</p>
       ) : (
         <div className="mx-auto max-w-3xl">
           <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-3xl font-bold">{course.title}</h1>
-              {course.description && <p className="mt-1 text-zinc-400">{course.description}</p>}
+              {course.description && <p className="mt-1 text-zinc-600">{course.description}</p>}
             </div>
             <div className="flex items-center gap-3">
               {assignment && <AssignmentStatusBadge assignment={assignment} />}
               {canManage && (
-                <Link href={`/training/${course.id}/edit`} className="text-sm text-indigo-400 hover:underline">
+                <Link href={`/training/${course.id}/edit`} className="text-sm text-indigo-600 hover:underline">
                   Edit
                 </Link>
               )}
@@ -52,9 +52,9 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
               {assignment.attempts > 0 && ` · ${assignment.attempts} attempt${assignment.attempts === 1 ? "" : "s"}, best ${assignment.bestScore}%`}
             </p>
           )}
-          {!course.published && <p className="mt-3 text-sm text-amber-300">Draft: agents can&apos;t see this yet.</p>}
+          {!course.published && <p className="mt-3 text-sm text-amber-700">Draft: agents can&apos;t see this yet.</p>}
 
-          <article className="mt-6 whitespace-pre-line rounded-xl border border-zinc-800 bg-zinc-900 p-6 leading-relaxed text-zinc-200">
+          <article className="mt-6 whitespace-pre-line rounded-xl border border-zinc-200 bg-white p-6 leading-relaxed text-zinc-800">
             {course.body || "This course has no lesson text."}
           </article>
 

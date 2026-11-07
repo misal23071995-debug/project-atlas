@@ -13,7 +13,7 @@ export default function ChatInput({
     <div className="mt-6 flex items-end gap-3">
       <textarea
         rows={1}
-        className="min-h-[52px] max-h-40 flex-1 resize-none rounded-lg border border-zinc-700 bg-zinc-800 px-4 py-3 leading-6 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none"
+        className="min-h-[52px] max-h-40 flex-1 resize-none rounded-lg border border-zinc-300 bg-zinc-100 px-4 py-3 leading-6 text-white placeholder:text-zinc-500 focus:border-blue-500 focus:outline-none"
         placeholder="Describe your issue..."
         value={value}
         onChange={(e) => onChange(e.target.value)}

@@ -21,7 +21,7 @@ export default async function NewCoursePage() {
 
   return (
     <DashboardLayout>
-      <Link href="/training" className="text-sm text-zinc-400 hover:text-zinc-200">
+      <Link href="/training" className="text-sm text-zinc-600 hover:text-zinc-800">
         ← Training
       </Link>
       <h1 className="mt-2 text-3xl font-bold">New course</h1>

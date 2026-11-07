@@ -5,7 +5,7 @@ import { useActionState } from "react";
 import { signInAction, type LoginState } from "./actions";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100";
+  "mt-1 w-full rounded-lg border px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 border-zinc-300 bg-white text-zinc-900";
 
 export default function LoginForm({ next }: { next: string }) {
   const [state, action, pending] = useActionState<LoginState, FormData>(signInAction, {});
@@ -13,11 +13,11 @@ export default function LoginForm({ next }: { next: string }) {
   return (
     <form
       action={action}
-      className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      className="space-y-4 rounded-xl border p-6 shadow-sm border-zinc-200 bg-white"
     >
       <input type="hidden" name="next" value={next} />
 
-      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <label className="block text-sm font-medium text-zinc-700">
         Email
         <input
           type="email"
@@ -29,10 +29,10 @@ export default function LoginForm({ next }: { next: string }) {
         />
       </label>
 
-      <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-300">
+      <label className="block text-sm font-medium text-zinc-700">
         <span className="flex items-center justify-between">
           Password
-          <Link href="/forgot-password" className="text-xs font-normal text-indigo-400 hover:text-indigo-300">
+          <Link href="/forgot-password" className="text-xs font-normal text-indigo-600 hover:text-indigo-700">
             Forgot password?
           </Link>
         </span>
@@ -46,7 +46,7 @@ export default function LoginForm({ next }: { next: string }) {
       </label>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+        <p role="alert" className="text-sm text-red-600">
           {state.error}
         </p>
       )}

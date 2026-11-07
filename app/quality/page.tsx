@@ -16,8 +16,8 @@ function Score({ value }: { value: number | null }) {
 
 function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-      <p className="text-sm text-zinc-400">{label}</p>
+    <div className="rounded-xl border border-zinc-200 bg-white p-5">
+      <p className="text-sm text-zinc-600">{label}</p>
       <p className="mt-2 text-3xl font-bold">{value}</p>
       <p className="mt-1 text-xs text-zinc-500">{hint}</p>
     </div>
@@ -35,7 +35,7 @@ export default async function QualityPage() {
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold">{isReviewer ? "Quality" : "My quality"}</h1>
-          <p className="mt-1 max-w-3xl text-zinc-400">
+          <p className="mt-1 max-w-3xl text-zinc-600">
             {isReviewer
               ? "AI scores each conversation against your scorecard. A reviewer checks the score, adjusts it and gives the agent feedback."
               : "How your conversations were scored by the quality team in the last 30 days."}
@@ -44,7 +44,7 @@ export default async function QualityPage() {
         {can(role, "quality.scorecard") && (
           <Link
             href="/quality/scorecard"
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm font-medium text-zinc-200 hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
           >
             Edit scorecard
           </Link>
@@ -52,7 +52,7 @@ export default async function QualityPage() {
       </div>
 
       {overview === null ? (
-        <p className="mt-8 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+        <p className="mt-8 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
           Run supabase/migrations/007_quality.sql in the Supabase SQL Editor to turn on quality checks.
         </p>
       ) : (
@@ -78,14 +78,14 @@ export default async function QualityPage() {
           {isReviewer && (
             <section className="mt-10">
               <h2 className="text-xl font-semibold">Ready to review</h2>
-              <p className="mt-1 text-sm text-zinc-400">Tickets with agent replies that haven&apos;t been reviewed yet.</p>
+              <p className="mt-1 text-sm text-zinc-600">Tickets with agent replies that haven&apos;t been reviewed yet.</p>
 
               {overview.queue.length === 0 ? (
                 <p className="mt-4 text-sm text-zinc-500">Nothing waiting. Every answered ticket has been reviewed.</p>
               ) : (
-                <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-800">
+                <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-zinc-900 text-left text-zinc-400">
+                    <thead className="bg-white text-left text-zinc-600">
                       <tr>
                         <th className="px-4 py-3 font-medium">Ticket</th>
                         <th className="px-4 py-3 font-medium">Agent</th>
@@ -96,18 +96,18 @@ export default async function QualityPage() {
                     </thead>
                     <tbody>
                       {overview.queue.map((item) => (
-                        <tr key={item.ticketId} className="border-t border-zinc-800">
+                        <tr key={item.ticketId} className="border-t border-zinc-200">
                           <td className="px-4 py-3">
-                            <p className="font-medium text-zinc-100">#{item.ticketId}</p>
+                            <p className="font-medium text-zinc-900">#{item.ticketId}</p>
                             <p className="max-w-md truncate text-xs text-zinc-500">{item.subject}</p>
                           </td>
-                          <td className="px-4 py-3 text-zinc-300">{item.agentName}</td>
+                          <td className="px-4 py-3 text-zinc-700">{item.agentName}</td>
                           <td className="px-4 py-3"><StatusBadge status={item.status} /></td>
                           <td className="px-4 py-3">
                             <Score value={item.aiTotal} />
                           </td>
                           <td className="px-4 py-3 text-right">
-                            <Link href={`/quality/${item.ticketId}`} className="font-medium text-indigo-400 hover:underline">
+                            <Link href={`/quality/${item.ticketId}`} className="font-medium text-indigo-600 hover:underline">
                               Review →
                             </Link>
                           </td>
@@ -122,7 +122,7 @@ export default async function QualityPage() {
 
           <div className="mt-10 grid gap-6 lg:grid-cols-2">
             {isReviewer && (
-              <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+              <section className="rounded-xl border border-zinc-200 bg-white p-6">
                 <h2 className="text-lg font-semibold">By agent</h2>
                 {overview.byAgent.length === 0 ? (
                   <p className="mt-4 text-sm text-zinc-500">No reviews yet.</p>
@@ -138,13 +138,13 @@ export default async function QualityPage() {
                     </thead>
                     <tbody>
                       {overview.byAgent.map((row) => (
-                        <tr key={row.name} className="border-t border-zinc-800">
-                          <td className="py-2 text-zinc-100">{row.name}</td>
-                          <td className="py-2 text-zinc-400">{row.reviews}</td>
+                        <tr key={row.name} className="border-t border-zinc-200">
+                          <td className="py-2 text-zinc-900">{row.name}</td>
+                          <td className="py-2 text-zinc-600">{row.reviews}</td>
                           <td className="py-2">
                             <Score value={row.average} />
                           </td>
-                          <td className="py-2 text-zinc-400">{row.weakest ?? "—"}</td>
+                          <td className="py-2 text-zinc-600">{row.weakest ?? "—"}</td>
                         </tr>
                       ))}
                     </tbody>
@@ -153,7 +153,7 @@ export default async function QualityPage() {
               </section>
             )}
 
-            <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+            <section className="rounded-xl border border-zinc-200 bg-white p-6">
               <h2 className="text-lg font-semibold">By criterion</h2>
               <p className="mt-1 text-xs text-zinc-500">Lowest first: where coaching helps most</p>
               {overview.byCriterion.length === 0 ? (
@@ -163,10 +163,10 @@ export default async function QualityPage() {
                   {overview.byCriterion.map((row) => (
                     <li key={row.label}>
                       <div className="flex justify-between text-sm">
-                        <span className="text-zinc-300">{row.label}</span>
+                        <span className="text-zinc-700">{row.label}</span>
                         <Score value={row.average} />
                       </div>
-                      <div className="mt-1 h-2 rounded-full bg-zinc-800">
+                      <div className="mt-1 h-2 rounded-full bg-zinc-100">
                         <div className="h-2 rounded-full bg-indigo-500" style={{ width: `${row.average}%` }} />
                       </div>
                     </li>
@@ -175,16 +175,16 @@ export default async function QualityPage() {
               )}
             </section>
 
-            <section className={`rounded-xl border border-zinc-800 bg-zinc-900 p-6 ${isReviewer ? "lg:col-span-2" : ""}`}>
+            <section className={`rounded-xl border border-zinc-200 bg-white p-6 ${isReviewer ? "lg:col-span-2" : ""}`}>
               <h2 className="text-lg font-semibold">Recent reviews</h2>
               {overview.recent.length === 0 ? (
                 <p className="mt-4 text-sm text-zinc-500">No reviews yet.</p>
               ) : (
-                <ul className="mt-4 divide-y divide-zinc-800">
+                <ul className="mt-4 divide-y divide-zinc-200">
                   {overview.recent.map((review) => (
                     <li key={review.ticketId} className="flex flex-wrap items-center justify-between gap-2 py-3">
                       <Link href={`/quality/${review.ticketId}`} className="min-w-0">
-                        <p className="truncate text-sm font-medium text-zinc-100 hover:underline">
+                        <p className="truncate text-sm font-medium text-zinc-900 hover:underline">
                           #{review.ticketId} · {review.subject}
                         </p>
                         <p className="text-xs text-zinc-500">

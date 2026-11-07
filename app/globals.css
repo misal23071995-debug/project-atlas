@@ -1,38 +1,39 @@
 @import "tailwindcss";
 
-/* Atlas has one look: a dark operations console. Every `dark:` style always applies, so screens
-   written with light and dark variants and screens written dark-only look the same. */
-@custom-variant dark (&:where(.dark, .dark *));
-
+/* Atlas's look: a light workspace with a dark navy sidebar, like most support desks.
+   Neutrals are cool slate greys, used through Tailwind's zinc names across the app. */
 @theme {
-  /* Neutrals with a slight blue-indigo bias, replacing Tailwind's zinc everywhere it's used */
-  --color-zinc-50: #f6f7fb;
-  --color-zinc-100: #eceef5;
-  --color-zinc-200: #d9dce8;
-  --color-zinc-300: #b9bed0;
-  --color-zinc-400: #9aa1b6;
-  --color-zinc-500: #737b92;
-  --color-zinc-600: #535a70;
-  --color-zinc-700: #353b4f;
-  --color-zinc-800: #222737;
-  --color-zinc-900: #151925;
-  --color-zinc-950: #0c0f17;
+  --color-zinc-50: #f8fafc;
+  --color-zinc-100: #f1f5f9;
+  --color-zinc-200: #e2e8f0;
+  --color-zinc-300: #cbd5e1;
+  --color-zinc-400: #94a3b8;
+  --color-zinc-500: #64748b;
+  --color-zinc-600: #475569;
+  --color-zinc-700: #334155;
+  --color-zinc-800: #1e293b;
+  --color-zinc-900: #0f172a;
+  --color-zinc-950: #020617;
+
+  /* The sidebar's navy */
+  --color-nav: #111a2e;
+  --color-nav-hover: #1b2640;
+  --color-nav-line: #24304b;
 
   --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
   --font-mono: var(--font-geist-mono), ui-monospace, Menlo, monospace;
 }
 
 :root {
-  color-scheme: dark;
-  --background: var(--color-zinc-950);
-  --foreground: var(--color-zinc-100);
+  color-scheme: light;
+  --background: #f4f6fa;
+  --foreground: var(--color-zinc-900);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
-  font-feature-settings: "cv11", "ss01";
 }
 
 /* Numbers that sit in columns or tiles line up */
@@ -41,10 +42,10 @@ body {
 }
 
 ::selection {
-  background: color-mix(in oklab, var(--color-indigo-500) 40%, transparent);
+  background: color-mix(in oklab, var(--color-indigo-500) 22%, transparent);
 }
 
 :focus-visible {
-  outline: 2px solid var(--color-indigo-400);
+  outline: 2px solid var(--color-indigo-500);
   outline-offset: 2px;
 }

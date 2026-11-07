@@ -12,13 +12,13 @@ import {
 import { cancelLeaveAction, decideLeaveAction, requestLeaveAction, type LeaveFormState } from "../actions";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500";
+  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500";
 
 const STATUS_STYLES: Record<LeaveStatus, string> = {
-  requested: "bg-amber-500/15 text-amber-300",
-  approved: "bg-emerald-500/15 text-emerald-400",
-  rejected: "bg-red-500/15 text-red-400",
-  cancelled: "bg-zinc-700 text-zinc-400",
+  requested: "bg-amber-500/15 text-amber-700",
+  approved: "bg-emerald-500/15 text-emerald-600",
+  rejected: "bg-red-500/15 text-red-600",
+  cancelled: "bg-zinc-200 text-zinc-600",
 };
 
 const STATUS_LABELS: Record<LeaveStatus, string> = {
@@ -64,13 +64,13 @@ export default function LeaveView({
   const row = (item: LeaveRequest) => (
     <li key={item.id} className="flex flex-wrap items-center justify-between gap-3 py-3">
       <div className="min-w-0">
-        <p className="text-sm font-medium text-zinc-100">
+        <p className="text-sm font-medium text-zinc-900">
           {item.userName}
           {item.userId === currentUserId && <span className="ml-1 text-xs text-zinc-500">(you)</span>}
-          <span className="ml-2 text-zinc-400">{LEAVE_LABELS[item.type]}</span>
+          <span className="ml-2 text-zinc-600">{LEAVE_LABELS[item.type]}</span>
         </p>
         <p className="text-xs text-zinc-500">{dateRange(item)}</p>
-        {item.note && <p className="mt-1 text-xs text-zinc-400">&ldquo;{item.note}&rdquo;</p>}
+        {item.note && <p className="mt-1 text-xs text-zinc-600">&ldquo;{item.note}&rdquo;</p>}
       </div>
 
       <div className="flex items-center gap-3">
@@ -92,7 +92,7 @@ export default function LeaveView({
               type="button"
               disabled={isPending}
               onClick={() => run(() => decideLeaveAction(item.id, "rejected"))}
-              className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs text-zinc-300 hover:bg-zinc-800 disabled:opacity-50"
+              className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs text-zinc-700 hover:bg-zinc-100 disabled:opacity-50"
             >
               Reject
             </button>
@@ -103,7 +103,7 @@ export default function LeaveView({
             type="button"
             disabled={isPending}
             onClick={() => run(() => cancelLeaveAction(item.id))}
-            className="text-xs text-zinc-500 hover:text-red-400 disabled:opacity-50"
+            className="text-xs text-zinc-500 hover:text-red-600 disabled:opacity-50"
           >
             Cancel
           </button>
@@ -114,20 +114,20 @@ export default function LeaveView({
 
   return (
     <div className="mt-8 grid gap-6 lg:grid-cols-3">
-      <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+      <section className="rounded-xl border border-zinc-200 bg-white p-6">
         <h2 className="text-lg font-semibold">Request leave</h2>
         <form action={action} key={state.success} className="mt-4 space-y-4">
           <div className="grid grid-cols-2 gap-3">
-            <label className="text-sm text-zinc-400">
+            <label className="text-sm text-zinc-600">
               First day
               <input type="date" name="startDate" required className={inputClass} />
             </label>
-            <label className="text-sm text-zinc-400">
+            <label className="text-sm text-zinc-600">
               Last day
               <input type="date" name="endDate" className={inputClass} />
             </label>
           </div>
-          <label className="block text-sm text-zinc-400">
+          <label className="block text-sm text-zinc-600">
             Type
             <select name="type" defaultValue="annual" className={inputClass}>
               {LEAVE_TYPES.map((type) => (
@@ -137,13 +137,13 @@ export default function LeaveView({
               ))}
             </select>
           </label>
-          <label className="block text-sm text-zinc-400">
+          <label className="block text-sm text-zinc-600">
             Note (optional)
             <textarea name="note" rows={2} maxLength={500} className={inputClass} />
           </label>
 
-          {state.error && <p role="alert" className="text-sm text-red-400">{state.error}</p>}
-          {state.success && <p role="status" className="text-sm text-emerald-400">{state.success}</p>}
+          {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
+          {state.success && <p role="status" className="text-sm text-emerald-600">{state.success}</p>}
 
           <button
             type="submit"
@@ -156,25 +156,25 @@ export default function LeaveView({
       </section>
 
       <div className="space-y-6 lg:col-span-2">
-        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6">
           <h2 className="text-lg font-semibold">
             Waiting for approval <span className="text-sm font-normal text-zinc-500">({waiting.length})</span>
           </h2>
           {waiting.length === 0 ? (
             <p className="mt-3 text-sm text-zinc-500">Nothing waiting.</p>
           ) : (
-            <ul className="mt-2 divide-y divide-zinc-800">{waiting.map(row)}</ul>
+            <ul className="mt-2 divide-y divide-zinc-200">{waiting.map(row)}</ul>
           )}
         </section>
 
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6">
           <h2 className="text-lg font-semibold">{canManage ? "Team leave" : "Your leave"}</h2>
           {others.length === 0 ? (
             <p className="mt-3 text-sm text-zinc-500">No leave in the last 90 days or coming up.</p>
           ) : (
-            <ul className="mt-2 divide-y divide-zinc-800">{others.map(row)}</ul>
+            <ul className="mt-2 divide-y divide-zinc-200">{others.map(row)}</ul>
           )}
         </section>
       </div>

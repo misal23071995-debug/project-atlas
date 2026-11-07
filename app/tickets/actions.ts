@@ -144,7 +144,7 @@ export async function addNoteAction(ticketId: string, note: string) {
   const { agent, org } = await requireSession("tickets.note");
 
   await addNote(org.id, ticketId, agent.name, requireText(note, "Note"));
-  await addActivity(org.id, ticketId, `Note added by ${agent.name}`, "bg-zinc-500");
+  await addActivity(org.id, ticketId, `Note added by ${agent.name}`, "bg-zinc-400");
 
   revalidatePath(`/tickets/${ticketId}`);
 }

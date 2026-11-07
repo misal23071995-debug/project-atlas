@@ -7,8 +7,8 @@ import { createManualTicketAction, type NewTicketFormState } from "../actions";
 const CHANNELS = ["Phone", "Email", "Chat", "Walk-in", "Social", "Other"];
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
-const labelClass = "block text-sm font-medium text-zinc-300";
+  "mt-1 w-full rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
+const labelClass = "block text-sm font-medium text-zinc-700";
 
 export default function NewTicketForm() {
   const [state, action, pending] = useActionState<NewTicketFormState, FormData>(
@@ -17,7 +17,7 @@ export default function NewTicketForm() {
   );
 
   return (
-    <form action={action} className="mt-6 space-y-5 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <form action={action} className="mt-6 space-y-5 rounded-xl border border-zinc-200 bg-white p-6">
       <div className="grid gap-5 sm:grid-cols-2">
         <label className={labelClass}>
           Customer name
@@ -61,7 +61,7 @@ export default function NewTicketForm() {
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-400">
+        <p role="alert" className="text-sm text-red-600">
           {state.error}
         </p>
       )}

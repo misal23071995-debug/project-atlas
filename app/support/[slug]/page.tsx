@@ -29,7 +29,7 @@ export default async function SupportPage({ params }: Props) {
   if (!workspace) notFound();
 
   return (
-    <main className="flex min-h-screen flex-col items-center bg-zinc-950 px-4 py-8 font-sans text-zinc-100">
+    <main className="flex min-h-screen flex-col items-center bg-zinc-50 px-4 py-8 font-sans text-zinc-900">
       <div className="flex w-full max-w-xl flex-1 flex-col">
         <header className="mb-6 flex items-center gap-3">
           <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-lg font-semibold">
@@ -37,7 +37,7 @@ export default async function SupportPage({ params }: Props) {
           </div>
           <div>
             <h1 className="text-lg font-semibold">{workspace.name} Support</h1>
-            <p className="text-sm text-zinc-400">Instant answers, with a real person when you need one</p>
+            <p className="text-sm text-zinc-600">Instant answers, with a real person when you need one</p>
           </div>
         </header>
 

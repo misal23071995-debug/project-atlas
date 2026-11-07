@@ -14,7 +14,7 @@ import ChatRating from "./ChatRating";
 type ChatState = "intro" | "chatting" | "ended";
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
+  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
 
 export default function SupportChat({
   workspaceSlug,
@@ -92,12 +92,12 @@ export default function SupportChat({
 
   if (state === "intro") {
     return (
-      <form onSubmit={handleStart} className="space-y-4 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-6">
-        <p className="text-sm text-zinc-300">
+      <form onSubmit={handleStart} className="space-y-4 rounded-2xl border border-zinc-200 bg-white p-6">
+        <p className="text-sm text-zinc-700">
           Hi! Tell us who you are so our team can follow up if the assistant can&apos;t solve it.
         </p>
 
-        <label className="block text-sm text-zinc-400">
+        <label className="block text-sm text-zinc-600">
           Your name
           <input
             value={name}
@@ -109,7 +109,7 @@ export default function SupportChat({
           />
         </label>
 
-        <label className="block text-sm text-zinc-400">
+        <label className="block text-sm text-zinc-600">
           Email
           <input
             type="email"
@@ -122,7 +122,7 @@ export default function SupportChat({
           />
         </label>
 
-        {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
         <button
           type="submit"
@@ -138,18 +138,18 @@ export default function SupportChat({
   const customerHasWritten = messages.some((m) => m.role === "customer");
 
   return (
-    <div className="flex flex-1 flex-col rounded-2xl border border-zinc-800 bg-zinc-900/60">
+    <div className="flex flex-1 flex-col rounded-2xl border border-zinc-200 bg-white">
       <div className="flex-1 space-y-4 overflow-y-auto p-4" aria-live="polite">
         {messages.map((message, index) => (
           <div key={index} className={message.role === "customer" ? "flex justify-end" : "flex justify-start"}>
             <div
               className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm ${
-                message.role === "customer" ? "bg-indigo-600 text-white" : "bg-zinc-800 text-zinc-100"
+                message.role === "customer" ? "bg-indigo-600 text-white" : "bg-zinc-100 text-zinc-900"
               }`}
             >
               <p className="whitespace-pre-line">{message.body}</p>
               {message.sources && message.sources.length > 0 && (
-                <p className="mt-2 text-xs text-zinc-400">From: {message.sources.join(", ")}</p>
+                <p className="mt-2 text-xs text-zinc-600">From: {message.sources.join(", ")}</p>
               )}
             </div>
           </div>
@@ -157,17 +157,17 @@ export default function SupportChat({
 
         {isPending && (
           <div className="flex justify-start">
-            <div className="rounded-2xl bg-zinc-800 px-4 py-3 text-sm text-zinc-400">Typing…</div>
+            <div className="rounded-2xl bg-zinc-100 px-4 py-3 text-sm text-zinc-600">Typing…</div>
           </div>
         )}
 
         <div ref={bottomRef} />
       </div>
 
-      {error && <p role="alert" className="px-4 pb-2 text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="px-4 pb-2 text-sm text-red-600">{error}</p>}
 
       {state === "ended" ? (
-        <div className="space-y-4 border-t border-zinc-800 p-4 text-center text-sm text-zinc-400">
+        <div className="space-y-4 border-t border-zinc-200 p-4 text-center text-sm text-zinc-600">
           <p>{endNote}</p>
           {conversationId && <ChatRating key={conversationId} conversationId={conversationId} />}
           <button
@@ -178,13 +178,13 @@ export default function SupportChat({
               setConversationId(null);
               setEndNote(null);
             }}
-            className="text-indigo-400 hover:text-indigo-300"
+            className="text-indigo-600 hover:text-indigo-700"
           >
             Start a new chat
           </button>
         </div>
       ) : (
-        <div className="space-y-3 border-t border-zinc-800 p-4">
+        <div className="space-y-3 border-t border-zinc-200 p-4">
           {!customerHasWritten && suggestions.length > 0 && (
             <div className="flex flex-wrap gap-2">
               {suggestions.map((suggestion) => (
@@ -193,7 +193,7 @@ export default function SupportChat({
                   type="button"
                   onClick={() => send(suggestion)}
                   disabled={isPending}
-                  className="rounded-full border border-zinc-700 px-3 py-1 text-xs text-zinc-300 hover:border-indigo-500 hover:text-white"
+                  className="rounded-full border border-zinc-300 px-3 py-1 text-xs text-zinc-700 hover:border-indigo-500 hover:text-white"
                 >
                   {suggestion}
                 </button>
@@ -231,7 +231,7 @@ export default function SupportChat({
                 type="button"
                 disabled={isPending}
                 onClick={() => run(() => markResolvedAction(conversationId))}
-                className="text-emerald-400 hover:text-emerald-300 disabled:opacity-50"
+                className="text-emerald-600 hover:text-emerald-700 disabled:opacity-50"
               >
                 ✓ That solved it
               </button>
@@ -239,7 +239,7 @@ export default function SupportChat({
                 type="button"
                 disabled={isPending}
                 onClick={() => run(() => requestHumanAction(conversationId))}
-                className="text-zinc-400 hover:text-zinc-200 disabled:opacity-50"
+                className="text-zinc-600 hover:text-zinc-800 disabled:opacity-50"
               >
                 Talk to a person
               </button>

@@ -38,14 +38,14 @@ import {
 type Person = { id: string; name: string; role: string };
 
 const control =
-  "h-9 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 text-sm text-zinc-100 outline-none focus:border-indigo-500 disabled:opacity-60";
-const card = "rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6";
+  "h-9 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-900 outline-none focus:border-indigo-500 disabled:opacity-60";
+const card = "rounded-xl border border-zinc-200 bg-white p-5 sm:p-6";
 const primary = "inline-flex h-9 items-center rounded-lg bg-indigo-600 px-4 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60";
-const quiet = "inline-flex h-9 items-center rounded-lg border border-zinc-700 px-3 text-sm text-zinc-200 hover:bg-zinc-800 disabled:opacity-60";
+const quiet = "inline-flex h-9 items-center rounded-lg border border-zinc-300 px-3 text-sm text-zinc-800 hover:bg-zinc-100 disabled:opacity-60";
 
 function Message({ result }: { result: ActionResult }) {
-  if (result.error) return <p role="alert" className="text-sm text-red-400">{result.error}</p>;
-  if (result.success) return <p role="status" className="text-sm text-emerald-400">{result.success}</p>;
+  if (result.error) return <p role="alert" className="text-sm text-red-600">{result.error}</p>;
+  if (result.success) return <p role="status" className="text-sm text-emerald-600">{result.success}</p>;
   return null;
 }
 
@@ -64,22 +64,22 @@ function waitLabel(hours: number) {
 // "When a ticket is created · if Channel is Email · then set priority to High"
 function Summary({ rule }: { rule: Rule }) {
   return (
-    <p className="text-sm leading-relaxed text-zinc-400">
-      <span className="font-medium text-zinc-300">When</span> {TRIGGER_LABELS[rule.trigger].toLowerCase()}
+    <p className="text-sm leading-relaxed text-zinc-600">
+      <span className="font-medium text-zinc-700">When</span> {TRIGGER_LABELS[rule.trigger].toLowerCase()}
       {rule.trigger === "waiting_on_customer" && rule.waitHours ? ` ${waitLabel(rule.waitHours)}` : ""}
       {rule.conditions.length > 0 && (
         <>
           {" "}
-          <span className="font-medium text-zinc-300">and</span>{" "}
+          <span className="font-medium text-zinc-700">and</span>{" "}
           {rule.conditions.map((c, i) => (
             <span key={i}>
               {i > 0 && " and "}
-              {FIELDS[c.field].label.toLowerCase()} {OPERATORS[c.op]} <span className="text-zinc-200">“{c.value}”</span>
+              {FIELDS[c.field].label.toLowerCase()} {OPERATORS[c.op]} <span className="text-zinc-800">“{c.value}”</span>
             </span>
           ))}
         </>
       )}
-      , <span className="font-medium text-zinc-300">then</span> {rule.actions.map(describeAction).join(", ")}.
+      , <span className="font-medium text-zinc-700">then</span> {rule.actions.map(describeAction).join(", ")}.
     </p>
   );
 }
@@ -94,8 +94,8 @@ function AssignmentCard({ settings, people }: { settings: AssignmentSettings; pe
   return (
     <form action={formAction} className={`${card} space-y-5`}>
       <div>
-        <h2 className="text-lg font-semibold text-zinc-50">Assignment</h2>
-        <p className="mt-1 text-sm text-zinc-400">How new tickets get an owner. Rules run first, so a rule can still assign a ticket to someone specific.</p>
+        <h2 className="text-lg font-semibold text-zinc-900">Assignment</h2>
+        <p className="mt-1 text-sm text-zinc-600">How new tickets get an owner. Rules run first, so a rule can still assign a ticket to someone specific.</p>
       </div>
 
       <fieldset className="grid gap-2 sm:grid-cols-3">
@@ -104,7 +104,7 @@ function AssignmentCard({ settings, people }: { settings: AssignmentSettings; pe
           <label
             key={m}
             className={`flex cursor-pointer items-start gap-2.5 rounded-lg border p-3 text-sm ${
-              mode === m ? "border-indigo-500 bg-indigo-500/10 text-zinc-100" : "border-zinc-800 text-zinc-300 hover:border-zinc-700"
+              mode === m ? "border-indigo-500 bg-indigo-500/10 text-zinc-900" : "border-zinc-200 text-zinc-700 hover:border-zinc-300"
             }`}
           >
             <input type="radio" name="mode" value={m} checked={mode === m} onChange={() => setMode(m)} className="mt-0.5" />
@@ -115,7 +115,7 @@ function AssignmentCard({ settings, people }: { settings: AssignmentSettings; pe
 
       {mode !== "off" && (
         <>
-          <label className="flex items-start gap-2.5 text-sm text-zinc-300">
+          <label className="flex items-start gap-2.5 text-sm text-zinc-700">
             <input type="checkbox" name="onlyOnShift" defaultChecked={settings.onlyOnShift} className="mt-0.5" />
             <span>
               Only people on shift right now, from the roster. If nobody is on shift, the ticket waits unassigned.
@@ -123,10 +123,10 @@ function AssignmentCard({ settings, people }: { settings: AssignmentSettings; pe
           </label>
 
           <div>
-            <p className="text-sm text-zinc-400">Who can receive tickets</p>
+            <p className="text-sm text-zinc-600">Who can receive tickets</p>
             <div className="mt-2 flex flex-wrap gap-2">
               {people.map((p) => (
-                <label key={p.id} className="flex items-center gap-2 rounded-full border border-zinc-800 px-3 py-1.5 text-sm text-zinc-200">
+                <label key={p.id} className="flex items-center gap-2 rounded-full border border-zinc-200 px-3 py-1.5 text-sm text-zinc-800">
                   <input type="checkbox" name="userIds" value={p.id} defaultChecked={everyone || settings.userIds.includes(p.id)} />
                   {p.name}
                 </label>
@@ -245,13 +245,13 @@ function RuleEditor({
   return (
     <div className={`${card} space-y-5 border-indigo-500/40`}>
       <div className="flex items-center justify-between gap-3">
-        <h3 className="text-lg font-semibold text-zinc-50">{rule ? "Edit rule" : "New rule"}</h3>
-        <button type="button" onClick={onClose} className="text-sm text-zinc-400 hover:text-zinc-200">
+        <h3 className="text-lg font-semibold text-zinc-900">{rule ? "Edit rule" : "New rule"}</h3>
+        <button type="button" onClick={onClose} className="text-sm text-zinc-600 hover:text-zinc-800">
           Cancel
         </button>
       </div>
 
-      <label className="block text-sm text-zinc-400">
+      <label className="block text-sm text-zinc-600">
         Name
         <input value={draft.name} onChange={(e) => set({ name: e.target.value })} maxLength={80} placeholder="e.g. Refunds go to billing" className={`${control} mt-1 w-full`} />
       </label>
@@ -329,7 +329,7 @@ function RuleEditor({
               value={c.value}
               onChange={(value) => updateCondition(i, { value })}
             />
-            <button type="button" aria-label="Remove condition" onClick={() => set({ conditions: draft.conditions.filter((_, j) => j !== i) })} className="h-9 px-2 text-zinc-500 hover:text-red-400">
+            <button type="button" aria-label="Remove condition" onClick={() => set({ conditions: draft.conditions.filter((_, j) => j !== i) })} className="h-9 px-2 text-zinc-500 hover:text-red-600">
               ✕
             </button>
           </div>
@@ -338,7 +338,7 @@ function RuleEditor({
           <button
             type="button"
             onClick={() => set({ conditions: [...draft.conditions, { field: "category", op: "is", value: FIELDS.category.options[0] }] })}
-            className="text-sm font-medium text-indigo-300 hover:text-indigo-200"
+            className="text-sm font-medium text-indigo-700 hover:text-indigo-700"
           >
             + Add condition
           </button>
@@ -370,7 +370,7 @@ function RuleEditor({
             ) : (
               <ValueInput label="Value" options={ACTIONS[a.type].options} value={a.value} onChange={(value) => updateAction(i, { value })} wide={a.type === "add_note"} />
             )}
-            <button type="button" aria-label="Remove action" onClick={() => set({ actions: draft.actions.filter((_, j) => j !== i) })} className="h-9 px-2 text-zinc-500 hover:text-red-400">
+            <button type="button" aria-label="Remove action" onClick={() => set({ actions: draft.actions.filter((_, j) => j !== i) })} className="h-9 px-2 text-zinc-500 hover:text-red-600">
               ✕
             </button>
           </div>
@@ -379,14 +379,14 @@ function RuleEditor({
           <button
             type="button"
             onClick={() => set({ actions: [...draft.actions, { type: "add_tag", value: "" }] })}
-            className="text-sm font-medium text-indigo-300 hover:text-indigo-200"
+            className="text-sm font-medium text-indigo-700 hover:text-indigo-700"
           >
             + Add action
           </button>
         )}
       </div>
 
-      <label className="flex items-center gap-2.5 text-sm text-zinc-300">
+      <label className="flex items-center gap-2.5 text-sm text-zinc-700">
         <input type="checkbox" checked={draft.enabled} onChange={(e) => set({ enabled: e.target.checked })} />
         Turned on
       </label>
@@ -423,8 +423,8 @@ function RuleCard({ rule, first, last, canEdit, onEdit }: { rule: Rule; first: b
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <h3 className="font-semibold text-zinc-50">{rule.name}</h3>
-            {!rule.enabled && <span className="rounded-full bg-zinc-500/15 px-2 py-0.5 text-xs text-zinc-400 ring-1 ring-inset ring-zinc-500/25">Off</span>}
+            <h3 className="font-semibold text-zinc-900">{rule.name}</h3>
+            {!rule.enabled && <span className="rounded-full bg-zinc-500/15 px-2 py-0.5 text-xs text-zinc-600 ring-1 ring-inset ring-zinc-500/25">Off</span>}
           </div>
           <div className="mt-1">
             <Summary rule={rule} />
@@ -436,16 +436,16 @@ function RuleCard({ rule, first, last, canEdit, onEdit }: { rule: Rule; first: b
         </div>
         {canEdit && (
           <div className="flex items-center gap-1">
-            <button type="button" aria-label="Run earlier" disabled={first || pending} onClick={() => run(() => moveRuleAction(rule.id, "up"))} className="h-8 w-8 rounded-lg text-zinc-400 hover:bg-zinc-800 disabled:opacity-30">
+            <button type="button" aria-label="Run earlier" disabled={first || pending} onClick={() => run(() => moveRuleAction(rule.id, "up"))} className="h-8 w-8 rounded-lg text-zinc-600 hover:bg-zinc-100 disabled:opacity-30">
               ↑
             </button>
-            <button type="button" aria-label="Run later" disabled={last || pending} onClick={() => run(() => moveRuleAction(rule.id, "down"))} className="h-8 w-8 rounded-lg text-zinc-400 hover:bg-zinc-800 disabled:opacity-30">
+            <button type="button" aria-label="Run later" disabled={last || pending} onClick={() => run(() => moveRuleAction(rule.id, "down"))} className="h-8 w-8 rounded-lg text-zinc-600 hover:bg-zinc-100 disabled:opacity-30">
               ↓
             </button>
-            <button type="button" disabled={pending} onClick={() => run(() => setRuleEnabledAction(rule.id, !rule.enabled))} className="h-8 rounded-lg px-2.5 text-sm text-zinc-300 hover:bg-zinc-800">
+            <button type="button" disabled={pending} onClick={() => run(() => setRuleEnabledAction(rule.id, !rule.enabled))} className="h-8 rounded-lg px-2.5 text-sm text-zinc-700 hover:bg-zinc-100">
               {rule.enabled ? "Turn off" : "Turn on"}
             </button>
-            <button type="button" onClick={onEdit} className="h-8 rounded-lg px-2.5 text-sm text-indigo-300 hover:bg-zinc-800">
+            <button type="button" onClick={onEdit} className="h-8 rounded-lg px-2.5 text-sm text-indigo-700 hover:bg-zinc-100">
               Edit
             </button>
             <button
@@ -454,14 +454,14 @@ function RuleCard({ rule, first, last, canEdit, onEdit }: { rule: Rule; first: b
               onClick={() => {
                 if (window.confirm(`Delete “${rule.name}”?`)) run(() => deleteRuleAction(rule.id));
               }}
-              className="h-8 rounded-lg px-2.5 text-sm text-red-400 hover:bg-zinc-800"
+              className="h-8 rounded-lg px-2.5 text-sm text-red-600 hover:bg-zinc-100"
             >
               Delete
             </button>
           </div>
         )}
       </div>
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
     </li>
   );
 }
@@ -490,8 +490,8 @@ export default function AutomationView({
       <section className="space-y-4">
         <div className="flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h2 className="text-lg font-semibold text-zinc-50">Rules</h2>
-            <p className="mt-1 text-sm text-zinc-400">Rules run from top to bottom; a later rule sees what earlier ones changed. Every change shows in the ticket’s activity.</p>
+            <h2 className="text-lg font-semibold text-zinc-900">Rules</h2>
+            <p className="mt-1 text-sm text-zinc-600">Rules run from top to bottom; a later rule sees what earlier ones changed. Every change shows in the ticket’s activity.</p>
           </div>
           {canEdit && (
             <div className="flex flex-wrap gap-2">
@@ -516,7 +516,7 @@ export default function AutomationView({
         {editing === "new" && <RuleEditor rule={null} people={people} onClose={() => setEditing(null)} />}
 
         {rules.length === 0 && editing !== "new" ? (
-          <div className={`${card} text-sm text-zinc-400`}>
+          <div className={`${card} text-sm text-zinc-600`}>
             <p>No rules yet. Start with five that most support teams use, then change them to suit yours.</p>
             {canEdit && (
               <button type="button" disabled={adding} onClick={() => startAdding(() => addStarterRulesAction())} className={`${quiet} mt-4`}>

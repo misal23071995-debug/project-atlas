@@ -35,12 +35,12 @@ function OrderRow({ order, ticketId, canAct, highlight }: { order: Order; ticket
   }
 
   return (
-    <li className={`rounded-lg border p-3 ${highlight ? "border-indigo-500/50 bg-indigo-500/5" : "border-zinc-800 bg-zinc-950/40"}`}>
+    <li className={`rounded-lg border p-3 ${highlight ? "border-indigo-500/50 bg-indigo-500/5" : "border-zinc-200 bg-zinc-50"}`}>
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <span className="font-mono text-sm text-zinc-100">{order.orderNumber}</span>
+        <span className="font-mono text-sm text-zinc-900">{order.orderNumber}</span>
         <OrderStatusBadge status={order.status} />
       </div>
-      <p className="mt-1.5 text-sm text-zinc-300">
+      <p className="mt-1.5 text-sm text-zinc-700">
         {order.items.map((i) => `${i.quantity > 1 ? `${i.quantity} × ` : ""}${i.name}${i.variant ? ` · ${i.variant}` : ""}`).join(", ")}
       </p>
       <p className="mt-1 text-xs text-zinc-500 tabular">
@@ -49,7 +49,7 @@ function OrderRow({ order, ticketId, canAct, highlight }: { order: Order; ticket
       </p>
       {order.trackingNumber && (
         <p className="mt-1 text-xs text-zinc-500">
-          {order.carrier ?? "Carrier"} tracking <span className="font-mono text-zinc-300">{order.trackingNumber}</span>
+          {order.carrier ?? "Carrier"} tracking <span className="font-mono text-zinc-700">{order.trackingNumber}</span>
         </p>
       )}
       {order.closedBy && (
@@ -62,7 +62,7 @@ function OrderRow({ order, ticketId, canAct, highlight }: { order: Order; ticket
         <div className="mt-2.5">
           {confirming ? (
             <div className="flex flex-wrap items-center gap-2 text-sm">
-              <span className="text-zinc-300">
+              <span className="text-zinc-700">
                 {confirming === "cancelled" ? "Cancel" : "Refund"} {formatMoney(order.total, order.currency)}?
               </span>
               <button
@@ -73,19 +73,19 @@ function OrderRow({ order, ticketId, canAct, highlight }: { order: Order; ticket
               >
                 {pending ? "Working…" : `Yes, ${confirming === "cancelled" ? "cancel" : "refund"}`}
               </button>
-              <button type="button" onClick={() => setConfirming(null)} className="text-xs text-zinc-400 hover:text-zinc-200">
+              <button type="button" onClick={() => setConfirming(null)} className="text-xs text-zinc-600 hover:text-zinc-800">
                 Keep it
               </button>
             </div>
           ) : (
             <div className="flex gap-3 text-xs">
               {canCancel(order) && (
-                <button type="button" onClick={() => setConfirming("cancelled")} className="font-medium text-rose-300 hover:text-rose-200">
+                <button type="button" onClick={() => setConfirming("cancelled")} className="font-medium text-rose-700 hover:text-rose-700">
                   Cancel order
                 </button>
               )}
               {canRefund(order) && (
-                <button type="button" onClick={() => setConfirming("refunded")} className="font-medium text-rose-300 hover:text-rose-200">
+                <button type="button" onClick={() => setConfirming("refunded")} className="font-medium text-rose-700 hover:text-rose-700">
                   Refund
                 </button>
               )}
@@ -93,8 +93,8 @@ function OrderRow({ order, ticketId, canAct, highlight }: { order: Order; ticket
           )}
         </div>
       )}
-      {result.error && <p role="alert" className="mt-2 text-xs text-red-400">{result.error}</p>}
-      {result.success && <p role="status" className="mt-2 text-xs text-emerald-400">{result.success}</p>}
+      {result.error && <p role="alert" className="mt-2 text-xs text-red-600">{result.error}</p>}
+      {result.success && <p role="status" className="mt-2 text-xs text-emerald-600">{result.success}</p>}
     </li>
   );
 }
@@ -127,7 +127,7 @@ export default function OrdersPanel({
         ))}
       </ul>
       {limit && orders.length > limit && (
-        <button type="button" onClick={() => setShowAll((v) => !v)} className="text-xs font-medium text-indigo-300 hover:text-indigo-200">
+        <button type="button" onClick={() => setShowAll((v) => !v)} className="text-xs font-medium text-indigo-700 hover:text-indigo-700">
           {showAll ? "Show fewer" : `Show all ${orders.length} orders`}
         </button>
       )}

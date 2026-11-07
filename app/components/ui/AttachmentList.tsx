@@ -1,7 +1,7 @@
 import { formatBytes, isImage, type Attachment } from "@/app/lib/attachments";
 
 const FileIcon = () => (
-  <svg className="h-4 w-4 shrink-0 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} aria-hidden>
+  <svg className="h-4 w-4 shrink-0 text-zinc-600" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} aria-hidden>
     <path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z" strokeLinejoin="round" />
     <path d="M14 3v5h5" strokeLinejoin="round" />
   </svg>
@@ -26,7 +26,7 @@ export default function AttachmentList({ attachments, compact = false }: { attac
                 src={`/api/attachments/${a.id}?view=1`}
                 alt={a.fileName}
                 loading="lazy"
-                className={`${compact ? "h-14 w-14" : "h-24 w-24"} rounded-lg border border-zinc-700 bg-zinc-950 object-cover hover:border-indigo-400`}
+                className={`${compact ? "h-14 w-14" : "h-24 w-24"} rounded-lg border border-zinc-300 bg-zinc-50 object-cover hover:border-indigo-400`}
               />
             </a>
           ))}
@@ -36,7 +36,7 @@ export default function AttachmentList({ attachments, compact = false }: { attac
         <a
           key={a.id}
           href={`/api/attachments/${a.id}`}
-          className="flex max-w-xs items-center gap-2 rounded-lg border border-zinc-700 bg-zinc-950/60 px-3 py-2 text-sm text-zinc-200 hover:border-indigo-400"
+          className="flex max-w-xs items-center gap-2 rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-sm text-zinc-800 hover:border-indigo-400"
         >
           <FileIcon />
           <span className="min-w-0 flex-1 truncate">{a.fileName}</span>

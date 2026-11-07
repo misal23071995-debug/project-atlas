@@ -21,8 +21,8 @@ import {
 import AssignmentStatusBadge from "./AssignmentStatusBadge";
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500";
-const labelClass = "block text-sm text-zinc-400";
+  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500";
+const labelClass = "block text-sm text-zinc-600";
 
 const blankQuestion = (): QuizQuestion => ({
   id: `q${Math.random().toString(36).slice(2, 10)}`,
@@ -109,7 +109,7 @@ export default function CourseEditor({
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <section className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
           <label className={labelClass}>
             Title
             <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} className={`mt-1 ${inputClass}`} />
@@ -150,7 +150,7 @@ export default function CourseEditor({
           </label>
         </section>
 
-        <section className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
               <h2 className="text-lg font-semibold">Quiz</h2>
@@ -162,7 +162,7 @@ export default function CourseEditor({
               type="button"
               onClick={writeWithAi}
               disabled={isWriting || questions.length >= MAX_QUESTIONS}
-              className="inline-flex items-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 hover:bg-indigo-500/20 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-500/20 disabled:opacity-60"
             >
               <SparkleIcon />
               {isWriting ? "AI is writing…" : "Write 5 questions with AI"}
@@ -170,7 +170,7 @@ export default function CourseEditor({
           </div>
 
           {questions.map((q, index) => (
-            <div key={q.id} className="space-y-3 rounded-lg border border-zinc-800 p-4">
+            <div key={q.id} className="space-y-3 rounded-lg border border-zinc-200 p-4">
               <div className="flex gap-2">
                 <span className="mt-2 text-sm text-zinc-500">{index + 1}.</span>
                 <textarea
@@ -186,7 +186,7 @@ export default function CourseEditor({
                   type="button"
                   aria-label={`Remove question ${index + 1}`}
                   onClick={() => setQuestions((current) => current.filter((_, i) => i !== index))}
-                  className="self-start px-2 py-1 text-zinc-500 hover:text-red-400"
+                  className="self-start px-2 py-1 text-zinc-500 hover:text-red-600"
                 >
                   ✕
                 </button>
@@ -229,7 +229,7 @@ export default function CourseEditor({
             <button
               type="button"
               onClick={() => setQuestions((current) => [...current, blankQuestion()])}
-              className="text-sm text-indigo-400 hover:text-indigo-300"
+              className="text-sm text-indigo-600 hover:text-indigo-700"
             >
               + Add question
             </button>
@@ -238,7 +238,7 @@ export default function CourseEditor({
       </div>
 
       <div className="space-y-6">
-        <section className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
           <label className={labelClass}>
             Pass mark (%)
             <input
@@ -264,13 +264,13 @@ export default function CourseEditor({
               A quality review scoring this criterion 1 or 2 assigns this course to the agent automatically.
             </span>
           </label>
-          <label className="flex items-center gap-2 text-sm text-zinc-300">
+          <label className="flex items-center gap-2 text-sm text-zinc-700">
             <input type="checkbox" checked={published} onChange={(e) => setPublished(e.target.checked)} />
             Published (agents can take it)
           </label>
 
-          {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-          {notice && <p role="status" className="text-sm text-emerald-400">{notice}</p>}
+          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+          {notice && <p role="status" className="text-sm text-emerald-600">{notice}</p>}
 
           <button
             type="button"
@@ -286,7 +286,7 @@ export default function CourseEditor({
               onClick={() => {
                 if (confirm("Delete this course and everyone's results for it?")) deleteCourseAction(course.id);
               }}
-              className="w-full text-sm text-red-400 hover:text-red-300"
+              className="w-full text-sm text-red-600 hover:text-red-700"
             >
               Delete course
             </button>
@@ -331,7 +331,7 @@ function AssignPanel({
   }
 
   return (
-    <section className="space-y-4 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6">
       <h2 className="text-lg font-semibold">Assign</h2>
       {!published ? (
         <p className="text-sm text-zinc-500">Publish and save the course first.</p>
@@ -342,7 +342,7 @@ function AssignPanel({
               const assignment = byUser.get(member.id);
               return (
                 <li key={member.id} className="flex items-center justify-between gap-2">
-                  <label className="flex min-w-0 items-center gap-2 text-sm text-zinc-200">
+                  <label className="flex min-w-0 items-center gap-2 text-sm text-zinc-800">
                     <input
                       type="checkbox"
                       checked={chosen.includes(member.id)}
@@ -364,12 +364,12 @@ function AssignPanel({
             Due date (optional)
             <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={`mt-1 ${inputClass}`} />
           </label>
-          {message && <p className={`text-sm ${message.ok ? "text-emerald-400" : "text-red-400"}`}>{message.text}</p>}
+          {message && <p className={`text-sm ${message.ok ? "text-emerald-600" : "text-red-600"}`}>{message.text}</p>}
           <button
             type="button"
             onClick={assign}
             disabled={isPending || chosen.length === 0}
-            className="w-full rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"
+            className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-800 hover:bg-zinc-100 disabled:opacity-50"
           >
             {isPending ? "Assigning…" : "Assign course"}
           </button>

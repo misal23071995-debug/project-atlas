@@ -84,14 +84,14 @@ async function handleCreateTicket(message: ChatMessage) {
   }
 }
   return (
-    <div className="min-h-screen bg-zinc-950 text-white flex justify-center py-10">
-      <div className="w-full max-w-3xl rounded-xl border border-zinc-800 bg-zinc-900 p-6 shadow-lg">
+    <div className="min-h-screen bg-zinc-50 text-white flex justify-center py-10">
+      <div className="w-full max-w-3xl rounded-xl border border-zinc-200 bg-white p-6 shadow-lg">
 
         <h1 className="text-3xl font-bold">
           Atlas AI Assistant
         </h1>
 
-        <p className="mt-2 text-zinc-400">
+        <p className="mt-2 text-zinc-600">
           Ask Atlas anything before creating a support ticket.
         </p>
 

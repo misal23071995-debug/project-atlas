@@ -24,7 +24,7 @@ export default async function RosterPage({ searchParams }: { searchParams: Promi
   return (
     <DashboardLayout>
       {shifts === null || leave === null ? (
-        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
           Run supabase/migrations/008_roster.sql in the Supabase SQL Editor to turn on the roster.
         </p>
       ) : (

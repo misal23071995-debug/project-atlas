@@ -42,8 +42,8 @@ export default function ReplyEditor({
   const uploading = files.some((f) => f.status === "uploading");
   const ready = files.filter((f) => f.status === "ready").length;
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6">
-      <h2 className="mb-4 text-lg font-semibold text-zinc-50">
+    <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
+      <h2 className="mb-4 text-lg font-semibold text-zinc-900">
         {title}
       </h2>
 
@@ -58,7 +58,7 @@ export default function ReplyEditor({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="Type your reply..."
-        className="h-44 w-full rounded-lg border border-zinc-800 bg-zinc-950/60 p-4 text-sm leading-relaxed text-zinc-100 placeholder:text-zinc-500 focus:border-indigo-500 focus:outline-none"
+        className="h-44 w-full rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm leading-relaxed text-zinc-900 placeholder:text-zinc-500 focus:border-indigo-500 focus:outline-none"
       />
 
       {files.length > 0 && (
@@ -67,7 +67,7 @@ export default function ReplyEditor({
             <li
               key={f.key}
               className={`flex items-center gap-2 rounded-lg border px-2.5 py-1.5 text-xs ${
-                f.status === "error" ? "border-rose-500/40 text-rose-300" : "border-zinc-700 text-zinc-300"
+                f.status === "error" ? "border-rose-500/40 text-rose-700" : "border-zinc-300 text-zinc-700"
               }`}
               title={f.error}
             >
@@ -76,7 +76,7 @@ export default function ReplyEditor({
                 {f.status === "uploading" ? "uploading…" : f.status === "error" ? "failed" : formatBytes(f.size)}
               </span>
               {onRemoveFile && (
-                <button type="button" aria-label={`Remove ${f.fileName}`} onClick={() => onRemoveFile(f.key)} className="text-zinc-500 hover:text-zinc-200">
+                <button type="button" aria-label={`Remove ${f.fileName}`} onClick={() => onRemoveFile(f.key)} className="text-zinc-500 hover:text-zinc-800">
                   ✕
                 </button>
               )}
@@ -84,13 +84,13 @@ export default function ReplyEditor({
           ))}
         </ul>
       )}
-      {files.some((f) => f.error) && <p role="alert" className="mt-2 text-xs text-rose-300">{files.find((f) => f.error)?.error}</p>}
+      {files.some((f) => f.error) && <p role="alert" className="mt-2 text-xs text-rose-700">{files.find((f) => f.error)?.error}</p>}
 
       <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
         <div className="flex min-w-0 items-center gap-3">
           {onAttach && (
             <label
-              className={`inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-700 px-3 text-sm text-zinc-200 hover:bg-zinc-800 ${
+              className={`inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-zinc-300 px-3 text-sm text-zinc-800 hover:bg-zinc-100 ${
                 files.length >= MAX_FILES_PER_MESSAGE ? "pointer-events-none opacity-50" : ""
               }`}
             >

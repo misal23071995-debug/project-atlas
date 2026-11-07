@@ -14,7 +14,7 @@ export default function ChatRating({ conversationId }: { conversationId: string 
   const [isPending, startTransition] = useTransition();
 
   if (done) {
-    return <p className="text-sm text-emerald-400">Thanks for your feedback!</p>;
+    return <p className="text-sm text-emerald-600">Thanks for your feedback!</p>;
   }
 
   function submit() {
@@ -30,7 +30,7 @@ export default function ChatRating({ conversationId }: { conversationId: string 
 
   return (
     <div className="space-y-3">
-      <p className="text-sm text-zinc-300">How did we do?</p>
+      <p className="text-sm text-zinc-700">How did we do?</p>
 
       <div className="flex justify-center gap-1" role="radiogroup" aria-label="Rate this chat" onMouseLeave={() => setHovered(0)}>
         {LABELS.map((label, index) => {
@@ -45,7 +45,7 @@ export default function ChatRating({ conversationId }: { conversationId: string 
               onMouseEnter={() => setHovered(value)}
               onClick={() => setRating(value)}
               className={`text-3xl leading-none transition-colors ${
-                value <= shown ? "text-amber-400" : "text-zinc-600 hover:text-zinc-500"
+                value <= shown ? "text-amber-600" : "text-zinc-400 hover:text-zinc-500"
               }`}
             >
               ★
@@ -63,7 +63,7 @@ export default function ChatRating({ conversationId }: { conversationId: string 
             rows={2}
             maxLength={1000}
             placeholder="Anything we could do better? (optional)"
-            className="w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm outline-none focus:border-indigo-500"
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm outline-none focus:border-indigo-500"
           />
           <button
             type="button"
@@ -76,7 +76,7 @@ export default function ChatRating({ conversationId }: { conversationId: string 
         </>
       )}
 
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
     </div>
   );
 }

@@ -86,8 +86,8 @@ export function totalScore(scores: Pick<CriterionScore, "weight" | "score">[]) {
 }
 
 export function scoreBand(total: number) {
-  if (total >= 85) return { label: "Excellent", className: "text-emerald-400" };
-  if (total >= 70) return { label: "Good", className: "text-sky-400" };
-  if (total >= 50) return { label: "Needs work", className: "text-amber-400" };
-  return { label: "Poor", className: "text-red-400" };
+  if (total >= 85) return { label: "Excellent", className: "text-emerald-600" };
+  if (total >= 70) return { label: "Good", className: "text-sky-600" };
+  if (total >= 50) return { label: "Needs work", className: "text-amber-600" };
+  return { label: "Poor", className: "text-red-600" };
 }

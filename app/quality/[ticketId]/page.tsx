@@ -27,10 +27,10 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
   if (!ticket || !allowed) {
     return (
       <DashboardLayout>
-        <Link href="/quality" className="text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/quality" className="text-sm text-zinc-600 hover:text-zinc-800">
           ← Quality
         </Link>
-        <p className="mt-6 text-zinc-400">This review doesn&apos;t exist or isn&apos;t yours to see.</p>
+        <p className="mt-6 text-zinc-600">This review doesn&apos;t exist or isn&apos;t yours to see.</p>
       </DashboardLayout>
     );
   }
@@ -45,29 +45,29 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
 
   return (
     <DashboardLayout>
-      <Link href="/quality" className="text-sm text-zinc-400 hover:text-zinc-200">
+      <Link href="/quality" className="text-sm text-zinc-600 hover:text-zinc-800">
         ← Quality
       </Link>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
         <div>
           <h1 className="text-3xl font-bold">Review ticket #{ticket.id}</h1>
-          <p className="mt-1 text-zinc-400">
-            {ticket.subject} · agent <span className="text-zinc-200">{agentName}</span>
+          <p className="mt-1 text-zinc-600">
+            {ticket.subject} · agent <span className="text-zinc-800">{agentName}</span>
           </p>
         </div>
-        <Link href={`/tickets/${ticket.id}`} className="text-sm text-indigo-400 hover:underline">
+        <Link href={`/tickets/${ticket.id}`} className="text-sm text-indigo-600 hover:underline">
           Open ticket ↗
         </Link>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-5">
-        <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 lg:col-span-3">
+        <section className="rounded-xl border border-zinc-200 bg-white p-6 lg:col-span-3">
           <h2 className="mb-4 text-lg font-semibold">Conversation</h2>
           <div className="space-y-4">
             {ticket.conversation.map((message, index) => (
               <div
                 key={index}
-                className={message.role === "customer" ? "rounded-lg bg-zinc-800 p-4" : "ml-8 rounded-lg bg-indigo-600/20 p-4"}
+                className={message.role === "customer" ? "rounded-lg bg-zinc-100 p-4" : "ml-8 rounded-lg bg-indigo-600/20 p-4"}
               >
                 <p className="text-sm font-medium">
                   {message.sender}
@@ -90,7 +90,7 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
               readOnly={!isReviewer}
             />
           ) : (
-            <p className="rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-sm text-zinc-400">
+            <p className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600">
               No agent has replied on this ticket yet, so there&apos;s nothing to score.
             </p>
           )}

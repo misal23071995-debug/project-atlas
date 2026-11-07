@@ -10,10 +10,10 @@ export default function ChatMessage({ message, onCreateTicket }: Props) {
   const confidence = message.analysis?.confidence ?? 0;
   const confidenceColor =
   confidence >= 85
-    ? "bg-green-500/20 text-green-400"
+    ? "bg-green-500/20 text-green-600"
     : confidence >= 60
-    ? "bg-yellow-500/20 text-yellow-400"
-    : "bg-red-500/20 text-red-400";
+    ? "bg-yellow-500/20 text-yellow-600"
+    : "bg-red-500/20 text-red-600";
   const needsEscalation = confidence < 60;
 
     return (
@@ -22,7 +22,7 @@ export default function ChatMessage({ message, onCreateTicket }: Props) {
         className={
           isUser
             ? "max-w-[75%] rounded-xl bg-blue-600 px-4 py-3"
-            : "max-w-[75%] rounded-xl bg-zinc-800 px-4 py-3"
+            : "max-w-[75%] rounded-xl bg-zinc-100 px-4 py-3"
         }
       >
         {isUser ? (
@@ -33,7 +33,7 @@ export default function ChatMessage({ message, onCreateTicket }: Props) {
 
             <p>{message.analysis?.suggestedReply}</p>
 
-            <div className="mt-3 space-y-1 text-sm text-zinc-300">
+            <div className="mt-3 space-y-1 text-sm text-zinc-700">
               <p>
                 <strong>Intent:</strong> {message.analysis?.intent}
               </p>
@@ -56,11 +56,11 @@ export default function ChatMessage({ message, onCreateTicket }: Props) {
             </div>
             {needsEscalation && (
               <div className="mt-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3">
-                <p className="text-sm font-semibold text-red-400">
+                <p className="text-sm font-semibold text-red-600">
                   ⚠ AI recommends human escalation
                 </p>
 
-                <p className="mt-1 text-xs text-red-300">
+                <p className="mt-1 text-xs text-red-700">
                   Confidence is low. Review this conversation before sending a reply.
                 </p>
               </div>

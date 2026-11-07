@@ -20,7 +20,7 @@ export default async function EditArticlePage({
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-3xl">
-        <Link href="/knowledge" className="text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/knowledge" className="text-sm text-zinc-600 hover:text-zinc-800">
           ← Knowledge Base
         </Link>
 
@@ -35,12 +35,12 @@ export default async function EditArticlePage({
               <article className="mt-2">
                 <h1 className="text-3xl font-bold">{article.title}</h1>
                 <p className="mt-1 text-sm text-zinc-500">{article.category}</p>
-                <p className="mt-6 whitespace-pre-line text-zinc-200">{article.body}</p>
+                <p className="mt-6 whitespace-pre-line text-zinc-800">{article.body}</p>
               </article>
             )}
           </>
         ) : (
-          <p className="mt-6 text-zinc-400">This article doesn&apos;t exist.</p>
+          <p className="mt-6 text-zinc-600">This article doesn&apos;t exist.</p>
         )}
       </div>
     </DashboardLayout>

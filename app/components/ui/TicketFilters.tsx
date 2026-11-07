@@ -16,7 +16,7 @@ type TicketFiltersProps = {
 export const SLA_FILTERS = ["All SLAs", "Breached", "At risk", "Paused"] as const;
 
 const control =
-  "h-9 rounded-lg border border-zinc-800 bg-zinc-950/60 px-3 text-sm text-zinc-200 outline-none transition-colors focus:border-indigo-500";
+  "h-9 rounded-lg border border-zinc-200 bg-zinc-50 px-3 text-sm text-zinc-800 outline-none transition-colors focus:border-indigo-500";
 
 export default function TicketFilters({
   search,
@@ -29,7 +29,7 @@ export default function TicketFilters({
   onSlaChange,
 }: TicketFiltersProps) {
   return (
-    <div className="flex flex-col gap-3 border-b border-zinc-800 p-4 sm:px-6 lg:flex-row lg:items-center">
+    <div className="flex flex-col gap-3 border-b border-zinc-200 p-4 sm:px-6 lg:flex-row lg:items-center">
       <label className="relative flex-1">
         <span className="sr-only">Search tickets</span>
         <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>

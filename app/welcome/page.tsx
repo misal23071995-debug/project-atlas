@@ -13,11 +13,11 @@ export default async function WelcomePage() {
   if ("org" in session) redirect("/");
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 bg-[radial-gradient(60rem_30rem_at_50%_-10%,rgba(99,102,241,0.16),transparent)] p-4 font-sans">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-50 bg-[radial-gradient(60rem_30rem_at_50%_-10%,rgba(99,102,241,0.16),transparent)] p-4 font-sans">
       <div className="w-full max-w-sm space-y-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-zinc-900 dark:text-zinc-50">You&apos;re not in a workspace</h1>
-          <p className="mt-2 text-sm text-zinc-500 dark:text-zinc-400">
+          <h1 className="text-2xl font-bold text-zinc-900">You&apos;re not in a workspace</h1>
+          <p className="mt-2 text-sm text-zinc-600">
             Signed in as {session.agent.email}. Ask your team&apos;s admin to add you
             {signupOpen() ? ", or start a workspace for your own company" : ""}.
           </p>
@@ -26,7 +26,7 @@ export default async function WelcomePage() {
         {signupOpen() && <CreateWorkspaceForm />}
 
         <form action={signOutAction} className="text-center">
-          <button type="submit" className="text-sm text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-200">
+          <button type="submit" className="text-sm text-zinc-500 hover:text-zinc-800">
             Sign out
           </button>
         </form>

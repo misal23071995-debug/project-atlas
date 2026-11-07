@@ -14,8 +14,8 @@ import {
 } from "./actions";
 
 export const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
-const labelClass = "block text-sm text-zinc-400";
+  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
+const labelClass = "block text-sm text-zinc-600";
 const buttonClass =
   "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60";
 
@@ -36,8 +36,8 @@ function ActionForm({
   return (
     <form action={formAction} key={resetOnSuccess && state.success ? state.success : undefined} className="space-y-4">
       {children}
-      {state.error && <p role="alert" className="text-sm text-red-400">{state.error}</p>}
-      {state.success && <p role="status" className="text-sm text-emerald-400">{state.success}</p>}
+      {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
+      {state.success && <p role="status" className="text-sm text-emerald-600">{state.success}</p>}
       <button type="submit" disabled={pending} className={buttonClass}>
         {pending ? "Saving…" : submitLabel}
       </button>
@@ -97,7 +97,7 @@ export function CopyLink({ url }: { url: string }) {
           setCopied(true);
           setTimeout(() => setCopied(false), 2000);
         }}
-        className="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+        className="shrink-0 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
       >
         {copied ? "Copied" : "Copy"}
       </button>
@@ -128,14 +128,14 @@ export function AddMemberForm() {
             ))}
           </select>
         </label>
-        <fieldset className="text-sm text-zinc-400">
+        <fieldset className="text-sm text-zinc-600">
           <legend>How they get in</legend>
           <div className="mt-2 flex flex-col gap-1.5">
-            <label className="flex items-center gap-2 text-zinc-200">
+            <label className="flex items-center gap-2 text-zinc-800">
               <input type="radio" name="method" value="invite" checked={method === "invite"} onChange={() => setMethod("invite")} />
               Email them an invite link
             </label>
-            <label className="flex items-center gap-2 text-zinc-200">
+            <label className="flex items-center gap-2 text-zinc-800">
               <input type="radio" name="method" value="password" checked={method === "password"} onChange={() => setMethod("password")} />
               Set a temporary password
             </label>
@@ -174,14 +174,14 @@ export function MemberRow({ member, isYou, canManage }: { member: Member; isYou:
   }
 
   return (
-    <tr className="border-t border-zinc-800 align-top">
+    <tr className="border-t border-zinc-200 align-top">
       <td className="px-4 py-3">
-        <p className="font-medium text-zinc-100">
+        <p className="font-medium text-zinc-900">
           {member.name}
           {isYou && <span className="ml-2 text-xs text-zinc-500">(you)</span>}
         </p>
         <p className="text-xs text-zinc-500">{member.email}</p>
-        {error && <p role="alert" className="mt-1 text-xs text-red-400">{error}</p>}
+        {error && <p role="alert" className="mt-1 text-xs text-red-600">{error}</p>}
       </td>
       <td className="px-4 py-3">
         {canManage ? (
@@ -190,7 +190,7 @@ export function MemberRow({ member, isYou, canManage }: { member: Member; isYou:
             disabled={isPending}
             onChange={(e) => run(() => changeRoleAction(member.id, e.target.value))}
             aria-label={`Role for ${member.name}`}
-            className="rounded-md border border-zinc-700 bg-zinc-800 px-2 py-1 text-sm disabled:opacity-60"
+            className="rounded-md border border-zinc-300 bg-zinc-100 px-2 py-1 text-sm disabled:opacity-60"
           >
             {ROLES.map((role) => (
               <option key={role} value={role}>
@@ -199,7 +199,7 @@ export function MemberRow({ member, isYou, canManage }: { member: Member; isYou:
             ))}
           </select>
         ) : (
-          <span className="text-zinc-300">{ROLE_LABELS[member.role as Role]}</span>
+          <span className="text-zinc-700">{ROLE_LABELS[member.role as Role]}</span>
         )}
       </td>
       <td className="px-4 py-3 text-right">
@@ -213,7 +213,7 @@ export function MemberRow({ member, isYou, canManage }: { member: Member; isYou:
                 run(() => removeMemberAction(member.id));
               }
             }}
-            className="text-sm text-red-400 hover:text-red-300 disabled:opacity-50"
+            className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50"
           >
             Remove
           </button>
@@ -227,9 +227,9 @@ export function RoleGuide() {
   return (
     <dl className="grid gap-3 sm:grid-cols-2">
       {ROLES.map((role) => (
-        <div key={role} className="rounded-lg border border-zinc-800 bg-zinc-900/60 p-3">
-          <dt className="text-sm font-medium text-zinc-100">{ROLE_LABELS[role]}</dt>
-          <dd className="mt-1 text-xs text-zinc-400">{ROLE_DESCRIPTIONS[role]}</dd>
+        <div key={role} className="rounded-lg border border-zinc-200 bg-white p-3">
+          <dt className="text-sm font-medium text-zinc-900">{ROLE_LABELS[role]}</dt>
+          <dd className="mt-1 text-xs text-zinc-600">{ROLE_DESCRIPTIONS[role]}</dd>
         </div>
       ))}
     </dl>

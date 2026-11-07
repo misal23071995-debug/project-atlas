@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { initials } from "@/app/lib/auth/agent";
 import { ROLE_LABELS } from "@/app/lib/auth/roles";
 import { signOutAction } from "@/app/login/actions";
@@ -129,57 +129,53 @@ const NAV_SECTIONS = [
   { label: "Workspace", items: ["Team", "Automation", "Settings"] },
 ];
 
-function SidebarContent({
-  pathname,
-  onNavigate,
-}: {
-  pathname: string;
-  onNavigate?: () => void;
-}) {
+const LOGO =
+  "M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z";
+
+// The dark navy sidebar: workspace, navigation grouped by job
+function SidebarContent({ pathname, onNavigate }: { pathname: string; onNavigate?: () => void }) {
   const session = useSession();
-  const agent = session?.agent;
 
   return (
     <>
-      <div className="flex h-16 items-center gap-3 border-b border-zinc-200 px-6 dark:border-zinc-800">
-        <Link href="/" onClick={onNavigate} className="flex items-center gap-3">
-          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-600 text-white">
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+      <div className="flex h-14 items-center gap-2.5 px-4">
+        <Link href="/" onClick={onNavigate} className="flex min-w-0 items-center gap-2.5">
+          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-indigo-500 text-white">
+            <svg className="h-4.5 w-4.5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" aria-hidden>
+              <path strokeLinecap="round" strokeLinejoin="round" d={LOGO} />
             </svg>
-          </div>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">
-              {session?.org.name ?? "Atlas"}
-            </p>
-            <p className="text-xs text-zinc-500">Atlas support desk</p>
-          </div>
+          </span>
+          <span className="min-w-0">
+            <span className="block truncate text-sm font-semibold text-white">{session?.org.name ?? "Atlas"}</span>
+            <span className="block text-[0.7rem] text-slate-400">Atlas support desk</span>
+          </span>
         </Link>
       </div>
 
       {session && session.workspaces.length > 1 && (
-        <div className="border-b border-zinc-200 px-4 py-3 dark:border-zinc-800">
-          <label className="block text-xs text-zinc-500 dark:text-zinc-400">
+        <div className="px-3 pb-2">
+          <label className="sr-only" htmlFor="workspace-switch">
             Workspace
-            <select
-              value={session.org.id}
-              onChange={(e) => switchWorkspaceAction(e.target.value)}
-              className="mt-1 w-full rounded-md border border-zinc-300 bg-white px-2 py-1.5 text-sm text-zinc-900 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-100"
-            >
-              {session.workspaces.map((workspace) => (
-                <option key={workspace.id} value={workspace.id}>
-                  {workspace.name}
-                </option>
-              ))}
-            </select>
           </label>
+          <select
+            id="workspace-switch"
+            value={session.org.id}
+            onChange={(e) => switchWorkspaceAction(e.target.value)}
+            className="w-full rounded-md border border-nav-line bg-nav-hover px-2 py-1.5 text-sm text-slate-200"
+          >
+            {session.workspaces.map((workspace) => (
+              <option key={workspace.id} value={workspace.id}>
+                {workspace.name}
+              </option>
+            ))}
+          </select>
         </div>
       )}
 
-      <nav className="flex-1 space-y-5 overflow-y-auto px-3 py-4">
+      <nav className="flex-1 space-y-5 overflow-y-auto px-2.5 py-3">
         {NAV_SECTIONS.map((section) => (
           <div key={section.label}>
-            <p className="px-3 pb-1.5 text-[0.68rem] font-medium uppercase tracking-[0.08em] text-zinc-500">{section.label}</p>
+            <p className="px-2.5 pb-1.5 text-[0.65rem] font-semibold uppercase tracking-[0.1em] text-slate-500">{section.label}</p>
             <div className="space-y-0.5">
               {navItems
                 .filter((item) => section.items.includes(item.label))
@@ -197,13 +193,11 @@ function SidebarContent({
                       href={item.href}
                       onClick={onNavigate}
                       aria-current={isActive ? "page" : undefined}
-                      className={`relative flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors ${
-                        isActive
-                          ? "bg-indigo-500/10 text-indigo-200 before:absolute before:inset-y-1.5 before:left-0 before:w-0.5 before:rounded-full before:bg-indigo-400"
-                          : "text-zinc-400 hover:bg-zinc-800/60 hover:text-zinc-100"
+                      className={`flex w-full items-center gap-2.5 rounded-md px-2.5 py-1.5 text-[0.84rem] font-medium transition-colors ${
+                        isActive ? "bg-indigo-500 text-white shadow-sm" : "text-slate-300 hover:bg-nav-hover hover:text-white"
                       }`}
                     >
-                      <span className={isActive ? "text-indigo-300" : "text-zinc-500"}>{item.icon}</span>
+                      <span className={`[&>svg]:h-[1.05rem] [&>svg]:w-[1.05rem] ${isActive ? "text-white" : "text-slate-400"}`}>{item.icon}</span>
                       {item.label}
                     </Link>
                   );
@@ -213,31 +207,124 @@ function SidebarContent({
         ))}
       </nav>
 
-      <div className="border-t border-zinc-200 p-4 dark:border-zinc-800">
-        <div className="flex items-center gap-3 rounded-lg bg-zinc-50 p-3 dark:bg-zinc-800/50">
-          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-100 text-sm font-semibold text-indigo-700 dark:bg-indigo-500/20 dark:text-indigo-300">
-            {agent ? initials(agent.name) : "?"}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-medium text-zinc-900 dark:text-zinc-100">
-              {agent?.name ?? "Not signed in"}
-            </p>
-            <p className="truncate text-xs text-zinc-500 dark:text-zinc-400">
-              {session ? ROLE_LABELS[session.role] : ""}
-              {agent?.email ? ` · ${agent.email}` : ""}
-            </p>
-          </div>
-        </div>
-        <form action={signOutAction} className="mt-2">
-          <button
-            type="submit"
-            className="w-full rounded-lg px-3 py-2 text-left text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
-          >
-            Sign out
-          </button>
-        </form>
+      <div className="border-t border-nav-line px-4 py-3 text-[0.7rem] text-slate-500">
+        <a href={session ? `/support/${session.org.slug}` : "#"} target="_blank" rel="noreferrer" className="hover:text-slate-300">
+          Customer chat page ↗
+        </a>
       </div>
     </>
+  );
+}
+
+// Jump to tickets from anywhere: by number, subject, customer or agent
+function GlobalSearch() {
+  const router = useRouter();
+  const [value, setValue] = useState("");
+  const input = useRef<HTMLInputElement>(null);
+
+  // "/" focuses search, as in most support desks
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      const target = e.target as HTMLElement;
+      if (e.key === "/" && !["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName) && !target.isContentEditable) {
+        e.preventDefault();
+        input.current?.focus();
+      }
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
+
+  return (
+    <form
+      role="search"
+      className="relative w-full max-w-md"
+      onSubmit={(e) => {
+        e.preventDefault();
+        const q = value.trim();
+        if (/^#?\d{3,12}$/.test(q)) router.push(`/tickets/${q.replace("#", "")}`);
+        else router.push(q ? `/tickets?q=${encodeURIComponent(q)}` : "/tickets");
+      }}
+    >
+      <svg className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
+        <circle cx="11" cy="11" r="7" />
+        <path d="m20 20-3.5-3.5" strokeLinecap="round" />
+      </svg>
+      <input
+        ref={input}
+        type="search"
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        placeholder="Search tickets, customers or #number"
+        aria-label="Search tickets"
+        className="h-9 w-full rounded-lg border border-zinc-200 bg-zinc-50 pl-9 pr-10 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:bg-white focus:ring-2 focus:ring-indigo-500/15"
+      />
+      <kbd className="pointer-events-none absolute right-2.5 top-1/2 hidden -translate-y-1/2 rounded border border-zinc-200 bg-white px-1.5 text-[0.65rem] text-zinc-400 sm:block">/</kbd>
+    </form>
+  );
+}
+
+// Avatar menu: who you are, your role, settings and sign out
+function ProfileMenu() {
+  const session = useSession();
+  const agent = session?.agent;
+  const [open, setOpen] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    const close = (e: MouseEvent) => !box.current?.contains(e.target as Node) && setOpen(false);
+    const esc = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    document.addEventListener("mousedown", close);
+    document.addEventListener("keydown", esc);
+    return () => {
+      document.removeEventListener("mousedown", close);
+      document.removeEventListener("keydown", esc);
+    };
+  }, [open]);
+
+  return (
+    <div ref={box} className="relative">
+      <button
+        type="button"
+        aria-haspopup="menu"
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-full p-0.5 pr-2 hover:bg-zinc-100"
+      >
+        <span className="flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
+          {agent ? initials(agent.name) : "?"}
+        </span>
+        <span className="hidden text-left leading-tight md:block">
+          <span className="block text-sm font-medium text-zinc-900">{agent?.name}</span>
+          <span className="block text-[0.7rem] text-zinc-500">{session ? ROLE_LABELS[session.role] : ""}</span>
+        </span>
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 top-11 z-50 w-64 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-lg shadow-zinc-900/10">
+          <div className="border-b border-zinc-100 px-4 py-3">
+            <p className="truncate text-sm font-medium text-zinc-900">{agent?.name}</p>
+            <p className="truncate text-xs text-zinc-500">{agent?.email}</p>
+            <p className="mt-1 text-xs text-zinc-500">
+              {session ? ROLE_LABELS[session.role] : ""} · {session?.org.name}
+            </p>
+          </div>
+          <div className="py-1 text-sm">
+            <Link role="menuitem" href="/settings" className="block px-4 py-2 text-zinc-700 hover:bg-zinc-50">
+              Settings and profile
+            </Link>
+            <Link role="menuitem" href="/training" className="block px-4 py-2 text-zinc-700 hover:bg-zinc-50">
+              My training
+            </Link>
+            <form action={signOutAction}>
+              <button type="submit" role="menuitem" className="block w-full px-4 py-2 text-left text-zinc-700 hover:bg-zinc-50">
+                Sign out
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -245,22 +332,20 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const canWork = useCan("tickets.work");
-  const session = useSession();
-  const workspaceName = session?.org.name ?? "Atlas";
 
   return (
-    <div className="flex min-h-screen bg-zinc-50 font-sans dark:bg-zinc-950">
+    <div className="flex min-h-screen bg-[#f4f6fa] font-sans text-zinc-900">
       {sidebarOpen && (
         <button
           type="button"
-          aria-label="Close sidebar"
-          className="fixed inset-0 z-40 bg-zinc-900/50 backdrop-blur-sm lg:hidden"
+          aria-label="Close menu"
+          className="fixed inset-0 z-40 bg-zinc-900/40 backdrop-blur-[2px] lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-zinc-800/80 bg-zinc-900 lg:bg-zinc-900/60 transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-60 flex-col bg-nav transition-transform duration-200 lg:sticky lg:top-0 lg:h-screen lg:translate-x-0 ${
           sidebarOpen ? "translate-x-0" : "-translate-x-full"
         }`}
       >
@@ -268,47 +353,33 @@ export default function DashboardLayout({ children }: { children: ReactNode }) {
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">
-        <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-zinc-800/80 bg-zinc-950/80 px-4 backdrop-blur-md sm:px-6 lg:px-8">
+        <header className="sticky top-0 z-30 flex h-14 items-center gap-3 border-b border-zinc-200 bg-white/95 px-4 backdrop-blur sm:px-6">
           <button
             type="button"
-            aria-label="Open sidebar"
-            className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800 lg:hidden"
+            aria-label="Open menu"
+            className="rounded-lg p-2 text-zinc-600 hover:bg-zinc-100 lg:hidden"
             onClick={() => setSidebarOpen(true)}
           >
-            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+            <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" aria-hidden>
               <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
             </svg>
           </button>
 
-          <div className="flex flex-1 items-center justify-between">
-            <p className="text-sm text-zinc-500 dark:text-zinc-400 lg:hidden">{workspaceName}</p>
-            <div className="hidden flex-1 lg:block" />
-            <div className="flex items-center gap-3">
-              {session && (
-                <a
-                  href={`/support/${session.org.slug}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="hidden h-9 items-center gap-1.5 rounded-lg px-3 text-sm text-zinc-400 hover:bg-zinc-800 hover:text-zinc-100 sm:inline-flex"
-                >
-                  Customer chat
-                  <svg className="h-3.5 w-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} aria-hidden>
-                    <path d="M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5" strokeLinecap="round" strokeLinejoin="round" />
-                  </svg>
-                </a>
-              )}
-              {canWork && (
-                <Link
-                  href="/tickets/new"
-                  className="inline-flex h-9 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 text-sm font-medium text-white shadow-sm shadow-indigo-950 transition-colors hover:bg-indigo-500"
-                >
-                  <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
-                    <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-                  </svg>
-                  New ticket
-                </Link>
-              )}
-            </div>
+          <GlobalSearch />
+
+          <div className="ml-auto flex items-center gap-2">
+            {canWork && (
+              <Link
+                href="/tickets/new"
+                className="hidden h-9 items-center gap-1.5 rounded-lg bg-indigo-600 px-3.5 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 sm:inline-flex"
+              >
+                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.2} aria-hidden>
+                  <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+                </svg>
+                New ticket
+              </Link>
+            )}
+            <ProfileMenu />
           </div>
         </header>
 

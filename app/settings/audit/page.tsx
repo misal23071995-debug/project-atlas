@@ -38,7 +38,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
   if (!can(role, "audit.view")) {
     return (
       <DashboardLayout>
-        <p className="mx-auto max-w-xl rounded-xl border border-zinc-800 bg-zinc-900/60 p-8 text-center text-zinc-400">The audit log is for workspace admins.</p>
+        <p className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-8 text-center text-zinc-600">The audit log is for workspace admins.</p>
       </DashboardLayout>
     );
   }
@@ -51,11 +51,11 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
     <DashboardLayout>
       <div className="mx-auto max-w-5xl space-y-6">
         <div>
-          <Link href="/settings" className="text-sm text-zinc-400 hover:text-zinc-200">
+          <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
           <h1 className="mt-2 text-3xl font-bold">Audit log</h1>
-          <p className="mt-1 text-zinc-400">Who changed what in {org.name}: the team, sign-in security, settings, rules and orders. Latest 200.</p>
+          <p className="mt-1 text-zinc-600">Who changed what in {org.name}: the team, sign-in security, settings, rules and orders. Latest 200.</p>
         </div>
 
         <nav className="flex flex-wrap gap-2" aria-label="Filter">
@@ -63,7 +63,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
             <Link
               key={f.id}
               href={f.id ? `/settings/audit?type=${f.id}` : "/settings/audit"}
-              className={`rounded-full px-3 py-1 text-sm ${type === f.id ? "bg-indigo-600 text-white" : "border border-zinc-800 text-zinc-300 hover:bg-zinc-800"}`}
+              className={`rounded-full px-3 py-1 text-sm ${type === f.id ? "bg-indigo-600 text-white" : "border border-zinc-200 text-zinc-700 hover:bg-zinc-100"}`}
             >
               {f.label}
             </Link>
@@ -71,13 +71,13 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         </nav>
 
         {entries === null ? (
-          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
             The audit log isn&apos;t set up yet. Run supabase/migrations/017_audit_log.sql in the Supabase SQL Editor.
           </p>
         ) : entries.length === 0 ? (
-          <p className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-8 text-center text-sm text-zinc-500">Nothing recorded yet.</p>
+          <p className="rounded-xl border border-zinc-200 bg-white p-8 text-center text-sm text-zinc-500">Nothing recorded yet.</p>
         ) : (
-          <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60">
+          <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
             <div className="overflow-x-auto">
               <table className="w-full min-w-[40rem] text-left text-sm">
                 <thead>
@@ -89,13 +89,13 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
                 </thead>
                 <tbody>
                   {entries.map((e) => (
-                    <tr key={e.id} className="border-t border-zinc-800/80 align-top">
+                    <tr key={e.id} className="border-t border-zinc-200 align-top">
                       <td className="whitespace-nowrap py-3 pl-5 pr-4 text-xs text-zinc-500 tabular sm:pl-6">{formatDateTime(e.createdAt)}</td>
-                      <td className="whitespace-nowrap px-4 py-3 text-zinc-200">{e.actorName}</td>
+                      <td className="whitespace-nowrap px-4 py-3 text-zinc-800">{e.actorName}</td>
                       <td className="py-3 pl-4 pr-5 sm:pr-6">
-                        <p className="text-zinc-100">
+                        <p className="text-zinc-900">
                           {AUDIT_ACTIONS[e.action as AuditAction] ?? e.action}
-                          {e.target && <span className="text-zinc-400">: {e.target}</span>}
+                          {e.target && <span className="text-zinc-600">: {e.target}</span>}
                         </p>
                         {describe(e.details) && <p className="mt-0.5 text-xs text-zinc-500">{describe(e.details)}</p>}
                       </td>

@@ -13,8 +13,8 @@ import { currentClock, isAtRisk, isBreached, isDone } from "@/app/lib/sla";
 const PAGE_SIZE = 12;
 const ALL = "All";
 
-export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
-  const [search, setSearch] = useState("");
+export default function TicketsView({ tickets, initialSearch = "" }: { tickets: Ticket[]; initialSearch?: string }) {
+  const [search, setSearch] = useState(initialSearch);
   const [statusFilter, setStatusFilter] = useState(ALL);
   const [priorityFilter, setPriorityFilter] = useState(ALL);
   const [slaFilter, setSlaFilter] = useState<string>(SLA_FILTERS[0]);
@@ -31,6 +31,7 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
         ticket.id.toLowerCase().includes(query) ||
         ticket.subject.toLowerCase().includes(query) ||
         ticket.customer.name.toLowerCase().includes(query) ||
+        ticket.customer.email.toLowerCase().includes(query) ||
         ticket.assignedTo.toLowerCase().includes(query);
 
       const matchesStatus = statusFilter === ALL || ticket.status === statusFilter;
@@ -83,17 +84,17 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
     <DashboardLayout>
       <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">Tickets</h1>
-          <p className="mt-1 text-sm text-zinc-400">
-            <span className="tabular text-zinc-200">{counts.open}</span> open ·{" "}
-            <span className="tabular text-zinc-200">{counts.unassigned}</span> unassigned
+          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">Tickets</h1>
+          <p className="mt-1 text-sm text-zinc-600">
+            <span className="tabular text-zinc-800">{counts.open}</span> open ·{" "}
+            <span className="tabular text-zinc-800">{counts.unassigned}</span> unassigned
             {counts.breached !== null && (
               <>
                 {" "}·{" "}
                 <button
                   type="button"
                   onClick={() => filterSetter(setSlaFilter)("Breached")}
-                  className={counts.breached ? "text-rose-300 underline-offset-2 hover:underline" : ""}
+                  className={counts.breached ? "text-rose-700 underline-offset-2 hover:underline" : ""}
                 >
                   <span className="tabular">{counts.breached}</span> past SLA
                 </button>
@@ -104,14 +105,14 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
         {canWork && (
           <Link
             href="/tickets/new"
-            className="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-700 px-3 text-sm font-medium text-zinc-200 hover:bg-zinc-800"
+            className="inline-flex h-9 items-center justify-center rounded-lg border border-zinc-300 px-3 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
           >
             Log a phone or walk-in ticket
           </Link>
         )}
       </div>
 
-      <div className="overflow-hidden rounded-xl border border-zinc-800 bg-zinc-900/60">
+      <div className="overflow-hidden rounded-xl border border-zinc-200 bg-white">
         <TicketFilters
           search={search}
           status={statusFilter}
@@ -137,7 +138,7 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
           }))}
         />
 
-        <div className="flex flex-col gap-3 border-t border-zinc-800 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+        <div className="flex flex-col gap-3 border-t border-zinc-200 px-5 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <p className="text-sm text-zinc-500 tabular">
             {start}–{end} of {filteredTickets.length.toLocaleString("en-IN")}
           </p>
@@ -147,19 +148,19 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
               type="button"
               disabled={currentPage <= 1}
               onClick={() => setPage(currentPage - 1)}
-              className="h-8 rounded-lg px-3 text-sm text-zinc-300 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-8 rounded-lg px-3 text-sm text-zinc-700 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Previous
             </button>
             {pageNumbers.map((n, i) => (
               <span key={n} className="flex items-center">
-                {i > 0 && n - pageNumbers[i - 1] > 1 && <span className="px-1 text-zinc-600">…</span>}
+                {i > 0 && n - pageNumbers[i - 1] > 1 && <span className="px-1 text-zinc-400">…</span>}
                 <button
                   type="button"
                   onClick={() => setPage(n)}
                   aria-current={n === currentPage ? "page" : undefined}
                   className={`h-8 min-w-8 rounded-lg px-2 text-sm tabular ${
-                    n === currentPage ? "bg-indigo-600 text-white" : "text-zinc-400 hover:bg-zinc-800"
+                    n === currentPage ? "bg-indigo-600 text-white" : "text-zinc-600 hover:bg-zinc-100"
                   }`}
                 >
                   {n}
@@ -170,7 +171,7 @@ export default function TicketsView({ tickets }: { tickets: Ticket[] }) {
               type="button"
               disabled={currentPage >= totalPages}
               onClick={() => setPage(currentPage + 1)}
-              className="h-8 rounded-lg px-3 text-sm text-zinc-300 hover:bg-zinc-800 disabled:cursor-not-allowed disabled:opacity-40"
+              className="h-8 rounded-lg px-3 text-sm text-zinc-700 hover:bg-zinc-100 disabled:cursor-not-allowed disabled:opacity-40"
             >
               Next
             </button>

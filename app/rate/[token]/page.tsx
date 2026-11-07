@@ -16,8 +16,8 @@ export default async function RatePage({ params }: { params: Promise<{ token: st
   const ticket = await getSurveyTicket(token);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 px-4 py-10 font-sans text-zinc-100">
-      <div className="w-full max-w-md rounded-2xl border border-zinc-800 bg-zinc-900 p-6 sm:p-8">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-10 font-sans text-zinc-900">
+      <div className="w-full max-w-md rounded-2xl border border-zinc-200 bg-white p-6 sm:p-8">
         {ticket ? (
           <>
             <div className="mb-6 flex items-center gap-3">
@@ -26,20 +26,20 @@ export default async function RatePage({ params }: { params: Promise<{ token: st
               </div>
               <div>
                 <h1 className="font-semibold">{ticket.workspaceName} Support</h1>
-                <p className="text-sm text-zinc-400">
+                <p className="text-sm text-zinc-600">
                   Ticket #{ticket.ticketId}: {ticket.subject}
                 </p>
               </div>
             </div>
             {ticket.customerName && (
-              <p className="mb-5 text-sm text-zinc-300">Hi {ticket.customerName.split(" ")[0]},</p>
+              <p className="mb-5 text-sm text-zinc-700">Hi {ticket.customerName.split(" ")[0]},</p>
             )}
             <SurveyForm token={token} rating={ticket.rating} comment={ticket.comment} />
           </>
         ) : (
           <div className="text-center">
             <h1 className="text-xl font-semibold">This link isn&apos;t valid</h1>
-            <p className="mt-2 text-sm text-zinc-400">Please use the full link from your support message.</p>
+            <p className="mt-2 text-sm text-zinc-600">Please use the full link from your support message.</p>
           </div>
         )}
       </div>

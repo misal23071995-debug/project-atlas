@@ -3,19 +3,19 @@ import type { TicketPriority, TicketStatus } from "@/app/lib/tickets";
 // One look for status, priority and channel everywhere a ticket appears
 
 const STATUS_STYLES: Record<TicketStatus, string> = {
-  Open: "bg-sky-500/10 text-sky-300 ring-sky-500/25",
-  Pending: "bg-amber-500/10 text-amber-300 ring-amber-500/25",
-  "Waiting on Customer": "bg-zinc-500/15 text-zinc-300 ring-zinc-500/25",
-  Escalated: "bg-rose-500/10 text-rose-300 ring-rose-500/25",
-  Resolved: "bg-emerald-500/10 text-emerald-300 ring-emerald-500/25",
-  Closed: "bg-zinc-500/10 text-zinc-400 ring-zinc-500/20",
+  Open: "bg-sky-500/10 text-sky-700 ring-sky-500/25",
+  Pending: "bg-amber-500/10 text-amber-700 ring-amber-500/25",
+  "Waiting on Customer": "bg-zinc-500/15 text-zinc-700 ring-zinc-500/25",
+  Escalated: "bg-rose-500/10 text-rose-700 ring-rose-500/25",
+  Resolved: "bg-emerald-500/10 text-emerald-700 ring-emerald-500/25",
+  Closed: "bg-zinc-500/10 text-zinc-600 ring-zinc-500/20",
 };
 
 const PRIORITY_STYLES: Record<TicketPriority, { dot: string; text: string }> = {
-  Urgent: { dot: "bg-rose-400", text: "text-rose-300" },
-  High: { dot: "bg-orange-400", text: "text-orange-300" },
-  Medium: { dot: "bg-amber-300", text: "text-zinc-200" },
-  Low: { dot: "bg-zinc-500", text: "text-zinc-400" },
+  Urgent: { dot: "bg-rose-400", text: "text-rose-700" },
+  High: { dot: "bg-orange-400", text: "text-orange-700" },
+  Medium: { dot: "bg-amber-300", text: "text-zinc-800" },
+  Low: { dot: "bg-zinc-400", text: "text-zinc-600" },
 };
 
 const base = "inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset";
@@ -45,7 +45,7 @@ const CHANNEL_ICONS: Record<string, string> = {
 export function ChannelLabel({ channel }: { channel: string }) {
   const icon = CHANNEL_ICONS[channel] ?? CHANNEL_ICONS.Chat;
   return (
-    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-zinc-300">
+    <span className="inline-flex items-center gap-1.5 whitespace-nowrap text-xs text-zinc-700">
       <svg className="h-3.5 w-3.5 text-zinc-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden>
         <path d={icon} />
       </svg>

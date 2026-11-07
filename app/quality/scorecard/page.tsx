@@ -17,11 +17,11 @@ export default async function ScorecardPage() {
   return (
     <DashboardLayout>
       <div className="mx-auto max-w-3xl">
-        <Link href="/quality" className="text-sm text-zinc-400 hover:text-zinc-200">
+        <Link href="/quality" className="text-sm text-zinc-600 hover:text-zinc-800">
           ← Quality
         </Link>
         <h1 className="mt-2 text-3xl font-bold">Scorecard</h1>
-        <p className="mt-1 text-zinc-400">
+        <p className="mt-1 text-zinc-600">
           What a good conversation looks like at {org.name}. Reviewers and the AI score each item from 1 to 5, and
           the weights decide how much each one counts. Reviews already done keep the scorecard they were made with.
         </p>

@@ -7,10 +7,10 @@ import { formatDateTime } from "@/app/lib/tickets";
 // The clock that matters right now for a ticket in a list: reply, then resolve
 export default function SlaBadge({ ticket }: { ticket: TicketSla }) {
   const now = useNow();
-  if (now === null) return <span className="text-xs text-zinc-600">…</span>;
+  if (now === null) return <span className="text-xs text-zinc-400">…</span>;
 
   const { kind, clock } = currentClock(ticket, now);
-  if (!clock) return <span className="text-xs text-zinc-600">—</span>;
+  if (!clock) return <span className="text-xs text-zinc-400">—</span>;
 
   return (
     <span

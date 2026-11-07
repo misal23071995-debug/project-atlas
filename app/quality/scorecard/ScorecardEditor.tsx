@@ -8,7 +8,7 @@ import { saveScorecardAction } from "../actions";
 type Row = Partial<Criterion> & { key: number };
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500";
+  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500";
 
 let nextKey = 0;
 const toRows = (criteria: Criterion[]): Row[] => criteria.map((c) => ({ ...c, key: nextKey++ }));
@@ -42,7 +42,7 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
   return (
     <div className="mt-8 space-y-4">
       {rows.map((row, index) => (
-        <div key={row.key} className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
+        <div key={row.key} className="rounded-xl border border-zinc-200 bg-white p-4">
           <div className="flex gap-3">
             <span className="mt-2 text-sm text-zinc-500">{index + 1}.</span>
             <div className="flex-1 space-y-2">
@@ -81,7 +81,7 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
               type="button"
               onClick={() => setRows((current) => current.filter((r) => r.key !== row.key))}
               aria-label={`Remove ${row.label || "criterion"}`}
-              className="self-start rounded-md px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-800 hover:text-red-400"
+              className="self-start rounded-md px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-red-600"
             >
               ✕
             </button>
@@ -100,7 +100,7 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
             type="button"
             disabled={rows.length >= MAX_CRITERIA}
             onClick={() => setRows((current) => [...current, { key: nextKey++, label: "", description: "", weight: 10 }])}
-            className="rounded-lg border border-zinc-700 px-4 py-2 text-sm text-zinc-200 hover:bg-zinc-800 disabled:opacity-50"
+            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-800 hover:bg-zinc-100 disabled:opacity-50"
           >
             + Add criterion
           </button>
@@ -110,7 +110,7 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
               setSaved(false);
               setRows(toRows(DEFAULT_CRITERIA));
             }}
-            className="text-sm text-zinc-500 hover:text-zinc-300"
+            className="text-sm text-zinc-500 hover:text-zinc-700"
           >
             Reset to default
           </button>
@@ -126,8 +126,8 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
         </button>
       </div>
 
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-      {saved && <p role="status" className="text-sm text-emerald-400">Scorecard saved. New reviews will use it.</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {saved && <p role="status" className="text-sm text-emerald-600">Scorecard saved. New reviews will use it.</p>}
     </div>
   );
 }

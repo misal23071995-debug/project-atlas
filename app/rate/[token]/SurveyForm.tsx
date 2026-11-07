@@ -18,7 +18,7 @@ export default function SurveyForm({ token, rating, comment }: { token: string; 
           🙏
         </p>
         <h2 className="mt-3 text-xl font-semibold">Thanks for your feedback</h2>
-        <p className="mt-2 text-sm text-zinc-400">It goes straight to the support team. You can close this page.</p>
+        <p className="mt-2 text-sm text-zinc-600">It goes straight to the support team. You can close this page.</p>
       </div>
     );
   }
@@ -26,7 +26,7 @@ export default function SurveyForm({ token, rating, comment }: { token: string; 
   return (
     <form action={formAction} className="space-y-5">
       <fieldset>
-        <legend className="mb-3 text-sm text-zinc-300">How happy are you with the help you got?</legend>
+        <legend className="mb-3 text-sm text-zinc-700">How happy are you with the help you got?</legend>
         <div className="flex justify-center gap-2" onMouseLeave={() => setHover(0)}>
           {[1, 2, 3, 4, 5].map((n) => (
             <label key={n} className="cursor-pointer" onMouseEnter={() => setHover(n)}>
@@ -39,27 +39,27 @@ export default function SurveyForm({ token, rating, comment }: { token: string; 
                 className="sr-only"
                 aria-label={`${n} star${n > 1 ? "s" : ""}: ${LABELS[n]}`}
               />
-              <span className={`text-4xl transition-colors ${n <= shown ? "text-amber-400" : "text-zinc-700"}`} aria-hidden>
+              <span className={`text-4xl transition-colors ${n <= shown ? "text-amber-600" : "text-zinc-300"}`} aria-hidden>
                 ★
               </span>
             </label>
           ))}
         </div>
-        <p className="mt-2 h-5 text-center text-sm text-zinc-400">{LABELS[shown]}</p>
+        <p className="mt-2 h-5 text-center text-sm text-zinc-600">{LABELS[shown]}</p>
       </fieldset>
 
-      <label className="block text-sm text-zinc-300">
+      <label className="block text-sm text-zinc-700">
         Anything you&apos;d like to add? (optional)
         <textarea
           name="comment"
           defaultValue={comment ?? ""}
           maxLength={1000}
           rows={4}
-          className="mt-2 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500"
+          className="mt-2 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500"
         />
       </label>
 
-      {state.error && <p role="alert" className="text-sm text-red-400">{state.error}</p>}
+      {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
 
       <button
         type="submit"

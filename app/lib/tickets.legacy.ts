@@ -52,17 +52,17 @@ export const mockTickets: Ticket[] = [
 ];
 
 export const statusStyles: Record<TicketStatus, string> = {
-  Open: "bg-blue-50 text-blue-700 dark:bg-blue-500/10 dark:text-blue-400",
-  Pending: "bg-amber-50 text-amber-700 dark:bg-amber-500/10 dark:text-amber-400",
-  Resolved: "bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400",
-  Closed: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
+  Open: "bg-blue-500/10 text-blue-600",
+  Pending: "bg-amber-500/10 text-amber-600",
+  Resolved: "bg-emerald-500/10 text-emerald-600",
+  Closed: "bg-zinc-100 text-zinc-600",
 };
 
 export const priorityStyles: Record<TicketPriority, string> = {
-  Low: "bg-zinc-100 text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400",
-  Medium: "bg-sky-50 text-sky-700 dark:bg-sky-500/10 dark:text-sky-400",
-  High: "bg-orange-50 text-orange-700 dark:bg-orange-500/10 dark:text-orange-400",
-  Urgent: "bg-rose-50 text-rose-700 dark:bg-rose-500/10 dark:text-rose-400",
+  Low: "bg-zinc-100 text-zinc-600",
+  Medium: "bg-sky-500/10 text-sky-600",
+  High: "bg-orange-500/10 text-orange-600",
+  Urgent: "bg-rose-500/10 text-rose-600",
 };
 
 export function formatDate(dateStr: string): string {

@@ -50,10 +50,10 @@ export default function TakeCourse({
             result.passed ? "border-emerald-500/40 bg-emerald-500/10" : "border-amber-500/40 bg-amber-500/10"
           }`}
         >
-          <p className={`text-2xl font-bold ${result.passed ? "text-emerald-400" : "text-amber-300"}`}>
+          <p className={`text-2xl font-bold ${result.passed ? "text-emerald-600" : "text-amber-700"}`}>
             {result.score}% · {result.passed ? "Passed 🎉" : "Not passed yet"}
           </p>
-          <p className="mt-1 text-sm text-zinc-300">
+          <p className="mt-1 text-sm text-zinc-700">
             {result.passed
               ? "Well done. Your result is saved."
               : `You need ${passPercent}%. Read the explanations below, then try again.`}
@@ -65,8 +65,8 @@ export default function TakeCourse({
         {questions.map((q, index) => {
           const graded = outcome.get(q.id);
           return (
-            <li key={q.id} className="rounded-xl border border-zinc-800 bg-zinc-900 p-5">
-              <p className="font-medium text-zinc-100">
+            <li key={q.id} className="rounded-xl border border-zinc-200 bg-white p-5">
+              <p className="font-medium text-zinc-900">
                 {index + 1}. {q.question}
               </p>
               <div className="mt-3 space-y-2" role="radiogroup" aria-label={`Question ${index + 1}`}>
@@ -78,10 +78,10 @@ export default function TakeCourse({
                       ? "border-emerald-500 bg-emerald-500/10"
                       : isChosen
                       ? "border-red-500 bg-red-500/10"
-                      : "border-zinc-800"
+                      : "border-zinc-200"
                     : isChosen
                     ? "border-indigo-500 bg-indigo-500/10"
-                    : "border-zinc-800 hover:border-zinc-600";
+                    : "border-zinc-200 hover:border-zinc-300";
 
                   return (
                     <label key={optionIndex} className={`flex cursor-pointer items-center gap-3 rounded-lg border px-3 py-2 text-sm ${style}`}>
@@ -92,19 +92,19 @@ export default function TakeCourse({
                         disabled={Boolean(result)}
                         onChange={() => setChosen((current) => ({ ...current, [q.id]: optionIndex }))}
                       />
-                      <span className="text-zinc-200">{option}</span>
-                      {graded && isRight && <span className="ml-auto text-xs text-emerald-400">Correct answer</span>}
+                      <span className="text-zinc-800">{option}</span>
+                      {graded && isRight && <span className="ml-auto text-xs text-emerald-600">Correct answer</span>}
                     </label>
                   );
                 })}
               </div>
-              {graded?.explanation && <p className="mt-3 text-sm text-zinc-400">{graded.explanation}</p>}
+              {graded?.explanation && <p className="mt-3 text-sm text-zinc-600">{graded.explanation}</p>}
             </li>
           );
         })}
       </ol>
 
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
 
       {result ? (
         <button
@@ -113,7 +113,7 @@ export default function TakeCourse({
             setResult(null);
             setChosen({});
           }}
-          className="rounded-lg border border-zinc-700 px-5 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+          className="rounded-lg border border-zinc-300 px-5 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
         >
           Try again
         </button>

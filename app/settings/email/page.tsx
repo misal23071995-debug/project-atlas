@@ -13,9 +13,9 @@ export const maxDuration = 60;
 
 function Section({ title, description, children }: { title: string; description?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <section className="rounded-xl border border-zinc-200 bg-white p-6">
       <h2 className="text-lg font-semibold">{title}</h2>
-      {description && <div className="mt-1 text-sm text-zinc-400">{description}</div>}
+      {description && <div className="mt-1 text-sm text-zinc-600">{description}</div>}
       <div className="mt-5">{children}</div>
     </section>
   );
@@ -28,9 +28,9 @@ export default async function EmailSettingsPage() {
   if (!canManage) {
     return (
       <DashboardLayout>
-        <div className="mx-auto max-w-xl rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
+        <div className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-8 text-center">
           <h1 className="text-2xl font-bold">Email</h1>
-          <p className="mt-2 text-zinc-400">Email settings are for admins and team leads.</p>
+          <p className="mt-2 text-zinc-600">Email settings are for admins and team leads.</p>
         </div>
       </DashboardLayout>
     );
@@ -46,18 +46,18 @@ export default async function EmailSettingsPage() {
     <DashboardLayout>
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
-          <Link href="/settings" className="text-sm text-zinc-400 hover:text-zinc-200">
+          <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
             ← Settings
           </Link>
           <h1 className="mt-2 text-3xl font-bold">Email</h1>
-          <p className="mt-1 text-zinc-400">
+          <p className="mt-1 text-zinc-600">
             Customer emails become tickets in the inbox. Replies on email tickets go back to the customer by email,
             and a customer&apos;s reply lands on the same ticket.
           </p>
         </div>
 
         {!settings ? (
-          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-300">
+          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
             Email isn&apos;t set up yet. Run supabase/migrations/013_email.sql in the Supabase SQL Editor.
           </p>
         ) : (
@@ -66,10 +66,10 @@ export default async function EmailSettingsPage() {
               title="Sending"
               description={
                 connection ? (
-                  <span className="text-emerald-400">Connected through {connection.provider}, sending from {connection.from}.</span>
+                  <span className="text-emerald-600">Connected through {connection.provider}, sending from {connection.from}.</span>
                 ) : (
                   <span>
-                    <span className="text-amber-300">Not connected.</span>{" "}
+                    <span className="text-amber-700">Not connected.</span>{" "}
                     Replies are saved on the ticket and marked
                     &ldquo;not emailed&rdquo;. To send real email, create a free Resend account, verify your company&apos;s
                     domain, then add RESEND_API_KEY and EMAIL_FROM (for example support@yourcompany.com) to the

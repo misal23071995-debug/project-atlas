@@ -39,7 +39,7 @@ export default function TicketInfoCard({
   if (!assigneeOptions.includes(assignedTo)) assigneeOptions.push(assignedTo);
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-xl border border-zinc-200 bg-white p-6">
       <h2 className="mb-6 text-xl font-semibold">
         Ticket details
       </h2>
@@ -53,7 +53,7 @@ export default function TicketInfoCard({
             value={status}
             onChange={(e) => onStatusChange(e.target.value)}
             disabled={readOnly}
-            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1 disabled:opacity-60"
+            className="rounded-md bg-zinc-100 border border-zinc-300 px-3 py-1 disabled:opacity-60"
           >
             {TICKET_STATUSES.map((value) => (
               <option key={value}>{value}</option>
@@ -68,7 +68,7 @@ export default function TicketInfoCard({
             value={priority}
             onChange={(e) => onPriorityChange(e.target.value)}
             disabled={readOnly}
-            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1 disabled:opacity-60"
+            className="rounded-md bg-zinc-100 border border-zinc-300 px-3 py-1 disabled:opacity-60"
           >
             {[...TICKET_PRIORITIES].reverse().map((value) => (
               <option key={value}>{value}</option>
@@ -98,7 +98,7 @@ export default function TicketInfoCard({
             value={assignedTo}
             onChange={(e) => onAssignedChange(e.target.value)}
             disabled={readOnly}
-            className="rounded-md bg-zinc-800 border border-zinc-700 px-3 py-1 disabled:opacity-60"
+            className="rounded-md bg-zinc-100 border border-zinc-300 px-3 py-1 disabled:opacity-60"
           >
             {assigneeOptions.map((name) => (
               <option key={name}>{name}</option>

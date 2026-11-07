@@ -19,7 +19,7 @@ export default function ReplyTemplates({ replies, values, onSelect }: Props) {
         <label htmlFor="saved-reply" className="block text-sm font-medium">
           Saved replies
         </label>
-        <Link href="/settings/replies" className="text-xs text-indigo-400 hover:text-indigo-300">
+        <Link href="/settings/replies" className="text-xs text-indigo-600 hover:text-indigo-700">
           Manage
         </Link>
       </div>
@@ -33,7 +33,7 @@ export default function ReplyTemplates({ replies, values, onSelect }: Props) {
           if (selected) onSelect(fillPlaceholders(selected.body, values));
           e.target.value = "";
         }}
-        className="w-full rounded-lg border border-zinc-700 bg-zinc-800 px-3 py-2 disabled:opacity-60"
+        className="w-full rounded-lg border border-zinc-300 bg-zinc-100 px-3 py-2 disabled:opacity-60"
       >
         <option value="">{replies.length ? "Insert a saved reply…" : "No saved replies yet"}</option>
         {categories.map((category) => (

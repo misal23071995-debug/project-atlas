@@ -40,18 +40,18 @@ export default function AuthCallbackPage() {
   }, []);
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-4 font-sans">
-      <div className="w-full max-w-sm rounded-xl border border-zinc-800 bg-zinc-900 p-6 text-center">
+    <main className="flex min-h-screen items-center justify-center bg-zinc-50 p-4 font-sans">
+      <div className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6 text-center">
         {error ? (
           <>
-            <h1 className="text-lg font-semibold text-zinc-50">{error}</h1>
-            <p className="mt-2 text-sm text-zinc-400">Ask for a new link and use it within the hour.</p>
-            <Link href="/forgot-password" className="mt-4 inline-block text-sm font-medium text-indigo-400 hover:text-indigo-300">
+            <h1 className="text-lg font-semibold text-zinc-900">{error}</h1>
+            <p className="mt-2 text-sm text-zinc-600">Ask for a new link and use it within the hour.</p>
+            <Link href="/forgot-password" className="mt-4 inline-block text-sm font-medium text-indigo-600 hover:text-indigo-700">
               Get a new reset link
             </Link>
           </>
         ) : (
-          <p className="text-sm text-zinc-400">Signing you in…</p>
+          <p className="text-sm text-zinc-600">Signing you in…</p>
         )}
       </div>
     </main>

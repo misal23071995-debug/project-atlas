@@ -6,16 +6,16 @@ import type { EmailSettings } from "@/app/lib/db/email";
 import { regenerateInboundKeyAction, saveEmailSettingsAction, sendTestEmailAction } from "./actions";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
-const labelClass = "block text-sm text-zinc-400";
+  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
+const labelClass = "block text-sm text-zinc-600";
 const buttonClass = "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60";
 
 function Status({ error, success, children }: { error?: string; success?: string; children?: ReactNode }) {
   return (
     <>
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
       {success && (
-        <p role="status" className="text-sm text-emerald-400">
+        <p role="status" className="text-sm text-emerald-600">
           {success} {children}
         </p>
       )}
@@ -38,7 +38,7 @@ export function InboundAddress({ url, canRegenerate }: { url: string; canRegener
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           }}
-          className="shrink-0 rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+          className="shrink-0 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -52,7 +52,7 @@ export function InboundAddress({ url, canRegenerate }: { url: string; canRegener
               startTransition(() => regenerateInboundKeyAction());
             }
           }}
-          className="text-sm text-red-400 hover:text-red-300"
+          className="text-sm text-red-600 hover:text-red-700"
         >
           {pending ? "Changing…" : "Make a new address"}
         </button>
@@ -74,13 +74,13 @@ export function EmailSettingsForm({ settings, workspaceName }: { settings: Email
         Signature, added under every email
         <textarea name="signature" defaultValue={settings.signature} rows={3} maxLength={1000} placeholder={`${workspaceName} Support`} className={inputClass} />
       </label>
-      <label className="flex items-start gap-3 text-sm text-zinc-300">
+      <label className="flex items-start gap-3 text-sm text-zinc-700">
         <input type="checkbox" name="autoAcknowledge" defaultChecked={settings.autoAcknowledge} className="mt-0.5 h-4 w-4" />
         <span>
           Reply to new emails straight away with the ticket number and when to expect an answer
         </span>
       </label>
-      <label className="flex items-start gap-3 text-sm text-zinc-300">
+      <label className="flex items-start gap-3 text-sm text-zinc-700">
         <input type="checkbox" name="surveyOnResolve" defaultChecked={settings.surveyOnResolve} className="mt-0.5 h-4 w-4" />
         <span>Email the satisfaction survey when an email ticket is resolved</span>
       </label>
@@ -126,7 +126,7 @@ export function TestInbox() {
       </label>
       <Status error={state.error} success={state.success}>
         {state.ticketId && (
-          <Link href={`/tickets/${state.ticketId}`} className="font-medium text-indigo-400 hover:text-indigo-300">
+          <Link href={`/tickets/${state.ticketId}`} className="font-medium text-indigo-600 hover:text-indigo-700">
             Open it →
           </Link>
         )}

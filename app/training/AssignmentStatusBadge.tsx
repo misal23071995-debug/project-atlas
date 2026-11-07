@@ -11,12 +11,12 @@ export default function AssignmentStatusBadge({
   const overdue = isOverdue(assignment, today);
   const [label, className] =
     assignment.status === "passed"
-      ? [`Passed ${assignment.bestScore ?? ""}%`, "bg-emerald-500/15 text-emerald-400"]
+      ? [`Passed ${assignment.bestScore ?? ""}%`, "bg-emerald-500/15 text-emerald-600"]
       : overdue
-      ? ["Overdue", "bg-red-500/15 text-red-400"]
+      ? ["Overdue", "bg-red-500/15 text-red-600"]
       : assignment.status === "failed"
-      ? [`Failed ${assignment.lastScore ?? ""}%`, "bg-amber-500/15 text-amber-300"]
-      : ["To do", "bg-zinc-700 text-zinc-300"];
+      ? [`Failed ${assignment.lastScore ?? ""}%`, "bg-amber-500/15 text-amber-700"]
+      : ["To do", "bg-zinc-200 text-zinc-700"];
 
   return <span className={`whitespace-nowrap rounded-full px-2.5 py-1 text-xs ${className}`}>{label}</span>;
 }

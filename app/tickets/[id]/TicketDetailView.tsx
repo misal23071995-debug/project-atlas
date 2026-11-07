@@ -133,8 +133,8 @@ export default function TicketDetailView({
           {/* Header */}
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div className="min-w-0">
-              <p className="font-mono text-sm text-indigo-300">#{ticket.id}</p>
-              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-50 sm:text-3xl">{ticket.subject}</h1>
+              <p className="font-mono text-sm text-indigo-700">#{ticket.id}</p>
+              <h1 className="mt-1 text-2xl font-semibold tracking-tight text-zinc-900 sm:text-3xl">{ticket.subject}</h1>
               <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
                 <StatusBadge status={ticket.status} />
                 <PriorityBadge priority={ticket.priority} />
@@ -146,7 +146,7 @@ export default function TicketDetailView({
             {canReview && ticket.conversation.some((m) => m.role === "agent") && (
               <Link
                 href={`/quality/${ticket.id}`}
-                className="rounded-lg border border-zinc-700 px-3 py-2 text-sm text-zinc-200 hover:bg-zinc-800"
+                className="rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
               >
                 Review quality
               </Link>
@@ -154,13 +154,13 @@ export default function TicketDetailView({
           </div>
 
           {error && (
-            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
+            <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-600">
               {error}
             </div>
           )}
 
           {/* Conversation */}
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6">
+          <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
             <h2 className="mb-5 text-sm font-medium uppercase tracking-wide text-zinc-500">
               Conversation
             </h2>
@@ -172,7 +172,7 @@ export default function TicketDetailView({
                   <div key={index} className={`flex gap-3 ${fromAgent ? "flex-row-reverse" : ""}`}>
                     <span
                       className={`mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
-                        fromAgent ? "bg-indigo-500/20 text-indigo-200" : "bg-zinc-800 text-zinc-300"
+                        fromAgent ? "bg-indigo-500/20 text-indigo-700" : "bg-zinc-100 text-zinc-700"
                       }`}
                       aria-hidden
                     >
@@ -180,25 +180,25 @@ export default function TicketDetailView({
                     </span>
                     <div
                       className={`max-w-[85%] rounded-2xl px-4 py-3 ${
-                        fromAgent ? "rounded-tr-md bg-indigo-500/15 ring-1 ring-inset ring-indigo-500/20" : "rounded-tl-md bg-zinc-800/70"
+                        fromAgent ? "rounded-tr-md bg-indigo-500/15 ring-1 ring-inset ring-indigo-500/20" : "rounded-tl-md bg-zinc-100"
                       }`}
                     >
-                      <p className="text-xs font-medium text-zinc-400">
+                      <p className="text-xs font-medium text-zinc-600">
                         {message.sender}
                         {fromAgent && <span className="font-normal text-zinc-500"> · agent</span>}
                       </p>
-                      <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-zinc-100">{message.message}</p>
+                      <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-zinc-900">{message.message}</p>
                       <AttachmentList attachments={ticket.attachments.filter((a) => a.messageId === message.id)} />
                       <p className="mt-2 text-xs text-zinc-500">
                         {formatDateTime(message.time)}
-                        {message.delivery === "sent" && <span className="ml-2 text-emerald-400">· Emailed</span>}
+                        {message.delivery === "sent" && <span className="ml-2 text-emerald-600">· Emailed</span>}
                         {message.delivery === "not_sent" && (
-                          <span className="ml-2 text-amber-400" title={message.deliveryNote ?? undefined}>
+                          <span className="ml-2 text-amber-600" title={message.deliveryNote ?? undefined}>
                             · Not emailed: {message.deliveryNote ?? "email isn't connected"}
                           </span>
                         )}
                         {message.delivery === "failed" && (
-                          <span className="ml-2 text-rose-400">· Email failed: {message.deliveryNote ?? "unknown error"}</span>
+                          <span className="ml-2 text-rose-600">· Email failed: {message.deliveryNote ?? "unknown error"}</span>
                         )}
                       </p>
                     </div>
@@ -229,7 +229,7 @@ export default function TicketDetailView({
               }}
             />
           ) : (
-            <p className="rounded-xl border border-zinc-800 bg-zinc-900 p-4 text-sm text-zinc-400">
+            <p className="rounded-xl border border-zinc-200 bg-white p-4 text-sm text-zinc-600">
               Your role can read this ticket and leave internal notes, but not reply or change it.
             </p>
           )}
@@ -267,8 +267,8 @@ export default function TicketDetailView({
           />
 
           {orders && (
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6">
-              <h2 className="mb-4 text-lg font-semibold text-zinc-50">Orders</h2>
+            <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
+              <h2 className="mb-4 text-lg font-semibold text-zinc-900">Orders</h2>
               <OrdersPanel
                 orders={orders}
                 ticketId={ticket.id}
@@ -283,8 +283,8 @@ export default function TicketDetailView({
           <SlaCard ticket={ticket} />
 
           {ticket.attachments.length > 0 && (
-            <div className="rounded-xl border border-zinc-800 bg-zinc-900/60 p-5 sm:p-6">
-              <h2 className="text-lg font-semibold text-zinc-50">
+            <div className="rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
+              <h2 className="text-lg font-semibold text-zinc-900">
                 Files <span className="text-sm font-normal text-zinc-500">· {ticket.attachments.length}</span>
               </h2>
               <AttachmentList attachments={ticket.attachments} compact />

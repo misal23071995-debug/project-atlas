@@ -42,7 +42,7 @@ export default function QuickActions({ onSelect }: Props) {
         <button
           key={action.title}
           onClick={() => onSelect(action.message)}
-          className="rounded-full border border-zinc-700 bg-zinc-900 px-4 py-2 text-sm transition hover:border-blue-500 hover:bg-zinc-800"
+          className="rounded-full border border-zinc-300 bg-white px-4 py-2 text-sm transition hover:border-blue-500 hover:bg-zinc-100"
         >
           {action.icon} {action.title}
         </button>

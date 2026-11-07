@@ -22,7 +22,7 @@ export default function ChatWindow({
 }, [messages, isThinking]);
 
 return (
-    <div className="mt-8 rounded-lg border border-zinc-800 bg-zinc-950 h-96 overflow-y-auto p-4">
+    <div className="mt-8 rounded-lg border border-zinc-200 bg-zinc-50 h-96 overflow-y-auto p-4">
       {messages.length === 0 ? (
         <p className="text-sm text-zinc-500">
           No conversation yet.
@@ -38,7 +38,7 @@ return (
           ))}
           {isThinking && (
             <div className="flex justify-start">
-                <div className="rounded-xl bg-zinc-800 px-4 py-3">
+                <div className="rounded-xl bg-zinc-100 px-4 py-3">
                 <p className="animate-pulse">
                     🤖 Atlas is thinking...
                 </p>

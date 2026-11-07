@@ -26,7 +26,7 @@ export default function InternalNotes({
   }
 
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <div className="rounded-xl border border-zinc-200 bg-white p-6">
       <h2 className="text-lg font-semibold">
         Internal notes
       </h2>
@@ -42,7 +42,7 @@ export default function InternalNotes({
         {notes.map((note, index) => (
           <div
             key={index}
-            className="rounded-lg border border-zinc-800 bg-zinc-950 p-4"
+            className="rounded-lg border border-zinc-200 bg-zinc-50 p-4"
           >
             <div className="flex items-center justify-between">
               <p className="font-medium">
@@ -54,7 +54,7 @@ export default function InternalNotes({
               </p>
             </div>
 
-            <p className="mt-3 whitespace-pre-line text-sm text-zinc-400">
+            <p className="mt-3 whitespace-pre-line text-sm text-zinc-600">
               {note.note}
             </p>
           </div>

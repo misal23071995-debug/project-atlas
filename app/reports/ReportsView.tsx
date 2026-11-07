@@ -33,17 +33,17 @@ function Section({
 }) {
   return (
     // min-w-0 lets wide tables scroll inside the card instead of stretching the page
-    <section className="min-w-0 rounded-xl border border-zinc-800 bg-zinc-900 p-5 sm:p-6">
+    <section className="min-w-0 rounded-xl border border-zinc-200 bg-white p-5 sm:p-6">
       <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
         <div>
           <h2 className="text-lg font-semibold">{title}</h2>
-          {description && <p className="mt-1 text-sm text-zinc-400">{description}</p>}
+          {description && <p className="mt-1 text-sm text-zinc-600">{description}</p>}
         </div>
         {onExport && (
           <button
             type="button"
             onClick={onExport}
-            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
           >
             Download CSV
           </button>
@@ -59,7 +59,7 @@ function Table({ header, rows, empty }: { header: string[]; rows: ReactNode[][];
   return (
     <div className="-mx-5 overflow-x-auto sm:-mx-6">
       <table className="min-w-full text-sm">
-        <thead className="text-left text-zinc-400">
+        <thead className="text-left text-zinc-600">
           <tr>
             {header.map((h, i) => (
               <th key={h} className={`whitespace-nowrap px-5 py-2 font-medium sm:px-6 ${i ? "text-right" : ""}`}>
@@ -70,7 +70,7 @@ function Table({ header, rows, empty }: { header: string[]; rows: ReactNode[][];
         </thead>
         <tbody>
           {rows.map((row, r) => (
-            <tr key={r} className="border-t border-zinc-800">
+            <tr key={r} className="border-t border-zinc-200">
               {row.map((cell, i) => (
                 <td key={i} className={`whitespace-nowrap px-5 py-2.5 sm:px-6 ${i ? "text-right tabular-nums" : "font-medium"}`}>
                   {cell}
@@ -94,7 +94,7 @@ function Delta({ now, before, better }: { now: number | null; before: number | n
 
   const up = change > 0;
   const good = better === undefined ? null : (better === "up") === up;
-  const tone = good === null ? "text-zinc-400" : good ? "text-emerald-400" : "text-rose-400";
+  const tone = good === null ? "text-zinc-600" : good ? "text-emerald-600" : "text-rose-600";
   return (
     <span className={tone}>
       <span aria-hidden>{up ? "▲" : "▼"}</span> {Math.abs(change)}%{good === null ? "" : good ? " better" : " worse"}
@@ -104,8 +104,8 @@ function Delta({ now, before, better }: { now: number | null; before: number | n
 
 function Tile({ label, value, sub, delta }: { label: string; value: string; sub?: string; delta: ReactNode }) {
   return (
-    <div className="rounded-xl border border-zinc-800 bg-zinc-900 p-4">
-      <p className="text-sm text-zinc-400">{label}</p>
+    <div className="rounded-xl border border-zinc-200 bg-white p-4">
+      <p className="text-sm text-zinc-600">{label}</p>
       <p className="mt-2 text-2xl font-bold tabular-nums">{value}</p>
       {sub && <p className="mt-1 text-xs text-zinc-500">{sub}</p>}
       <p className="mt-2 text-xs">{delta}</p>
@@ -116,7 +116,7 @@ function Tile({ label, value, sub, delta }: { label: string; value: string; sub?
 // One horizontal bar per row, for shares and percentages
 function Meter({ value, max = 100 }: { value: number; max?: number }) {
   return (
-    <div className="h-2 w-28 rounded-full bg-zinc-800">
+    <div className="h-2 w-28 rounded-full bg-zinc-100">
       <div
         className="h-2 rounded-full"
         style={{ width: `${Math.max(2, Math.min(100, (value / max) * 100))}%`, background: BAR_COLOR }}
@@ -160,7 +160,7 @@ function TrendChart({ points, step }: { points: Report["trend"]; step: "day" | "
 
   return (
     <div>
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-400">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs text-zinc-600">
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5">
             <span className="h-2.5 w-2.5 rounded-sm" style={{ background: CREATED_COLOR }} /> Created
@@ -169,7 +169,7 @@ function TrendChart({ points, step }: { points: Report["trend"]; step: "day" | "
             <span className="h-2.5 w-2.5 rounded-sm" style={{ background: RESOLVED_COLOR }} /> Resolved
           </span>
         </div>
-        <button type="button" onClick={() => setAsTable((v) => !v)} className="text-indigo-400 hover:text-indigo-300">
+        <button type="button" onClick={() => setAsTable((v) => !v)} className="text-indigo-600 hover:text-indigo-700">
           {asTable ? "Show chart" : "Show as table"}
         </button>
       </div>
@@ -185,8 +185,8 @@ function TrendChart({ points, step }: { points: Report["trend"]; step: "day" | "
           <svg viewBox={`0 0 ${width} ${height}`} className="h-auto w-full" role="img" aria-label="Tickets created and resolved over time">
             {ticks.map((t) => (
               <g key={t}>
-                <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} stroke="#27272a" strokeWidth={1} />
-                <text x={pad.left - 6} y={y(t) + 4} textAnchor="end" fontSize={11} fill="#71717a">
+                <line x1={pad.left} x2={width - pad.right} y1={y(t)} y2={y(t)} stroke="#e2e8f0" strokeWidth={1} />
+                <text x={pad.left - 6} y={y(t) + 4} textAnchor="end" fontSize={11} fill="#64748b">
                   {Math.round(t)}
                 </text>
               </g>
@@ -195,11 +195,11 @@ function TrendChart({ points, step }: { points: Report["trend"]; step: "day" | "
               const x0 = pad.left + i * slot + (slot - (bar * 2 + 2)) / 2;
               return (
                 <g key={p.label}>
-                  {hover === i && <rect x={pad.left + i * slot} y={pad.top} width={slot} height={plotH} fill="#27272a" opacity={0.6} />}
+                  {hover === i && <rect x={pad.left + i * slot} y={pad.top} width={slot} height={plotH} fill="#e2e8f0" opacity={0.6} />}
                   <path d={column(x0, p.created)} fill={CREATED_COLOR} />
                   <path d={column(x0 + bar + 2, p.resolved)} fill={RESOLVED_COLOR} />
                   {i % every === 0 && (
-                    <text x={pad.left + i * slot + slot / 2} y={height - 8} textAnchor="middle" fontSize={11} fill="#71717a">
+                    <text x={pad.left + i * slot + slot / 2} y={height - 8} textAnchor="middle" fontSize={11} fill="#64748b">
                       {p.label.replace("Week of ", "")}
                     </text>
                   )}
@@ -220,14 +220,14 @@ function TrendChart({ points, step }: { points: Report["trend"]; step: "day" | "
 
           {hover !== null && (
             <div
-              className="pointer-events-none absolute top-2 z-10 -translate-x-1/2 rounded-lg border border-zinc-700 bg-zinc-950 px-3 py-2 text-xs shadow-lg"
+              className="pointer-events-none absolute top-2 z-10 -translate-x-1/2 rounded-lg border border-zinc-300 bg-zinc-50 px-3 py-2 text-xs shadow-lg"
               style={{ left: `${((pad.left + hover * slot + slot / 2) / width) * 100}%` }}
             >
-              <p className="font-medium text-zinc-100">{points[hover].label}</p>
-              <p className="mt-1 flex items-center gap-1.5 text-zinc-300">
+              <p className="font-medium text-zinc-900">{points[hover].label}</p>
+              <p className="mt-1 flex items-center gap-1.5 text-zinc-700">
                 <span className="h-2 w-2 rounded-sm" style={{ background: CREATED_COLOR }} /> Created {points[hover].created}
               </p>
-              <p className="flex items-center gap-1.5 text-zinc-300">
+              <p className="flex items-center gap-1.5 text-zinc-700">
                 <span className="h-2 w-2 rounded-sm" style={{ background: RESOLVED_COLOR }} /> Resolved {points[hover].resolved}
               </p>
             </div>
@@ -241,7 +241,7 @@ function TrendChart({ points, step }: { points: Report["trend"]; step: "day" | "
 // ---- Page ----
 
 const inputClass =
-  "rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-1.5 text-sm text-zinc-100 outline-none focus:border-indigo-500";
+  "rounded-lg border border-zinc-300 bg-white px-3 py-1.5 text-sm text-zinc-900 outline-none focus:border-indigo-500";
 
 export default function ReportsView({
   report,
@@ -276,7 +276,7 @@ export default function ReportsView({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <h1 className="text-3xl font-bold">Reports</h1>
-            <p className="mt-1 text-zinc-400">
+            <p className="mt-1 text-zinc-600">
               {period.label} · {period.fromDate} to {period.toDate} · days in {period.timezone}
             </p>
           </div>
@@ -287,7 +287,7 @@ export default function ReportsView({
                 key={preset.id}
                 href={`/reports?range=${preset.id}`}
                 className={`rounded-lg px-3 py-1.5 text-sm font-medium ${
-                  period.id === preset.id ? "bg-indigo-600 text-white" : "border border-zinc-700 text-zinc-300 hover:bg-zinc-800"
+                  period.id === preset.id ? "bg-indigo-600 text-white" : "border border-zinc-300 text-zinc-700 hover:bg-zinc-100"
                 }`}
               >
                 {preset.label.replace("Last ", "")}
@@ -298,7 +298,7 @@ export default function ReportsView({
               <input type="date" name="from" defaultValue={period.fromDate} aria-label="From" className={inputClass} />
               <span className="text-zinc-500">to</span>
               <input type="date" name="to" defaultValue={period.toDate} aria-label="To" className={inputClass} />
-              <button type="submit" className="rounded-lg border border-zinc-700 px-3 py-1.5 text-sm text-zinc-300 hover:bg-zinc-800">
+              <button type="submit" className="rounded-lg border border-zinc-300 px-3 py-1.5 text-sm text-zinc-700 hover:bg-zinc-100">
                 Apply
               </button>
             </form>
@@ -340,12 +340,12 @@ export default function ReportsView({
         <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
           {[
             { label: "Open now", value: num(report.backlog.open) },
-            { label: "SLA breached", value: num(report.backlog.breached), tone: report.backlog.breached ? "text-rose-400" : "" },
-            { label: "SLA at risk", value: num(report.backlog.atRisk), tone: report.backlog.atRisk ? "text-amber-400" : "" },
+            { label: "SLA breached", value: num(report.backlog.breached), tone: report.backlog.breached ? "text-rose-600" : "" },
+            { label: "SLA at risk", value: num(report.backlog.atRisk), tone: report.backlog.atRisk ? "text-amber-600" : "" },
             { label: "Unassigned", value: num(report.backlog.unassigned) },
             { label: "Oldest open", value: duration(report.backlog.oldestOpenMinutes) },
           ].map((item) => (
-            <div key={item.label} className="rounded-xl border border-zinc-800 bg-zinc-900 px-4 py-3">
+            <div key={item.label} className="rounded-xl border border-zinc-200 bg-white px-4 py-3">
               <p className="text-xs text-zinc-500">{item.label}</p>
               <p className={`mt-1 text-lg font-semibold tabular-nums ${item.tone ?? ""}`}>{item.value}</p>
             </div>
@@ -398,7 +398,7 @@ export default function ReportsView({
               a.csatAverage === null ? "—" : `${a.csatAverage} ★ (${a.csatResponses})`,
               a.qcAverage === null ? "—" : `${a.qcAverage}% (${a.qcReviews})`,
               a.trainingOverdue ? (
-                <span className="text-rose-400">{a.trainingOverdue} overdue</span>
+                <span className="text-rose-600">{a.trainingOverdue} overdue</span>
               ) : a.trainingPassed ? (
                 `${a.trainingPassed} passed`
               ) : (
@@ -542,7 +542,7 @@ export default function ReportsView({
                   ["Still to pass", report.training.open],
                   [
                     "Overdue",
-                    report.training.overdue ? <span className="text-rose-400">{report.training.overdue}</span> : 0,
+                    report.training.overdue ? <span className="text-rose-600">{report.training.overdue}</span> : 0,
                   ],
                   ["Average best score", pct(report.training.averageBestScore)],
                 ]}
@@ -560,7 +560,7 @@ export default function ReportsView({
               ["Period", "Created", "Resolved", "Avg first reply (min)", "Median first reply (min)", "Avg resolution (min)", "Median resolution (min)", "SLA met %", "Ticket CSAT", "Chat CSAT"],
               [summaryRows(`${period.fromDate} to ${period.toDate}`, s), summaryRows("Previous period", p)]
             )}
-            className="rounded-lg border border-zinc-700 px-3 py-1.5 text-xs font-medium text-zinc-300 hover:bg-zinc-800"
+            className="rounded-lg border border-zinc-300 px-3 py-1.5 text-xs font-medium text-zinc-700 hover:bg-zinc-100"
           >
             Download summary CSV
           </button>

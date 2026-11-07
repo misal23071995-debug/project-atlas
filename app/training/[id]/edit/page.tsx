@@ -25,7 +25,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   return (
     <DashboardLayout>
-      <Link href="/training" className="text-sm text-zinc-400 hover:text-zinc-200">
+      <Link href="/training" className="text-sm text-zinc-600 hover:text-zinc-800">
         ← Training
       </Link>
       {course ? (
@@ -33,7 +33,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
           <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
             <h1 className="text-3xl font-bold">Edit course</h1>
             {course.published && (
-              <Link href={`/training/${course.id}`} className="text-sm text-indigo-400 hover:underline">
+              <Link href={`/training/${course.id}`} className="text-sm text-indigo-600 hover:underline">
                 Preview as an agent ↗
               </Link>
             )}
@@ -47,7 +47,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
           />
         </>
       ) : (
-        <p className="mt-6 text-zinc-400">This course doesn&apos;t exist.</p>
+        <p className="mt-6 text-zinc-600">This course doesn&apos;t exist.</p>
       )}
     </DashboardLayout>
   );

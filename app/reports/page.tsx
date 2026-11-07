@@ -21,9 +21,9 @@ export default async function ReportsPage({
   if (!can(role, "reports.view")) {
     return (
       <DashboardLayout>
-        <div className="mx-auto max-w-xl rounded-xl border border-zinc-800 bg-zinc-900 p-8 text-center">
+        <div className="mx-auto max-w-xl rounded-xl border border-zinc-200 bg-white p-8 text-center">
           <h1 className="text-2xl font-bold">Reports</h1>
-          <p className="mt-2 text-zinc-400">
+          <p className="mt-2 text-zinc-600">
             Team reports are for admins, team leads and QA analysts. Your own quality results and training are on the
             Quality and Training pages.
           </p>

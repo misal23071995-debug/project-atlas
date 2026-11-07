@@ -37,9 +37,9 @@ export default function AICopilot({
 
   if (!analysis) {
     return (
-      <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-zinc-900/60 p-6">
-        <p className="flex animate-pulse items-center gap-2 text-sm text-zinc-400">
-          <SparkleIcon className="h-4 w-4 text-indigo-300" />
+      <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-white p-6">
+        <p className="flex animate-pulse items-center gap-2 text-sm text-zinc-600">
+          <SparkleIcon className="h-4 w-4 text-indigo-700" />
           Atlas AI is reading this ticket…
         </p>
       </div>
@@ -47,18 +47,18 @@ export default function AICopilot({
   }
 
   return (
-    <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-zinc-900/60 p-6">
+    <div className="rounded-xl border border-indigo-500/25 bg-gradient-to-br from-indigo-500/10 to-white p-6">
       <div className="mb-6 flex items-center gap-3">
         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-600 text-white">
           <SparkleIcon className="h-5 w-5" />
         </div>
 
         <div>
-          <h2 className="text-lg font-semibold text-zinc-50">
+          <h2 className="text-lg font-semibold text-zinc-900">
             AI copilot
           </h2>
 
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-600">
             Powered by Atlas AI
           </p>
         </div>
@@ -66,26 +66,26 @@ export default function AICopilot({
 
       {/* Summary */}
       <div className="mb-6">
-        <h3 className="mb-2 font-semibold text-indigo-400">
+        <h3 className="mb-2 font-semibold text-indigo-600">
           Ticket Summary
         </h3>
 
-        <p className="text-zinc-300">
+        <p className="text-zinc-700">
           {analysis.summary}
         </p>
       </div>
-      <div className="mb-6 rounded-lg bg-zinc-800 p-5">
+      <div className="mb-6 rounded-lg bg-zinc-100 p-5">
         <h3 className="mb-2 font-semibold">
           Detected Intent
         </h3>
 
-        <p className="text-lg font-medium text-indigo-400">
+        <p className="text-lg font-medium text-indigo-600">
           {analysis.intent}
         </p>
       </div>
       
       {/* Sentiment */}
-      <div className="mb-6 rounded-lg bg-zinc-800 p-5">
+      <div className="mb-6 rounded-lg bg-zinc-100 p-5">
         <h3 className="mb-3 font-semibold">
           Detected Sentiment
         </h3>
@@ -98,33 +98,33 @@ export default function AICopilot({
           ? "😟"
           : "😡"}</p>
 
-        <p className="mt-2 text-zinc-400">
+        <p className="mt-2 text-zinc-600">
           {analysis.sentiment}
         </p>
       </div>
-      <div className="mb-6 rounded-lg bg-zinc-800 p-5">
+      <div className="mb-6 rounded-lg bg-zinc-100 p-5">
         <h3 className="mb-2 font-semibold">
           AI Confidence
         </h3>
 
-        <div className="h-3 w-full rounded-full bg-zinc-700">
+        <div className="h-3 w-full rounded-full bg-zinc-200">
           <div
             className="h-3 rounded-full bg-indigo-500"
             style={{ width: `${analysis.confidence}%` }}
           />
         </div>
 
-        <p className="mt-2 text-sm text-zinc-400">
+        <p className="mt-2 text-sm text-zinc-600">
           {analysis.confidence}% Confidence
         </p>
       </div>
       {/* Suggested Reply */}
       <div>
-        <h3 className="mb-3 font-semibold text-indigo-400">
+        <h3 className="mb-3 font-semibold text-indigo-600">
           Suggested Reply
         </h3>
 
-        <div className="rounded-lg bg-zinc-800 p-5 whitespace-pre-line">
+        <div className="rounded-lg bg-zinc-100 p-5 whitespace-pre-line">
           {analysis.suggestedReply}
         </div>
 
@@ -138,7 +138,7 @@ export default function AICopilot({
 
       {/* Articles */}
       <div className="mt-8">
-        <h3 className="mb-3 font-semibold text-indigo-400">
+        <h3 className="mb-3 font-semibold text-indigo-600">
           Related Articles
         </h3>
 
@@ -147,7 +147,7 @@ export default function AICopilot({
             <a
               key={article}
               href="#"
-              className="block text-indigo-400 hover:underline"
+              className="block text-indigo-600 hover:underline"
             >
               {article}
             </a>

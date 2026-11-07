@@ -84,7 +84,7 @@ export default function ReviewForm({
   }
 
   return (
-    <section className="space-y-5 rounded-xl border border-zinc-800 bg-zinc-900 p-6">
+    <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <h2 className="text-lg font-semibold">Scorecard</h2>
@@ -109,7 +109,7 @@ export default function ReviewForm({
           type="button"
           onClick={scoreWithAi}
           disabled={aiPending || isPending}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-300 hover:bg-indigo-500/20 disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-500/20 disabled:opacity-60"
         >
           <SparkleIcon />
           {aiPending ? "AI is reading the conversation…" : review?.aiTotal != null ? "Re-score with AI" : "Score with AI"}
@@ -117,8 +117,8 @@ export default function ReviewForm({
       )}
 
       {review?.aiSummary && (
-        <div className="rounded-lg bg-zinc-800/60 p-3 text-sm text-zinc-300">
-          <p className="text-xs font-medium text-indigo-300">
+        <div className="rounded-lg bg-zinc-100 p-3 text-sm text-zinc-700">
+          <p className="text-xs font-medium text-indigo-700">
             AI summary{review.aiTotal !== null && ` · AI score ${review.aiTotal}%`}
           </p>
           <p className="mt-1">{review.aiSummary}</p>
@@ -132,7 +132,7 @@ export default function ReviewForm({
           return (
             <li key={criterion.id}>
               <div className="flex items-baseline justify-between gap-2">
-                <p className="text-sm font-medium text-zinc-100">{criterion.label}</p>
+                <p className="text-sm font-medium text-zinc-900">{criterion.label}</p>
                 <span className="text-xs text-zinc-500">weight {criterion.weight}</span>
               </div>
               <p className="text-xs text-zinc-500">{criterion.description}</p>
@@ -150,22 +150,22 @@ export default function ReviewForm({
                     className={`h-8 flex-1 rounded-md border text-sm transition-colors disabled:cursor-default ${
                       selected === value
                         ? "border-indigo-500 bg-indigo-600 text-white"
-                        : "border-zinc-700 text-zinc-400 hover:border-zinc-500 hover:text-zinc-200"
+                        : "border-zinc-300 text-zinc-600 hover:border-zinc-400 hover:text-zinc-800"
                     }`}
                   >
                     {value}
-                    {ai?.score === value && selected !== value && <span className="ml-0.5 text-[10px] text-indigo-400">AI</span>}
+                    {ai?.score === value && selected !== value && <span className="ml-0.5 text-[10px] text-indigo-600">AI</span>}
                   </button>
                 ))}
               </div>
               {selected !== undefined && <p className="mt-1 text-xs text-zinc-500">{SCORE_LABELS[selected]}</p>}
-              {ai?.reason && <p className="mt-1 text-xs text-indigo-300/80">AI: {ai.reason}</p>}
+              {ai?.reason && <p className="mt-1 text-xs text-indigo-700">AI: {ai.reason}</p>}
             </li>
           );
         })}
       </ol>
 
-      <label className="block text-sm text-zinc-400">
+      <label className="block text-sm text-zinc-600">
         Feedback for the agent
         <textarea
           value={feedback}
@@ -174,14 +174,14 @@ export default function ReviewForm({
           rows={4}
           maxLength={2000}
           placeholder={readOnly ? "" : "What went well, and one thing to do differently next time"}
-          className="mt-1 w-full rounded-lg border border-zinc-700 bg-zinc-900 px-3 py-2 text-sm text-zinc-100 outline-none focus:border-indigo-500"
+          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500"
         />
       </label>
 
-      {error && <p role="alert" className="text-sm text-red-400">{error}</p>}
-      {saved && <p role="status" className="text-sm text-emerald-400">Review saved.</p>}
+      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {saved && <p role="status" className="text-sm text-emerald-600">Review saved.</p>}
       {trainingNotes.map((note) => (
-        <p key={note} className="text-sm text-indigo-300">
+        <p key={note} className="text-sm text-indigo-700">
           🎓 {note}
         </p>
       ))}
