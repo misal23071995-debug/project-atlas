@@ -445,11 +445,23 @@ export async function removeDemoData(orgId: string) {
   const tickets = await supabase.from("tickets").delete({ count: "exact" }).eq("org_id", orgId).contains("tags", [DEMO_TAG]);
   if (tickets.error) throw new Error(`Failed to remove demo tickets: ${tickets.error.message}`);
 
+  // Any other ticket from a demo customer (made while trying the app on demo data) goes too,
+  // otherwise the customer can't be removed. Demo addresses use a reserved test domain, so no real customer has one.
+  let extra = 0;
+  const { data: demoCustomers, error: lookupError } = await supabase.from("customers").select("id").eq("org_id", orgId).like("email", domain);
+  if (lookupError) throw new Error(`Failed to find demo customers: ${lookupError.message}`);
+  const ids = demoCustomers.map((c) => c.id as string);
+  for (let i = 0; i < ids.length; i += 200) {
+    const res = await supabase.from("tickets").delete({ count: "exact" }).eq("org_id", orgId).in("customer_id", ids.slice(i, i + 200));
+    if (res.error) throw new Error(`Failed to remove demo tickets: ${res.error.message}`);
+    extra += res.count ?? 0;
+  }
+
   const chats = await supabase.from("bot_conversations").delete({ count: "exact" }).eq("org_id", orgId).like("customer_email", domain);
   if (chats.error && chats.error.code !== "PGRST205") throw new Error(`Failed to remove demo chats: ${chats.error.message}`);
 
   const customers = await supabase.from("customers").delete().eq("org_id", orgId).like("email", domain);
   if (customers.error) throw new Error(`Failed to remove demo customers: ${customers.error.message}`);
 
-  return { tickets: tickets.count ?? 0, chats: chats.count ?? 0 };
+  return { tickets: (tickets.count ?? 0) + extra, chats: chats.count ?? 0 };
 }
