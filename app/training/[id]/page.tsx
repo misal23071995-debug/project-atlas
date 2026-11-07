@@ -21,7 +21,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
 
   return (
     <DashboardLayout>
-      <Link href="/training" className="text-sm text-zinc-600 hover:text-zinc-800">
+      <Link href="/training" className="text-xs font-medium text-zinc-500 hover:text-zinc-800">
         ← Training
       </Link>
 
@@ -32,7 +32,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
           <div className="mt-2 flex flex-wrap items-start justify-between gap-3">
             <div>
               <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{course.title}</h1>
-              {course.description && <p className="mt-1 text-zinc-600">{course.description}</p>}
+              {course.description && <p className="mt-0.5 max-w-3xl text-sm text-zinc-500">{course.description}</p>}
             </div>
             <div className="flex items-center gap-3">
               {assignment && <AssignmentStatusBadge assignment={assignment} />}
@@ -54,7 +54,7 @@ export default async function CoursePage({ params }: { params: Promise<{ id: str
           )}
           {!course.published && <p className="mt-3 text-sm text-amber-700">Draft: agents can&apos;t see this yet.</p>}
 
-          <article className="mt-6 whitespace-pre-line rounded-xl border border-zinc-200 bg-white p-6 leading-relaxed text-zinc-800 shadow-sm">
+          <article className="mt-6 whitespace-pre-line rounded-xl border border-zinc-200 bg-white p-6 text-[0.95rem] leading-7 text-zinc-800 shadow-sm">
             {course.body || "This course has no lesson text."}
           </article>
 

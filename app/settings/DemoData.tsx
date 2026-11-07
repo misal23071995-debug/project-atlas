@@ -26,8 +26,8 @@ export default function DemoData({ demoTickets }: { demoTickets: number }) {
           {demoTickets.toLocaleString("en-IN")} demo tickets are in this workspace now.
         </p>
       )}
-      {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
-      {state.success && <p role="status" className="text-sm text-emerald-600">{state.success}</p>}
+      {state.error && <p role="alert" className="text-sm text-rose-600">{state.error}</p>}
+      {state.success && <p role="status" className="text-sm text-emerald-700">{state.success}</p>}
       <div className="flex flex-wrap gap-3">
         {!loaded && (
           <button
@@ -39,7 +39,7 @@ export default function DemoData({ demoTickets }: { demoTickets: number }) {
                 "Add about 1,000 demo tickets to this workspace? Everyone in the workspace will see them until you remove them."
               )
             }
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
           >
             {pending ? "Loading… this takes about a minute" : "Load demo data"}
           </button>
@@ -51,7 +51,7 @@ export default function DemoData({ demoTickets }: { demoTickets: number }) {
             onClick={() =>
               run(removeDemoDataAction, "Remove all demo tickets, chats and customers from this workspace? Real data stays.")
             }
-            className="rounded-lg border border-red-500/40 px-4 py-2 text-sm font-medium text-red-700 hover:bg-red-500/10 disabled:opacity-60"
+            className="rounded-md border border-rose-200 bg-white px-3.5 py-2 text-sm font-medium text-rose-700 shadow-sm hover:bg-rose-50 disabled:opacity-60"
           >
             {pending ? "Removing…" : "Remove demo data"}
           </button>

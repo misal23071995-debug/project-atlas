@@ -84,10 +84,10 @@ export default function ReviewForm({
   }
 
   return (
-    <section className="space-y-5 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <div className="flex items-start justify-between gap-4">
+    <section className="overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm lg:sticky lg:top-20">
+      <div className="flex items-start justify-between gap-4 border-b border-zinc-100 px-5 py-3">
         <div>
-          <h2 className="text-lg font-semibold">Scorecard</h2>
+          <h2 className="text-sm font-semibold text-zinc-900">Scorecard</h2>
           <p className="mt-1 text-xs text-zinc-500">
             {review?.status === "reviewed"
               ? `Reviewed by ${review.reviewedBy} · ${formatDateTime(review.reviewedAt!)}`
@@ -97,19 +97,21 @@ export default function ReviewForm({
           </p>
         </div>
         <div className="text-right">
-          <p className={`text-3xl font-semibold tabular ${liveTotal === null ? "text-zinc-500" : scoreBand(liveTotal).className}`}>
+          <p className={`text-2xl font-semibold tabular ${liveTotal === null ? "text-zinc-500" : scoreBand(liveTotal).className}`}>
             {liveTotal === null ? "—" : `${liveTotal}%`}
           </p>
           {liveTotal !== null && <p className="text-xs text-zinc-500">{scoreBand(liveTotal).label}</p>}
         </div>
       </div>
 
+      <div className="space-y-5 p-5">
+
       {!readOnly && (
         <button
           type="button"
           onClick={scoreWithAi}
           disabled={aiPending || isPending}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-500/20 disabled:opacity-60"
+          className="inline-flex w-full items-center justify-center gap-2 h-9 rounded-md border border-indigo-200 bg-indigo-50 px-4 text-sm font-medium text-indigo-700 hover:bg-indigo-100 disabled:opacity-60"
         >
           <SparkleIcon />
           {aiPending ? "AI is reading the conversation…" : review?.aiTotal != null ? "Re-score with AI" : "Score with AI"}
@@ -117,7 +119,7 @@ export default function ReviewForm({
       )}
 
       {review?.aiSummary && (
-        <div className="rounded-lg bg-zinc-100 p-3 text-sm text-zinc-700">
+        <div className="rounded-lg border border-indigo-100 bg-indigo-50/50 p-3 text-sm text-zinc-700">
           <p className="text-xs font-medium text-indigo-700">
             AI summary{review.aiTotal !== null && ` · AI score ${review.aiTotal}%`}
           </p>
@@ -149,8 +151,8 @@ export default function ReviewForm({
                     onClick={() => setScores((current) => ({ ...current, [criterion.id]: value }))}
                     className={`h-8 flex-1 rounded-md border text-sm transition-colors disabled:cursor-default ${
                       selected === value
-                        ? "border-indigo-500 bg-indigo-600 text-white"
-                        : "border-zinc-300 text-zinc-600 hover:border-zinc-400 hover:text-zinc-800"
+                        ? "border-indigo-600 bg-indigo-600 font-medium text-white"
+                        : "border-zinc-200 bg-white text-zinc-600 hover:border-zinc-300 hover:bg-zinc-50"
                     }`}
                   >
                     {value}
@@ -165,7 +167,7 @@ export default function ReviewForm({
         })}
       </ol>
 
-      <label className="block text-sm text-zinc-600">
+      <label className="block text-sm font-medium text-zinc-700">
         Feedback for the agent
         <textarea
           value={feedback}
@@ -174,12 +176,12 @@ export default function ReviewForm({
           rows={4}
           maxLength={2000}
           placeholder={readOnly ? "" : "What went well, and one thing to do differently next time"}
-          className="mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500"
+          className="mt-1.5 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm font-normal text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15"
         />
       </label>
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      {saved && <p role="status" className="text-sm text-emerald-600">Review saved.</p>}
+      {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
+      {saved && <p role="status" className="text-sm text-emerald-700">Review saved.</p>}
       {trainingNotes.map((note) => (
         <p key={note} className="text-sm text-indigo-700">
           🎓 {note}
@@ -191,11 +193,12 @@ export default function ReviewForm({
           type="button"
           onClick={save}
           disabled={!allScored || isPending || aiPending}
-          className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+          className="h-9 w-full rounded-md bg-indigo-600 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
         >
           {isPending ? "Saving…" : review?.status === "reviewed" ? "Update review" : "Save review"}
         </button>
       )}
+      </div>
     </section>
   );
 }

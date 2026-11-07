@@ -6,16 +6,16 @@ import type { EmailSettings } from "@/app/lib/db/email";
 import { regenerateInboundKeyAction, saveEmailSettingsAction, sendTestEmailAction } from "./actions";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20";
+  "mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15";
 const labelClass = "block text-sm text-zinc-600";
-const buttonClass = "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60";
+const buttonClass = "rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60";
 
 function Status({ error, success, children }: { error?: string; success?: string; children?: ReactNode }) {
   return (
     <>
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
       {success && (
-        <p role="status" className="text-sm text-emerald-600">
+        <p role="status" className="text-sm text-emerald-700">
           {success} {children}
         </p>
       )}
@@ -38,7 +38,7 @@ export function InboundAddress({ url, canRegenerate }: { url: string; canRegener
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           }}
-          className="shrink-0 rounded-lg border border-zinc-300 px-3 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
+          className="shrink-0 rounded-md border border-zinc-200 bg-white shadow-sm px-3 py-2 text-sm text-zinc-800 hover:bg-zinc-50"
         >
           {copied ? "Copied" : "Copy"}
         </button>
@@ -52,7 +52,7 @@ export function InboundAddress({ url, canRegenerate }: { url: string; canRegener
               startTransition(() => regenerateInboundKeyAction());
             }
           }}
-          className="text-sm text-red-600 hover:text-red-700"
+          className="text-sm text-rose-600 hover:text-rose-700"
         >
           {pending ? "Changing…" : "Make a new address"}
         </button>

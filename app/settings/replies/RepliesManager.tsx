@@ -6,7 +6,7 @@ import { MAX_REPLY_BODY, MAX_REPLY_TITLE, PLACEHOLDERS, type SavedReply } from "
 import { addStarterRepliesAction, deleteReplyAction, saveReplyAction } from "./actions";
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60";
+  "mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15 disabled:opacity-60";
 
 function Editor({ reply, canEdit, onDone }: { reply: SavedReply | null; canEdit: boolean; onDone: () => void }) {
   const [state, formAction, saving] = useActionState(saveReplyAction, {});
@@ -38,14 +38,14 @@ function Editor({ reply, canEdit, onDone }: { reply: SavedReply | null; canEdit:
   }
 
   return (
-    <form action={formAction} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+    <form action={formAction} className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
       <input type="hidden" name="id" value={reply?.id ?? ""} />
       <div className="grid gap-4 sm:grid-cols-3">
         <label className="block text-sm text-zinc-600 sm:col-span-2">
           Title
           <input name="title" defaultValue={reply?.title} required maxLength={MAX_REPLY_TITLE} disabled={!canEdit} className={inputClass} />
         </label>
-        <label className="block text-sm text-zinc-600">
+        <label className="block text-sm font-medium text-zinc-700">
           Category
           <select name="category" defaultValue={reply?.category ?? "Other"} disabled={!canEdit} className={inputClass}>
             {KB_CATEGORIES.map((c) => (
@@ -55,7 +55,7 @@ function Editor({ reply, canEdit, onDone }: { reply: SavedReply | null; canEdit:
         </label>
       </div>
 
-      <label className="block text-sm text-zinc-600">
+      <label className="block text-sm font-medium text-zinc-700">
         Reply
         <textarea
           ref={body}
@@ -79,26 +79,26 @@ function Editor({ reply, canEdit, onDone }: { reply: SavedReply | null; canEdit:
                 type="button"
                 onClick={() => insert(p.key)}
                 title={`{{${p.key}}}`}
-                className="rounded-full border border-zinc-300 px-2.5 py-1 text-zinc-700 hover:bg-zinc-100"
+                className="rounded-full border border-zinc-300 px-2.5 py-1 text-zinc-700 hover:bg-zinc-50"
               >
                 {p.label}
               </button>
             ))}
           </div>
 
-          {(state.error || error) && <p role="alert" className="text-sm text-red-600">{state.error ?? error}</p>}
-          {state.success && <p role="status" className="text-sm text-emerald-600">{state.success}</p>}
+          {(state.error || error) && <p role="alert" className="text-sm text-rose-600">{state.error ?? error}</p>}
+          {state.success && <p role="status" className="text-sm text-emerald-700">{state.success}</p>}
 
           <div className="flex items-center justify-between">
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
             >
               {saving ? "Saving…" : reply ? "Save changes" : "Add reply"}
             </button>
             {reply && (
-              <button type="button" onClick={remove} disabled={deleting} className="text-sm text-red-600 hover:text-red-700">
+              <button type="button" onClick={remove} disabled={deleting} className="text-sm text-rose-600 hover:text-rose-700">
                 {deleting ? "Deleting…" : "Delete"}
               </button>
             )}
@@ -122,7 +122,7 @@ export default function RepliesManager({ replies, canEdit }: { replies: SavedRep
             type="button"
             onClick={() => setSelected("new")}
             className={`w-full rounded-lg border px-4 py-2 text-left text-sm font-medium ${
-              selected === "new" ? "border-indigo-500 bg-indigo-500/10 text-indigo-700" : "border-dashed border-zinc-300 text-zinc-700 hover:bg-zinc-100"
+              selected === "new" ? "border-indigo-400 bg-indigo-50 text-indigo-700" : "border-dashed border-zinc-300 text-zinc-700 hover:bg-zinc-50"
             }`}
           >
             + New reply
@@ -134,7 +134,7 @@ export default function RepliesManager({ replies, canEdit }: { replies: SavedRep
             type="button"
             onClick={() => setSelected(r.id)}
             className={`w-full rounded-lg border px-4 py-2.5 text-left ${
-              selected === r.id ? "border-indigo-500 bg-indigo-500/10" : "border-zinc-200 bg-white hover:bg-zinc-100"
+              selected === r.id ? "border-indigo-400 bg-indigo-50" : "border-zinc-200 bg-white hover:bg-zinc-50"
             }`}
           >
             <p className="text-sm font-medium">{r.title}</p>

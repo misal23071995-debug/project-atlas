@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PageHeader, StatStrip } from "@/app/components/ui/Panel";
 import { useActionState, useState } from "react";
 import { gridTotal, type CapacitySettings, type WeekGrid } from "@/app/lib/capacity/model";
 import { addDays, formatDay, weekDates } from "@/app/lib/roster/types";
@@ -17,7 +18,7 @@ const VIEWS: { id: View; label: string }[] = [
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 const inputClass =
-  "mt-1 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500";
+  "mt-1 w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15";
 
 const hourLabel = (hour: number) => `${String(hour).padStart(2, "0")}:00`;
 const fmt = (value: number) => (Number.isInteger(value) ? String(value) : value.toFixed(1));
@@ -29,11 +30,11 @@ function gapCell(rostered: number, needed: number) {
     // Darker red the bigger the shortfall, relative to what's needed
     const share = needed ? -gap / needed : 1;
     const className =
-      share > 0.5 ? "bg-rose-500/35 text-rose-900" : share > 0.25 ? "bg-rose-500/20 text-rose-900" : "bg-rose-500/10 text-rose-700";
+      share > 0.5 ? "bg-rose-200/70 font-medium text-rose-900" : share > 0.25 ? "bg-rose-100 text-rose-800" : "bg-rose-50 text-rose-700";
     return { className, title: `Short by ${fmt(-gap)}` };
   }
-  if (gap < 1) return { className: "bg-emerald-500/20 text-emerald-700", title: "Right on target" };
-  return { className: "bg-sky-500/15 text-sky-700", title: `${fmt(gap)} more than needed` };
+  if (gap < 1) return { className: "bg-emerald-50 text-emerald-700", title: "Right on target" };
+  return { className: "bg-sky-50 text-sky-700", title: `${fmt(gap)} more than needed` };
 }
 
 function heatCell(value: number, max: number) {
@@ -102,63 +103,67 @@ export default function CapacityView({
 
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Capacity planning</h1>
-          <p className="mt-1 max-w-3xl text-zinc-600">
+      <PageHeader
+        title="Capacity planning"
+        description={
+          <>
             How many agents each hour needs to answer {settings.targetPercent}% of contacts within{" "}
-            {settings.targetSeconds >= 60 ? `${Math.round(settings.targetSeconds / 60)} min` : `${settings.targetSeconds}s`},
-            compared with who is on the roster. Week of {formatDay(monday)} – {formatDay(addDays(monday, 6))} ·{" "}
-            {settings.timezone}.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Link href={`/capacity?week=${addDays(monday, -7)}`} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100">
-            ← Previous
-          </Link>
-          <Link href="/capacity" className="rounded-lg border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100">
-            This week
-          </Link>
-          <Link href={`/capacity?week=${addDays(monday, 7)}`} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100">
-            Next →
-          </Link>
-        </div>
-      </div>
+            {settings.targetSeconds >= 60 ? `${Math.round(settings.targetSeconds / 60)} min` : `${settings.targetSeconds}s`}, compared with who is on
+            the roster. Week of {formatDay(monday)} – {formatDay(addDays(monday, 6))} · {settings.timezone}.
+          </>
+        }
+        actions={
+          <div className="flex overflow-hidden rounded-md border border-zinc-200 bg-white text-sm shadow-sm">
+            <Link href={`/capacity?week=${addDays(monday, -7)}`} className="px-3 py-1.5 text-zinc-700 hover:bg-zinc-50">
+              ← Previous
+            </Link>
+            <Link href="/capacity" className="border-x border-zinc-200 px-3 py-1.5 font-medium text-zinc-900 hover:bg-zinc-50">
+              This week
+            </Link>
+            <Link href={`/capacity?week=${addDays(monday, 7)}`} className="px-3 py-1.5 text-zinc-700 hover:bg-zinc-50">
+              Next →
+            </Link>
+          </div>
+        }
+      />
 
       {settings.useSampleDemand ? (
-        <p className="mt-4 rounded-lg border border-indigo-500/30 bg-indigo-500/10 px-4 py-2 text-sm text-indigo-700">
+        <p className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm text-indigo-700">
           Showing <strong>sample demand</strong> (about 1,400 contacts a week), not your real tickets.
           {canManage && " Turn it off in the settings below."}
         </p>
       ) : (
         historyCount < 50 && (
-          <p className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-4 py-2 text-sm text-amber-700">
+          <p className="mb-4 rounded-lg border border-amber-200 bg-amber-50 px-4 py-2 text-sm text-amber-700">
             Only {historyCount} ticket{historyCount === 1 ? "" : "s"} in the last {settings.historyWeeks} weeks, so the
             forecast is thin.{canManage && " Turn on sample demand in the settings below to see how planning works."}
           </p>
         )
       )}
       {!rosterReady && (
-        <p className="mt-4 text-sm text-amber-700">Run migration 008 to bring in the roster.</p>
+        <p className="mb-4 text-sm text-amber-700">Run migration 008 to bring in the roster.</p>
       )}
 
-      <section className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat label="Forecast contacts" value={Math.round(gridTotal(demand)).toLocaleString("en-IN")} hint="this week" />
-        <Stat
-          label="Busiest hour"
-          value={peak.contacts ? `${DAY_NAMES[peak.day]} ${hourLabel(peak.hour)}` : "—"}
-          hint={peak.contacts ? `${fmt(peak.contacts)} contacts, ${needed[peak.day][peak.hour]} agents needed` : "no demand"}
-        />
-        <Stat
-          label="Understaffed hours"
-          value={<span className={shortHours ? "text-red-600" : "text-emerald-600"}>{shortHours}</span>}
-          hint={`${fmt(Math.round(shortStaffHours * 10) / 10)} agent-hours short`}
-        />
-        <Stat label="Spare agent-hours" value={fmt(Math.round(overStaffHours * 10) / 10)} hint="rostered beyond what's needed" />
-      </section>
+      <StatStrip
+        stats={[
+          { label: "Forecast contacts", value: Math.round(gridTotal(demand)).toLocaleString("en-IN"), hint: "this week" },
+          {
+            label: "Busiest hour",
+            value: peak.contacts ? `${DAY_NAMES[peak.day]} ${hourLabel(peak.hour)}` : "—",
+            hint: peak.contacts ? `${fmt(peak.contacts)} contacts, ${needed[peak.day][peak.hour]} agents needed` : "no demand",
+          },
+          {
+            label: "Understaffed hours",
+            value: <span className={shortHours ? "text-rose-600" : "text-emerald-600"}>{shortHours}</span>,
+            hint: `${fmt(Math.round(shortStaffHours * 10) / 10)} agent-hours short`,
+          },
+          { label: "Spare agent-hours", value: fmt(Math.round(overStaffHours * 10) / 10), hint: "rostered beyond what's needed" },
+        ]}
+      />
 
-      <div className="mt-8 flex flex-wrap items-center justify-between gap-3">
-        <div className="flex rounded-lg border border-zinc-300 p-0.5" role="tablist">
+      <section className="mt-4 min-w-0 overflow-hidden rounded-xl border border-zinc-200 bg-white shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-zinc-100 px-5 py-3">
+        <div className="flex rounded-lg bg-zinc-100 p-0.5" role="tablist">
           {VIEWS.map((v) => (
             <button
               key={v.id}
@@ -166,32 +171,33 @@ export default function CapacityView({
               role="tab"
               aria-selected={view === v.id}
               onClick={() => setView(v.id)}
-              className={`rounded-md px-3 py-1.5 text-sm ${view === v.id ? "bg-indigo-600 text-white" : "text-zinc-600 hover:text-zinc-800"}`}
+              className={`rounded-md px-3 py-1 text-sm ${view === v.id ? "bg-white font-medium text-zinc-900 shadow-sm" : "text-zinc-600 hover:text-zinc-800"}`}
             >
               {v.label}
             </button>
           ))}
         </div>
-        <label className="flex items-center gap-2 text-sm text-zinc-600">
+        <div className="flex flex-wrap items-center gap-4">
+        {view === "gap" && (
+          <div className="flex flex-wrap gap-3 text-xs text-zinc-500">
+            <span><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-rose-200 align-middle" />Short</span>
+            <span><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-emerald-100 align-middle" />On target</span>
+            <span><span className="mr-1 inline-block h-2.5 w-2.5 rounded-sm bg-sky-100 align-middle" />Spare</span>
+            <span>Cell: rostered / needed</span>
+          </div>
+        )}
+        <label className="flex items-center gap-2 text-xs text-zinc-600">
           <input type="checkbox" checked={allHours} onChange={(e) => setAllHours(e.target.checked)} />
           Show all 24 hours
         </label>
+        </div>
       </div>
 
-      {view === "gap" && (
-        <div className="mt-3 flex flex-wrap gap-4 text-xs text-zinc-600">
-          <span><span className="mr-1 inline-block h-3 w-3 rounded bg-rose-500/35 align-middle" />Short of agents</span>
-          <span><span className="mr-1 inline-block h-3 w-3 rounded bg-emerald-500/20 align-middle" />On target</span>
-          <span><span className="mr-1 inline-block h-3 w-3 rounded bg-sky-500/30 align-middle" />More than needed</span>
-          <span>Each cell: rostered / needed</span>
-        </div>
-      )}
-
-      <div className="mt-3 overflow-x-auto rounded-xl border border-zinc-200">
+      <div className="overflow-x-auto">
         <table className="w-full min-w-[640px] table-fixed text-xs">
-          <thead className="bg-white text-zinc-600">
+          <thead className="bg-zinc-50 text-zinc-500">
             <tr>
-              <th className="w-16 px-2 py-2 text-left font-medium">Hour</th>
+              <th className="w-16 px-3 py-2 text-left font-medium">Hour</th>
               {dates.map((date) => (
                 <th key={date} className="px-1 py-2 font-medium">
                   {formatDay(date)}
@@ -201,13 +207,13 @@ export default function CapacityView({
           </thead>
           <tbody>
             {hours.map((hour) => (
-              <tr key={hour} className="border-t border-zinc-200">
-                <td className="px-2 py-1 text-zinc-500">{hourLabel(hour)}</td>
+              <tr key={hour} className="border-t border-zinc-100">
+                <td className="px-3 py-1 tabular-nums text-zinc-500">{hourLabel(hour)}</td>
                 {dates.map((date, day) => {
                   if (view === "gap") {
                     const cell = gapCell(rostered[day][hour], needed[day][hour]);
                     return (
-                      <td key={date} title={cell.title} className={`px-1 py-1 text-center ${cell.className}`}>
+                      <td key={date} title={cell.title} className={`border-l border-white px-1 py-1 text-center tabular-nums ${cell.className}`}>
                         {needed[day][hour] === 0 && rostered[day][hour] === 0
                           ? "·"
                           : `${fmt(rostered[day][hour])} / ${needed[day][hour]}`}
@@ -216,7 +222,7 @@ export default function CapacityView({
                   }
                   const value = grid[day][hour];
                   return (
-                    <td key={date} className={`px-1 py-1 text-center ${heatCell(value, max)}`}>
+                    <td key={date} className={`border-l border-white px-1 py-1 text-center tabular-nums ${heatCell(value, max)}`}>
                       {value === 0 ? "·" : fmt(value)}
                     </td>
                   );
@@ -224,16 +230,16 @@ export default function CapacityView({
               </tr>
             ))}
           </tbody>
-          <tfoot className="border-t border-zinc-300 bg-white text-zinc-600">
+          <tfoot className="border-t border-zinc-200 bg-zinc-50 text-zinc-600">
             <tr>
-              <td className="px-2 py-2 font-medium">Day</td>
+              <td className="px-3 py-2 font-medium">Day</td>
               {dates.map((date, day) => {
                 const contacts = demand[day].reduce((a, b) => a + b, 0);
                 const short = needed[day].reduce((sum, n, h) => sum + Math.max(0, n - rostered[day][h]), 0);
                 return (
                   <td key={date} className="px-1 py-2 text-center">
                     <p className="text-zinc-800">{Math.round(contacts)} contacts</p>
-                    <p className={short ? "text-red-600" : "text-emerald-600"}>
+                    <p className={short ? "text-rose-600" : "text-emerald-600"}>
                       {short ? `${fmt(Math.round(short * 10) / 10)} agent-h short` : "covered"}
                     </p>
                   </td>
@@ -243,6 +249,7 @@ export default function CapacityView({
           </tfoot>
         </table>
       </div>
+      </section>
 
       <p className="mt-3 text-xs text-zinc-500">
         Needed = Erlang C agents for {settings.targetPercent}/{settings.targetSeconds}s at {settings.ahtMinutes} min handling
@@ -258,46 +265,37 @@ export default function CapacityView({
   );
 }
 
-function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-      <p className="text-sm text-zinc-600">{label}</p>
-      <p className="mt-2 text-2xl font-bold">{value}</p>
-      <p className="mt-1 text-xs text-zinc-500">{hint}</p>
-    </div>
-  );
-}
 
 function SettingsForm({ settings, timeZones }: { settings: CapacitySettings; timeZones: string[] }) {
   const [state, action, pending] = useActionState<SettingsFormState, FormData>(saveCapacitySettingsAction, {});
 
   return (
-    <section className="mt-10 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold">Planning settings</h2>
+    <section className="mt-6 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-zinc-900">Planning settings</h2>
       <form action={action} className="mt-4 space-y-4">
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             Average handling time (minutes)
             <input type="number" name="ahtMinutes" min={0.1} max={240} step={0.1} defaultValue={settings.ahtMinutes} className={inputClass} />
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             Service level target (%)
             <input type="number" name="targetPercent" min={50} max={99} defaultValue={settings.targetPercent} className={inputClass} />
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             Answered within (seconds)
             <input type="number" name="targetSeconds" min={10} max={86400} defaultValue={settings.targetSeconds} className={inputClass} />
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             Shrinkage (%)
             <input type="number" name="shrinkagePercent" min={0} max={60} defaultValue={settings.shrinkagePercent} className={inputClass} />
             <span className="mt-1 block text-xs text-zinc-500">Meetings, coaching and absence, on top of breaks</span>
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             Forecast from the last (weeks)
             <input type="number" name="historyWeeks" min={1} max={26} defaultValue={settings.historyWeeks} className={inputClass} />
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             Time zone
             <select name="timezone" defaultValue={settings.timezone} className={inputClass}>
               {timeZones.map((zone) => (
@@ -319,13 +317,13 @@ function SettingsForm({ settings, timeZones }: { settings: CapacitySettings; tim
           </span>
         </label>
 
-        {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
-        {state.success && <p role="status" className="text-sm text-emerald-600">{state.success}</p>}
+        {state.error && <p role="alert" className="text-sm text-rose-600">{state.error}</p>}
+        {state.success && <p role="status" className="text-sm text-emerald-700">{state.success}</p>}
 
         <button
           type="submit"
           disabled={pending}
-          className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+          className="rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
         >
           {pending ? "Saving…" : "Save settings"}
         </button>

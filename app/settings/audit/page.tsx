@@ -51,11 +51,11 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
     <DashboardLayout>
       <div className="mx-auto max-w-5xl space-y-6">
         <div>
-          <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
+          <Link href="/settings" className="text-xs font-medium text-zinc-500 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Audit log</h1>
-          <p className="mt-1 text-zinc-600">Who changed what in {org.name}: the team, sign-in security, settings, rules and orders. Latest 200.</p>
+          <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-900">Audit log</h1>
+          <p className="mt-0.5 max-w-3xl text-sm text-zinc-500">Who changed what in {org.name}: the team, sign-in security, settings, rules and orders. Latest 200.</p>
         </div>
 
         <nav className="flex flex-wrap gap-2" aria-label="Filter">
@@ -63,7 +63,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
             <Link
               key={f.id}
               href={f.id ? `/settings/audit?type=${f.id}` : "/settings/audit"}
-              className={`rounded-full px-3 py-1 text-sm ${type === f.id ? "bg-indigo-600 text-white" : "border border-zinc-200 text-zinc-700 hover:bg-zinc-100"}`}
+              className={`rounded-full px-3 py-1 text-sm ${type === f.id ? "bg-indigo-600 text-white" : "border border-zinc-200 text-zinc-700 hover:bg-zinc-50"}`}
             >
               {f.label}
             </Link>
@@ -71,7 +71,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
         </nav>
 
         {entries === null ? (
-          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             The audit log isn&apos;t set up yet. Run supabase/migrations/017_audit_log.sql in the Supabase SQL Editor.
           </p>
         ) : entries.length === 0 ? (

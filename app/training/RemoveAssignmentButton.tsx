@@ -13,7 +13,7 @@ export default function RemoveAssignmentButton({ id }: { id: string }) {
       onClick={() => {
         if (confirm("Remove this assignment and its result?")) startTransition(() => removeAssignmentAction(id));
       }}
-      className="text-xs text-zinc-500 hover:text-red-600 disabled:opacity-50"
+      className="text-xs text-zinc-500 hover:text-rose-600 disabled:opacity-50"
     >
       Remove
     </button>

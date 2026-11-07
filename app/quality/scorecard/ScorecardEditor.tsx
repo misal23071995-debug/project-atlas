@@ -3,12 +3,12 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { DEFAULT_CRITERIA, MAX_CRITERIA, type Criterion } from "@/app/lib/quality/types";
+import { buttonPrimary, buttonSecondary, inputBase } from "@/app/components/ui/Panel";
 import { saveScorecardAction } from "../actions";
 
 type Row = Partial<Criterion> & { key: number };
 
-const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500";
+const inputClass = `w-full ${inputBase}`;
 
 let nextKey = 0;
 const toRows = (criteria: Criterion[]): Row[] => criteria.map((c) => ({ ...c, key: nextKey++ }));
@@ -40,11 +40,11 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
   }
 
   return (
-    <div className="mt-8 space-y-4">
+    <div className="space-y-3">
       {rows.map((row, index) => (
         <div key={row.key} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm">
           <div className="flex gap-3">
-            <span className="mt-2 text-sm text-zinc-500">{index + 1}.</span>
+            <span className="mt-1.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-zinc-100 text-xs font-semibold text-zinc-600">{index + 1}</span>
             <div className="flex-1 space-y-2">
               <div className="flex gap-2">
                 <input
@@ -81,13 +81,13 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
               type="button"
               onClick={() => setRows((current) => current.filter((r) => r.key !== row.key))}
               aria-label={`Remove ${row.label || "criterion"}`}
-              className="self-start rounded-md px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-red-600"
+              className="self-start rounded-md px-2 py-1 text-sm text-zinc-500 hover:bg-zinc-100 hover:text-rose-600"
             >
               ✕
             </button>
           </div>
           {weightSum > 0 && (
-            <p className="mt-2 pl-6 text-xs text-zinc-500">
+            <p className="mt-2 pl-9 text-xs text-zinc-500">
               Counts for {Math.round(((Number(row.weight) || 0) / weightSum) * 100)}% of the score
             </p>
           )}
@@ -95,12 +95,12 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
       ))}
 
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <div className="flex gap-3">
+        <div className="flex items-center gap-3">
           <button
             type="button"
             disabled={rows.length >= MAX_CRITERIA}
             onClick={() => setRows((current) => [...current, { key: nextKey++, label: "", description: "", weight: 10 }])}
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-800 hover:bg-zinc-100 disabled:opacity-50"
+            className={buttonSecondary}
           >
             + Add criterion
           </button>
@@ -120,14 +120,14 @@ export default function ScorecardEditor({ initial }: { initial: Criterion[] }) {
           type="button"
           onClick={save}
           disabled={isPending}
-          className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+          className={buttonPrimary}
         >
           {isPending ? "Saving…" : "Save scorecard"}
         </button>
       </div>
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-      {saved && <p role="status" className="text-sm text-emerald-600">Scorecard saved. New reviews will use it.</p>}
+      {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
+      {saved && <p role="status" className="text-sm text-emerald-700">Scorecard saved. New reviews will use it.</p>}
     </div>
   );
 }

@@ -21,7 +21,7 @@ import {
 import AssignmentStatusBadge from "./AssignmentStatusBadge";
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500";
+  "w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15";
 const labelClass = "block text-sm text-zinc-600";
 
 const blankQuestion = (): QuizQuestion => ({
@@ -109,7 +109,7 @@ export default function CourseEditor({
   return (
     <div className="mt-6 grid gap-6 lg:grid-cols-3">
       <div className="space-y-6 lg:col-span-2">
-        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
           <label className={labelClass}>
             Title
             <input value={title} onChange={(e) => setTitle(e.target.value)} maxLength={150} className={`mt-1 ${inputClass}`} />
@@ -150,10 +150,10 @@ export default function CourseEditor({
           </label>
         </section>
 
-        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div>
-              <h2 className="text-lg font-semibold">Quiz</h2>
+              <h2 className="text-sm font-semibold text-zinc-900">Quiz</h2>
               <p className="text-xs text-zinc-500">
                 {questions.length} question{questions.length === 1 ? "" : "s"} · pass at {passPercent}%
               </p>
@@ -162,7 +162,7 @@ export default function CourseEditor({
               type="button"
               onClick={writeWithAi}
               disabled={isWriting || questions.length >= MAX_QUESTIONS}
-              className="inline-flex items-center gap-2 rounded-lg border border-indigo-500/40 bg-indigo-500/10 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-500/20 disabled:opacity-60"
+              className="inline-flex items-center gap-2 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2 text-sm font-medium text-indigo-700 hover:bg-indigo-500/20 disabled:opacity-60"
             >
               <SparkleIcon />
               {isWriting ? "AI is writing…" : "Write 5 questions with AI"}
@@ -186,7 +186,7 @@ export default function CourseEditor({
                   type="button"
                   aria-label={`Remove question ${index + 1}`}
                   onClick={() => setQuestions((current) => current.filter((_, i) => i !== index))}
-                  className="self-start px-2 py-1 text-zinc-500 hover:text-red-600"
+                  className="self-start px-2 py-1 text-zinc-500 hover:text-rose-600"
                 >
                   ✕
                 </button>
@@ -238,7 +238,7 @@ export default function CourseEditor({
       </div>
 
       <div className="space-y-6">
-        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
+        <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
           <label className={labelClass}>
             Pass mark (%)
             <input
@@ -269,14 +269,14 @@ export default function CourseEditor({
             Published (agents can take it)
           </label>
 
-          {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
-          {notice && <p role="status" className="text-sm text-emerald-600">{notice}</p>}
+          {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
+          {notice && <p role="status" className="text-sm text-emerald-700">{notice}</p>}
 
           <button
             type="button"
             onClick={save}
             disabled={isSaving || isWriting}
-            className="w-full rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="w-full rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
           >
             {isSaving ? "Saving…" : "Save course"}
           </button>
@@ -286,7 +286,7 @@ export default function CourseEditor({
               onClick={() => {
                 if (confirm("Delete this course and everyone's results for it?")) deleteCourseAction(course.id);
               }}
-              className="w-full text-sm text-red-600 hover:text-red-700"
+              className="w-full text-sm text-rose-600 hover:text-rose-700"
             >
               Delete course
             </button>
@@ -331,8 +331,8 @@ function AssignPanel({
   }
 
   return (
-    <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold">Assign</h2>
+    <section className="space-y-4 rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-zinc-900">Assign</h2>
       {!published ? (
         <p className="text-sm text-zinc-500">Publish and save the course first.</p>
       ) : (
@@ -364,12 +364,12 @@ function AssignPanel({
             Due date (optional)
             <input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} className={`mt-1 ${inputClass}`} />
           </label>
-          {message && <p className={`text-sm ${message.ok ? "text-emerald-600" : "text-red-600"}`}>{message.text}</p>}
+          {message && <p className={`text-sm ${message.ok ? "text-emerald-600" : "text-rose-600"}`}>{message.text}</p>}
           <button
             type="button"
             onClick={assign}
             disabled={isPending || chosen.length === 0}
-            className="w-full rounded-lg border border-zinc-300 px-4 py-2 text-sm text-zinc-800 hover:bg-zinc-100 disabled:opacity-50"
+            className="w-full rounded-md border border-zinc-200 bg-white shadow-sm px-4 py-2 text-sm text-zinc-800 hover:bg-zinc-50 disabled:opacity-50"
           >
             {isPending ? "Assigning…" : "Assign course"}
           </button>

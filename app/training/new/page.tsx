@@ -21,10 +21,10 @@ export default async function NewCoursePage() {
 
   return (
     <DashboardLayout>
-      <Link href="/training" className="text-sm text-zinc-600 hover:text-zinc-800">
+      <Link href="/training" className="text-xs font-medium text-zinc-500 hover:text-zinc-800">
         ← Training
       </Link>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">New course</h1>
+      <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-900">New course</h1>
       <CourseEditor
         course={null}
         criteria={criteria.map((c) => ({ id: c.id, label: c.label }))}

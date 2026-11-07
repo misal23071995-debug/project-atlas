@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { confirmTwoFactorAction, disableTwoFactorAction, startTwoFactorAction, type TwoFactorSetup } from "./security-actions";
 
-const button = "rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60";
+const button = "rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60";
 
 export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
   const [setup, setSetup] = useState<TwoFactorSetup | null>(null);
@@ -41,7 +41,7 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
             Turn off two-step sign-in
           </button>
         )}
-        {message.error && <p role="alert" className="text-red-600">{message.error}</p>}
+        {message.error && <p role="alert" className="text-rose-600">{message.error}</p>}
       </div>
     );
   }
@@ -53,7 +53,7 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
           Off. Turn it on so a stolen password isn&apos;t enough to get into your account. You&apos;ll need an
           authenticator app such as Google Authenticator, Microsoft Authenticator or 1Password.
         </p>
-        {(message.error || setup?.error) && <p role="alert" className="text-red-600">{message.error ?? setup?.error}</p>}
+        {(message.error || setup?.error) && <p role="alert" className="text-rose-600">{message.error ?? setup?.error}</p>}
         {message.success && <p role="status" className="text-emerald-600">{message.success}</p>}
         {!message.success && (
           <button type="button" disabled={pending} onClick={() => run(async () => setSetup(await startTwoFactorAction()))} className={button}>
@@ -88,7 +88,7 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
             inputMode="numeric"
             autoComplete="one-time-code"
             maxLength={7}
-            className="mt-1 block w-36 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-center font-mono tracking-[0.3em] text-zinc-900 outline-none focus:border-indigo-500"
+            className="mt-1 block w-36 rounded-md border border-zinc-200 bg-white px-3 py-2 text-center font-mono tracking-[0.3em] text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15"
           />
         </label>
         <button
@@ -109,7 +109,7 @@ export default function TwoFactorCard({ enabled }: { enabled: boolean }) {
           Cancel
         </button>
       </div>
-      {message.error && <p role="alert" className="text-red-600">{message.error}</p>}
+      {message.error && <p role="alert" className="text-rose-600">{message.error}</p>}
     </div>
   );
 }

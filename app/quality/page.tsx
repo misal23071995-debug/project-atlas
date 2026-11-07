@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { StatusBadge } from "@/app/components/ui/Badges";
 import DashboardLayout from "@/app/components/dashboard-layout";
+import { EmptyState, Notice, PageHeader, Panel, StatStrip, buttonSecondary, td, th } from "@/app/components/ui/Panel";
 import { requireSession } from "@/app/lib/auth/session";
 import { can } from "@/app/lib/auth/roles";
 import { getQualityOverview } from "@/app/lib/db/quality";
@@ -11,17 +12,7 @@ export const dynamic = "force-dynamic";
 
 function Score({ value }: { value: number | null }) {
   if (value === null) return <span className="text-zinc-500">—</span>;
-  return <span className={`font-semibold ${scoreBand(value).className}`}>{value}%</span>;
-}
-
-function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-      <p className="text-sm text-zinc-600">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">{value}</p>
-      <p className="mt-1 text-xs text-zinc-500">{hint}</p>
-    </div>
-  );
+  return <span className={`font-semibold tabular-nums ${scoreBand(value).className}`}>{value}%</span>;
 }
 
 export default async function QualityPage() {
@@ -32,82 +23,78 @@ export default async function QualityPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{isReviewer ? "Quality" : "My quality"}</h1>
-          <p className="mt-1 max-w-3xl text-zinc-600">
-            {isReviewer
-              ? "AI scores each conversation against your scorecard. A reviewer checks the score, adjusts it and gives the agent feedback."
-              : "How your conversations were scored by the quality team in the last 30 days."}
-          </p>
-        </div>
-        {can(role, "quality.scorecard") && (
-          <Link
-            href="/quality/scorecard"
-            className="rounded-lg border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-800 hover:bg-zinc-100"
-          >
-            Edit scorecard
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title={isReviewer ? "Quality" : "My quality"}
+        description={
+          isReviewer
+            ? "AI scores each conversation against your scorecard. A reviewer checks the score, adjusts it and gives the agent feedback."
+            : "How your conversations were scored by the quality team in the last 30 days."
+        }
+        actions={
+          can(role, "quality.scorecard") && (
+            <Link href="/quality/scorecard" className={buttonSecondary}>
+              Edit scorecard
+            </Link>
+          )
+        }
+      />
 
       {overview === null ? (
-        <p className="mt-8 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
-          Run supabase/migrations/007_quality.sql in the Supabase SQL Editor to turn on quality checks.
-        </p>
+        <Notice>Run supabase/migrations/007_quality.sql in the Supabase SQL Editor to turn on quality checks.</Notice>
       ) : (
         <>
-          <section className="mt-8 grid gap-4 sm:grid-cols-3">
-            <Stat label="Average QA score" value={<Score value={overview.average} />} hint="final reviews, last 30 days" />
-            <Stat label="Reviews done" value={overview.reviewed} hint="last 30 days" />
-            {isReviewer ? (
-              <Stat
-                label="AI vs reviewer gap"
-                value={overview.aiGap === null ? "—" : `${overview.aiGap} pts`}
-                hint="how far the AI's score was from the final one; lower is better"
-              />
-            ) : (
-              <Stat
-                label="Weakest area"
-                value={<span className="text-xl">{overview.byCriterion[0]?.label ?? "—"}</span>}
-                hint="your lowest-scoring criterion"
-              />
-            )}
-          </section>
+          <StatStrip
+            stats={[
+              { label: "Average QA score", value: <Score value={overview.average} />, hint: "final reviews, last 30 days" },
+              { label: "Reviews done", value: overview.reviewed, hint: "last 30 days" },
+              isReviewer
+                ? {
+                    label: "AI vs reviewer gap",
+                    value: overview.aiGap === null ? "—" : `${overview.aiGap} pts`,
+                    hint: "how far the AI's score was from the final one; lower is better",
+                  }
+                : { label: "Weakest area", value: <span className="text-lg">{overview.byCriterion[0]?.label ?? "—"}</span>, hint: "your lowest-scoring criterion" },
+            ]}
+          />
 
           {isReviewer && (
-            <section className="mt-10">
-              <h2 className="text-xl font-semibold">Ready to review</h2>
-              <p className="mt-1 text-sm text-zinc-600">Tickets with agent replies that haven&apos;t been reviewed yet.</p>
-
+            <Panel
+              title="Ready to review"
+              description="Tickets with agent replies that haven't been reviewed yet"
+              action={<span className="text-xs tabular-nums text-zinc-500">{overview.queue.length} waiting</span>}
+              className="mt-4"
+              flush
+            >
               {overview.queue.length === 0 ? (
-                <p className="mt-4 text-sm text-zinc-500">Nothing waiting. Every answered ticket has been reviewed.</p>
+                <EmptyState>Nothing waiting. Every answered ticket has been reviewed.</EmptyState>
               ) : (
-                <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200">
+                <div className="overflow-x-auto">
                   <table className="min-w-full text-sm">
-                    <thead className="bg-white text-left text-zinc-600">
+                    <thead className="bg-zinc-50">
                       <tr>
-                        <th className="px-4 py-3 font-medium">Ticket</th>
-                        <th className="px-4 py-3 font-medium">Agent</th>
-                        <th className="px-4 py-3 font-medium">Status</th>
-                        <th className="px-4 py-3 font-medium">AI score</th>
-                        <th className="px-4 py-3" />
+                        <th className={th}>Ticket</th>
+                        <th className={th}>Agent</th>
+                        <th className={th}>Status</th>
+                        <th className={th}>AI score</th>
+                        <th className={th} />
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody className="divide-y divide-zinc-100">
                       {overview.queue.map((item) => (
-                        <tr key={item.ticketId} className="border-t border-zinc-200">
-                          <td className="px-4 py-3">
-                            <p className="font-medium text-zinc-900">#{item.ticketId}</p>
-                            <p className="max-w-md truncate text-xs text-zinc-500">{item.subject}</p>
+                        <tr key={item.ticketId} className="hover:bg-zinc-50/60">
+                          <td className={`${td} max-w-md`}>
+                            <p className="truncate font-medium text-zinc-900">{item.subject}</p>
+                            <p className="font-mono text-xs text-zinc-500">#{item.ticketId}</p>
                           </td>
-                          <td className="px-4 py-3 text-zinc-700">{item.agentName}</td>
-                          <td className="px-4 py-3"><StatusBadge status={item.status} /></td>
-                          <td className="px-4 py-3">
+                          <td className={`${td} whitespace-nowrap text-zinc-700`}>{item.agentName}</td>
+                          <td className={td}>
+                            <StatusBadge status={item.status} />
+                          </td>
+                          <td className={td}>
                             <Score value={item.aiTotal} />
                           </td>
-                          <td className="px-4 py-3 text-right">
-                            <Link href={`/quality/${item.ticketId}`} className="font-medium text-indigo-600 hover:underline">
+                          <td className={`${td} text-right`}>
+                            <Link href={`/quality/${item.ticketId}`} className="whitespace-nowrap text-xs font-medium text-indigo-600 hover:text-indigo-700">
                               Review →
                             </Link>
                           </td>
@@ -117,89 +104,89 @@ export default async function QualityPage() {
                   </table>
                 </div>
               )}
-            </section>
+            </Panel>
           )}
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-2">
+          <div className="mt-4 grid gap-4 lg:grid-cols-2">
             {isReviewer && (
-              <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-                <h2 className="text-lg font-semibold">By agent</h2>
+              <Panel title="By agent" flush>
                 {overview.byAgent.length === 0 ? (
-                  <p className="mt-4 text-sm text-zinc-500">No reviews yet.</p>
+                  <EmptyState>No reviews yet.</EmptyState>
                 ) : (
-                  <table className="mt-4 min-w-full text-sm">
-                    <thead className="text-left text-zinc-500">
-                      <tr>
-                        <th className="pb-2 font-medium">Agent</th>
-                        <th className="pb-2 font-medium">Reviews</th>
-                        <th className="pb-2 font-medium">Average</th>
-                        <th className="pb-2 font-medium">Coach on</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {overview.byAgent.map((row) => (
-                        <tr key={row.name} className="border-t border-zinc-200">
-                          <td className="py-2 text-zinc-900">{row.name}</td>
-                          <td className="py-2 text-zinc-600">{row.reviews}</td>
-                          <td className="py-2">
-                            <Score value={row.average} />
-                          </td>
-                          <td className="py-2 text-zinc-600">{row.weakest ?? "—"}</td>
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full text-sm">
+                      <thead className="bg-zinc-50">
+                        <tr>
+                          <th className={th}>Agent</th>
+                          <th className={`${th} text-right`}>Reviews</th>
+                          <th className={`${th} text-right`}>Average</th>
+                          <th className={th}>Coach on</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody className="divide-y divide-zinc-100">
+                        {overview.byAgent.map((row) => (
+                          <tr key={row.name}>
+                            <td className={`${td} font-medium text-zinc-900`}>{row.name}</td>
+                            <td className={`${td} text-right tabular-nums text-zinc-600`}>{row.reviews}</td>
+                            <td className={`${td} text-right`}>
+                              <Score value={row.average} />
+                            </td>
+                            <td className={`${td} text-zinc-600`}>{row.weakest ?? "—"}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 )}
-              </section>
+              </Panel>
             )}
 
-            <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-              <h2 className="text-lg font-semibold">By criterion</h2>
-              <p className="mt-1 text-xs text-zinc-500">Lowest first: where coaching helps most</p>
+            <Panel title="By criterion" description="Lowest first: where coaching helps most">
               {overview.byCriterion.length === 0 ? (
-                <p className="mt-4 text-sm text-zinc-500">No reviews yet.</p>
+                <p className="text-sm text-zinc-500">No reviews yet.</p>
               ) : (
-                <ul className="mt-4 space-y-3">
+                <ul className="space-y-3.5">
                   {overview.byCriterion.map((row) => (
                     <li key={row.label}>
                       <div className="flex justify-between text-sm">
                         <span className="text-zinc-700">{row.label}</span>
                         <Score value={row.average} />
                       </div>
-                      <div className="mt-1 h-2 rounded-full bg-zinc-100">
-                        <div className="h-2 rounded-full bg-indigo-500" style={{ width: `${row.average}%` }} />
+                      <div className="mt-1.5 h-1.5 rounded-full bg-zinc-100">
+                        <div className="h-1.5 rounded-full bg-indigo-500" style={{ width: `${row.average}%` }} />
                       </div>
                     </li>
                   ))}
                 </ul>
               )}
-            </section>
+            </Panel>
 
-            <section className={`rounded-xl border border-zinc-200 bg-white p-6 ${isReviewer ? "lg:col-span-2" : ""}`}>
-              <h2 className="text-lg font-semibold">Recent reviews</h2>
+            <Panel title="Recent reviews" className={isReviewer ? "lg:col-span-2" : ""} flush>
               {overview.recent.length === 0 ? (
-                <p className="mt-4 text-sm text-zinc-500">No reviews yet.</p>
+                <EmptyState>No reviews yet.</EmptyState>
               ) : (
-                <ul className="mt-4 divide-y divide-zinc-200">
+                <ul className="divide-y divide-zinc-100">
                   {overview.recent.map((review) => (
-                    <li key={review.ticketId} className="flex flex-wrap items-center justify-between gap-2 py-3">
-                      <Link href={`/quality/${review.ticketId}`} className="min-w-0">
-                        <p className="truncate text-sm font-medium text-zinc-900 hover:underline">
-                          #{review.ticketId} · {review.subject}
-                        </p>
-                        <p className="text-xs text-zinc-500">
-                          {review.agentName} · reviewed by {review.reviewedBy ?? "—"} · {formatDateTime(review.reviewedAt)}
-                        </p>
+                    <li key={review.ticketId}>
+                      <Link href={`/quality/${review.ticketId}`} className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 hover:bg-zinc-50/60">
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium text-zinc-900">
+                            <span className="font-mono text-xs font-normal text-zinc-500">#{review.ticketId}</span> {review.subject}
+                          </p>
+                          <p className="text-xs text-zinc-500">
+                            {review.agentName} · reviewed by {review.reviewedBy ?? "—"} · {formatDateTime(review.reviewedAt)}
+                          </p>
+                        </div>
+                        <div className="text-right text-sm">
+                          <Score value={review.total} />
+                          {review.aiTotal !== null && <p className="text-xs text-zinc-500">AI said {review.aiTotal}%</p>}
+                        </div>
                       </Link>
-                      <div className="text-right text-sm">
-                        <Score value={review.total} />
-                        {review.aiTotal !== null && <p className="text-xs text-zinc-500">AI said {review.aiTotal}%</p>}
-                      </div>
                     </li>
                   ))}
                 </ul>
               )}
-            </section>
+            </Panel>
           </div>
         </>
       )}

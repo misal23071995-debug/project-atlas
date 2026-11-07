@@ -1,5 +1,6 @@
 import Link from "next/link";
 import DashboardLayout from "@/app/components/dashboard-layout";
+import { EmptyState, Notice, PageHeader, Panel, StatStrip, buttonPrimary, th } from "@/app/components/ui/Panel";
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { can } from "@/app/lib/auth/roles";
 import { getScorecard } from "@/app/lib/db/quality";
@@ -11,16 +12,6 @@ import RemoveAssignmentButton from "./RemoveAssignmentButton";
 
 export const dynamic = "force-dynamic";
 
-function Stat({ label, value, hint }: { label: string; value: React.ReactNode; hint: string }) {
-  return (
-    <div className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
-      <p className="text-sm text-zinc-600">{label}</p>
-      <p className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">{value}</p>
-      <p className="mt-1 text-xs text-zinc-500">{hint}</p>
-    </div>
-  );
-}
-
 function MyTraining({ assignments, today }: { assignments: Assignment[]; today: string }) {
   // To do first (overdue at the top), then finished
   const sorted = [...assignments].sort((a, b) => {
@@ -29,11 +20,11 @@ function MyTraining({ assignments, today }: { assignments: Assignment[]; today: 
   });
 
   return (
-    <ul className="mt-4 divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white shadow-sm">
+    <ul className="divide-y divide-zinc-100">
       {sorted.map((a) => (
-        <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+        <li key={a.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3">
           <div className="min-w-0">
-            <Link href={`/training/${a.courseId}`} className="font-medium text-zinc-900 hover:underline">
+            <Link href={`/training/${a.courseId}`} className="text-sm font-medium text-zinc-900 hover:text-indigo-700">
               {a.courseTitle}
             </Link>
             <p className="text-xs text-zinc-500">
@@ -47,7 +38,7 @@ function MyTraining({ assignments, today }: { assignments: Assignment[]; today: 
             {a.status !== "passed" && (
               <Link
                 href={`/training/${a.courseId}`}
-                className="rounded-lg bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-indigo-500"
+                className="rounded-md bg-indigo-600 px-3 py-1.5 text-xs font-medium text-white shadow-sm hover:bg-indigo-500"
               >
                 {a.attempts ? "Try again" : "Start"}
               </Link>
@@ -74,9 +65,8 @@ export default async function TrainingPage() {
   if (courses === null || assignments === null) {
     return (
       <DashboardLayout>
-        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
-          Run supabase/migrations/010_training.sql in the Supabase SQL Editor to turn on training.
-        </p>
+        <PageHeader title="Training" />
+        <Notice>Run supabase/migrations/010_training.sql in the Supabase SQL Editor to turn on training.</Notice>
       </DashboardLayout>
     );
   }
@@ -98,39 +88,55 @@ export default async function TrainingPage() {
 
   return (
     <DashboardLayout>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Training</h1>
-          <p className="mt-1 max-w-3xl text-zinc-600">
-            Short lessons with a quiz. Courses linked to a quality criterion are assigned automatically when a review
-            scores an agent low on it.
-          </p>
-        </div>
-        {canManage && (
-          <Link href="/training/new" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500">
-            New course
-          </Link>
-        )}
-      </div>
+      <PageHeader
+        title="Training"
+        description="Short lessons with a quiz. Courses linked to a quality criterion are assigned automatically when a review scores an agent low on it."
+        actions={
+          canManage && (
+            <Link href="/training/new" className={buttonPrimary}>
+              New course
+            </Link>
+          )
+        }
+      />
 
-      <section className="mt-8">
-        <h2 className="text-xl font-semibold">My training</h2>
-        {mine.length === 0 ? (
-          <p className="mt-2 text-sm text-zinc-500">Nothing assigned to you right now.</p>
-        ) : (
-          <MyTraining assignments={mine} today={today} />
-        )}
-      </section>
+      {canManage && (
+        <StatStrip
+          className="mb-4"
+          stats={[
+            {
+              label: "Completion rate",
+              value: assigned.length ? `${Math.round((passed.length / assigned.length) * 100)}%` : "—",
+              hint: `${passed.length} of ${assigned.length} assignments passed`,
+            },
+            {
+              label: "Overdue",
+              value: <span className={overdue.length ? "text-rose-600" : "text-emerald-600"}>{overdue.length}</span>,
+              hint: "past the due date and not passed",
+            },
+            { label: "Average quiz score", value: averageScore === null ? "—" : `${averageScore}%`, hint: "best attempt per person" },
+            {
+              label: "From quality checks",
+              value: assigned.filter((a) => a.assignedBy === "Quality check").length,
+              hint: "assigned automatically after a low QC score",
+            },
+          ]}
+        />
+      )}
+
+      <Panel title="My training" action={<span className="text-xs tabular-nums text-zinc-500">{mine.length} assigned</span>} flush>
+        {mine.length === 0 ? <EmptyState>Nothing assigned to you right now.</EmptyState> : <MyTraining assignments={mine} today={today} />}
+      </Panel>
 
       {!canManage && others.length > 0 && (
-        <section className="mt-10">
-          <h2 className="text-xl font-semibold">More courses</h2>
-          <p className="mt-1 text-sm text-zinc-600">Take any of these for practice.</p>
-          <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+        <section className="mt-6">
+          <h2 className="text-sm font-semibold text-zinc-900">More courses</h2>
+          <p className="mt-0.5 text-xs text-zinc-500">Take any of these for practice.</p>
+          <ul className="mt-3 grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
             {others.map((c) => (
               <li key={c.id}>
-                <Link href={`/training/${c.id}`} className="block rounded-xl border border-zinc-200 bg-white p-4 hover:border-zinc-300 shadow-sm">
-                  <p className="font-medium text-zinc-900">{c.title}</p>
+                <Link href={`/training/${c.id}`} className="block h-full rounded-xl border border-zinc-200 bg-white p-4 shadow-sm hover:border-indigo-300">
+                  <p className="text-sm font-medium text-zinc-900">{c.title}</p>
                   {c.description && <p className="mt-1 text-sm text-zinc-600">{c.description}</p>}
                   <p className="mt-2 text-xs text-zinc-500">{c.questions.length} questions</p>
                 </Link>
@@ -142,65 +148,45 @@ export default async function TrainingPage() {
 
       {canManage && (
         <>
-          <section className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <Stat
-              label="Completion rate"
-              value={assigned.length ? `${Math.round((passed.length / assigned.length) * 100)}%` : "—"}
-              hint={`${passed.length} of ${assigned.length} assignments passed`}
-            />
-            <Stat
-              label="Overdue"
-              value={<span className={overdue.length ? "text-red-600" : "text-emerald-600"}>{overdue.length}</span>}
-              hint="past the due date and not passed"
-            />
-            <Stat label="Average quiz score" value={averageScore === null ? "—" : `${averageScore}%`} hint="best attempt per person" />
-            <Stat
-              label="From quality checks"
-              value={assigned.filter((a) => a.assignedBy === "Quality check").length}
-              hint="assigned automatically after a low QC score"
-            />
-          </section>
-
-          <section className="mt-10">
-            <h2 className="text-xl font-semibold">Courses</h2>
+          <Panel title="Courses" className="mt-4" flush>
             {courses.length === 0 ? (
-              <p className="mt-2 text-sm text-zinc-500">
+              <p className="px-5 py-10 text-center text-sm text-zinc-500">
                 No courses yet. Create one, and link it to a quality criterion like Empathy so it&apos;s assigned when
                 needed.
               </p>
             ) : (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200">
+              <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-white text-left text-zinc-600">
+                  <thead className="bg-zinc-50">
                     <tr>
-                      <th className="px-4 py-3 font-medium">Course</th>
-                      <th className="px-4 py-3 font-medium">Linked to</th>
-                      <th className="px-4 py-3 font-medium">Questions</th>
-                      <th className="px-4 py-3 font-medium">Passed</th>
-                      <th className="px-4 py-3 font-medium">Status</th>
+                      <th className={th}>Course</th>
+                      <th className={th}>Linked to</th>
+                      <th className={th}>Questions</th>
+                      <th className={th}>Passed</th>
+                      <th className={th}>Status</th>
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-zinc-100">
                     {courses.map((course) => {
                       const forCourse = assignments.filter((a) => a.courseId === course.id);
                       return (
-                        <tr key={course.id} className="border-t border-zinc-200">
-                          <td className="px-4 py-3">
-                            <Link href={`/training/${course.id}/edit`} className="font-medium text-indigo-600 hover:underline">
+                        <tr key={course.id} className="hover:bg-zinc-50/60">
+                          <td className="px-5 py-2.5">
+                            <Link href={`/training/${course.id}/edit`} className="font-medium text-zinc-900 hover:text-indigo-700">
                               {course.title}
                             </Link>
                           </td>
-                          <td className="px-4 py-3 text-zinc-700">
+                          <td className="px-5 py-2.5 text-zinc-700">
                             {course.linkedCriterion ? criterionLabels.get(course.linkedCriterion) ?? "Removed criterion" : "—"}
                           </td>
-                          <td className="px-4 py-3 text-zinc-600">{course.questions.length}</td>
-                          <td className="px-4 py-3 text-zinc-600">
+                          <td className="px-5 py-2.5 text-zinc-600">{course.questions.length}</td>
+                          <td className="px-5 py-2.5 text-zinc-600">
                             {forCourse.filter((a) => a.status === "passed").length} / {forCourse.length}
                           </td>
-                          <td className="px-4 py-3">
+                          <td className="px-5 py-2.5">
                             <span
-                              className={`rounded-full px-2.5 py-1 text-xs ${
-                                course.published ? "bg-emerald-500/15 text-emerald-600" : "bg-zinc-200 text-zinc-700"
+                              className={`rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${
+                                course.published ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" : "bg-zinc-50 text-zinc-600 ring-zinc-500/20"
                               }`}
                             >
                               {course.published ? "Published" : "Draft"}
@@ -213,40 +199,39 @@ export default async function TrainingPage() {
                 </table>
               </div>
             )}
-          </section>
+          </Panel>
 
-          <section className="mt-10">
-            <h2 className="text-xl font-semibold">Team progress</h2>
+          <Panel title="Team progress" description="Overdue first" className="mt-4" flush>
             {assignments.length === 0 ? (
-              <p className="mt-2 text-sm text-zinc-500">Nobody has been assigned a course yet.</p>
+              <EmptyState>Nobody has been assigned a course yet.</EmptyState>
             ) : (
-              <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200">
+              <div className="overflow-x-auto">
                 <table className="min-w-full text-sm">
-                  <thead className="bg-white text-left text-zinc-600">
+                  <thead className="bg-zinc-50">
                     <tr>
-                      <th className="px-4 py-3 font-medium">Person</th>
-                      <th className="px-4 py-3 font-medium">Course</th>
-                      <th className="px-4 py-3 font-medium">Why</th>
-                      <th className="px-4 py-3 font-medium">Due</th>
-                      <th className="px-4 py-3 font-medium">Result</th>
-                      <th className="px-4 py-3" />
+                      <th className={th}>Person</th>
+                      <th className={th}>Course</th>
+                      <th className={th}>Why</th>
+                      <th className={th}>Due</th>
+                      <th className={th}>Result</th>
+                      <th className={th} />
                     </tr>
                   </thead>
-                  <tbody>
+                  <tbody className="divide-y divide-zinc-100">
                     {[...assignments]
                       .sort((a, b) => Number(isOverdue(b, today)) - Number(isOverdue(a, today)))
                       .map((a) => (
-                        <tr key={a.id} className="border-t border-zinc-200">
-                          <td className="px-4 py-3 text-zinc-900">{names.get(a.userId) ?? "Former member"}</td>
-                          <td className="px-4 py-3 text-zinc-700">{a.courseTitle}</td>
-                          <td className="max-w-xs px-4 py-3 text-xs text-zinc-500">
+                        <tr key={a.id} className="hover:bg-zinc-50/60">
+                          <td className="px-5 py-2.5 font-medium text-zinc-900">{names.get(a.userId) ?? "Former member"}</td>
+                          <td className="px-5 py-2.5 text-zinc-700">{a.courseTitle}</td>
+                          <td className="max-w-xs px-5 py-2.5 text-xs text-zinc-500">
                             {a.reason ?? (a.assignedBy ? `Assigned by ${a.assignedBy}` : "Self-study")}
                           </td>
-                          <td className="whitespace-nowrap px-4 py-3 text-zinc-600">{a.dueDate ? formatDay(a.dueDate) : "—"}</td>
-                          <td className="px-4 py-3">
+                          <td className="whitespace-nowrap px-5 py-2.5 text-zinc-600">{a.dueDate ? formatDay(a.dueDate) : "—"}</td>
+                          <td className="px-5 py-2.5">
                             <AssignmentStatusBadge assignment={a} today={today} />
                           </td>
-                          <td className="px-4 py-3 text-right">
+                          <td className="px-5 py-2.5 text-right">
                             <RemoveAssignmentButton id={a.id} />
                           </td>
                         </tr>
@@ -255,7 +240,7 @@ export default async function TrainingPage() {
                 </table>
               </div>
             )}
-          </section>
+          </Panel>
         </>
       )}
     </DashboardLayout>

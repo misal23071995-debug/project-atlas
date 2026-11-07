@@ -1,5 +1,7 @@
 import Link from "next/link";
 import DashboardLayout from "@/app/components/dashboard-layout";
+import { PageHeader, Panel, buttonSecondary } from "@/app/components/ui/Panel";
+import { initials } from "@/app/lib/auth/agent";
 import { requireSession } from "@/app/lib/auth/session";
 import { can } from "@/app/lib/auth/roles";
 import { getTicket } from "@/app/lib/db/tickets";
@@ -27,10 +29,8 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
   if (!ticket || !allowed) {
     return (
       <DashboardLayout>
-        <Link href="/quality" className="text-sm text-zinc-600 hover:text-zinc-800">
-          ← Quality
-        </Link>
-        <p className="mt-6 text-zinc-600">This review doesn&apos;t exist or isn&apos;t yours to see.</p>
+        <PageHeader title="Review not found" back={{ href: "/quality", label: "Quality" }} />
+        <p className="text-sm text-zinc-600">This review doesn&apos;t exist or isn&apos;t yours to see.</p>
       </DashboardLayout>
     );
   }
@@ -45,41 +45,51 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
 
   return (
     <DashboardLayout>
-      <Link href="/quality" className="text-sm text-zinc-600 hover:text-zinc-800">
-        ← Quality
-      </Link>
-      <div className="mt-2 flex flex-wrap items-end justify-between gap-2">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Review ticket #{ticket.id}</h1>
-          <p className="mt-1 text-zinc-600">
-            {ticket.subject} · agent <span className="text-zinc-800">{agentName}</span>
-          </p>
-        </div>
-        <Link href={`/tickets/${ticket.id}`} className="text-sm text-indigo-600 hover:underline">
-          Open ticket ↗
-        </Link>
-      </div>
+      <PageHeader
+        back={{ href: "/quality", label: "Quality" }}
+        title={`Review ticket #${ticket.id}`}
+        description={
+          <>
+            {ticket.subject} · agent <span className="font-medium text-zinc-700">{agentName}</span>
+          </>
+        }
+        actions={
+          <Link href={`/tickets/${ticket.id}`} className={buttonSecondary}>
+            Open ticket ↗
+          </Link>
+        }
+      />
 
-      <div className="mt-6 grid gap-6 lg:grid-cols-5">
-        <section className="rounded-xl border border-zinc-200 bg-white p-6 lg:col-span-3 shadow-sm">
-          <h2 className="mb-4 text-lg font-semibold">Conversation</h2>
-          <div className="space-y-4">
-            {ticket.conversation.map((message, index) => (
-              <div
-                key={index}
-                className={message.role === "customer" ? "rounded-lg bg-zinc-100 p-4" : "ml-8 rounded-lg bg-indigo-600/20 p-4"}
-              >
-                <p className="text-sm font-medium">
-                  {message.sender}
-                  <span className="ml-2 text-xs font-normal text-zinc-500">
-                    {message.role === "agent" ? "Agent" : "Customer"} · {formatDateTime(message.time)}
+      <div className="grid gap-4 lg:grid-cols-5">
+        <Panel title="Conversation" className="lg:col-span-3">
+          <ol className="space-y-3">
+            {ticket.conversation.map((message, index) => {
+              const agentMsg = message.role === "agent";
+              return (
+                <li key={index} className="flex gap-3">
+                  <span
+                    aria-hidden
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold ${
+                      agentMsg ? "bg-indigo-600 text-white" : "bg-zinc-200 text-zinc-700"
+                    }`}
+                  >
+                    {initials(message.sender)}
                   </span>
-                </p>
-                <p className="mt-2 whitespace-pre-line text-sm">{message.message}</p>
-              </div>
-            ))}
-          </div>
-        </section>
+                  <div className={`min-w-0 flex-1 rounded-lg border px-4 py-3 ${agentMsg ? "border-indigo-100 bg-indigo-50/40" : "border-zinc-200 bg-white"}`}>
+                    <p className="flex flex-wrap items-baseline justify-between gap-2 text-sm font-semibold text-zinc-900">
+                      <span>
+                        {message.sender}
+                        <span className="ml-2 text-xs font-normal text-zinc-500">{agentMsg ? "Agent" : "Customer"}</span>
+                      </span>
+                      <time className="text-xs font-normal text-zinc-500">{formatDateTime(message.time)}</time>
+                    </p>
+                    <p className="mt-1.5 whitespace-pre-line text-sm leading-6 text-zinc-800">{message.message}</p>
+                  </div>
+                </li>
+              );
+            })}
+          </ol>
+        </Panel>
 
         <div className="lg:col-span-2">
           {hasAgentReply ? (
@@ -90,9 +100,9 @@ export default async function ReviewPage({ params }: { params: Promise<{ ticketI
               readOnly={!isReviewer}
             />
           ) : (
-            <p className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-600 shadow-sm">
-              No agent has replied on this ticket yet, so there&apos;s nothing to score.
-            </p>
+            <Panel title="Scorecard">
+              <p className="text-sm text-zinc-600">No agent has replied on this ticket yet, so there&apos;s nothing to score.</p>
+            </Panel>
           )}
         </div>
       </div>

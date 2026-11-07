@@ -13,8 +13,8 @@ export const maxDuration = 60;
 
 function Section({ title, description, children }: { title: string; description?: React.ReactNode; children: React.ReactNode }) {
   return (
-    <section className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-semibold">{title}</h2>
+    <section className="rounded-xl border border-zinc-200 bg-white p-5 shadow-sm">
+      <h2 className="text-sm font-semibold text-zinc-900">{title}</h2>
       {description && <div className="mt-1 text-sm text-zinc-600">{description}</div>}
       <div className="mt-5">{children}</div>
     </section>
@@ -46,18 +46,18 @@ export default async function EmailSettingsPage() {
     <DashboardLayout>
       <div className="mx-auto max-w-3xl space-y-6">
         <div>
-          <Link href="/settings" className="text-sm text-zinc-600 hover:text-zinc-800">
+          <Link href="/settings" className="text-xs font-medium text-zinc-500 hover:text-zinc-800">
             ← Settings
           </Link>
-          <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Email</h1>
-          <p className="mt-1 text-zinc-600">
+          <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-900">Email</h1>
+          <p className="mt-0.5 max-w-3xl text-sm text-zinc-500">
             Customer emails become tickets in the inbox. Replies on email tickets go back to the customer by email,
             and a customer&apos;s reply lands on the same ticket.
           </p>
         </div>
 
         {!settings ? (
-          <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+          <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
             Email isn&apos;t set up yet. Run supabase/migrations/013_email.sql in the Supabase SQL Editor.
           </p>
         ) : (

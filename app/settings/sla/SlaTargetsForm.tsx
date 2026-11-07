@@ -5,7 +5,7 @@ import { formatMinutes, sortedPriorities, type SlaTargets } from "@/app/lib/sla"
 import { saveSlaTargetsAction } from "./actions";
 
 const inputClass =
-  "w-28 rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 disabled:opacity-60";
+  "w-28 rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15 disabled:opacity-60";
 
 export default function SlaTargetsForm({ targets, canEdit }: { targets: SlaTargets; canEdit: boolean }) {
   const [state, formAction, pending] = useActionState(saveSlaTargetsAction, {});
@@ -54,12 +54,12 @@ export default function SlaTargetsForm({ targets, canEdit }: { targets: SlaTarge
       {canEdit && (
         <>
           <p className="text-xs text-zinc-500">Write times like 15m, 4h, 1h 30m or 3d.</p>
-          {state.error && <p role="alert" className="text-sm text-red-600">{state.error}</p>}
-          {state.success && <p role="status" className="text-sm text-emerald-600">{state.success}</p>}
+          {state.error && <p role="alert" className="text-sm text-rose-600">{state.error}</p>}
+          {state.success && <p role="status" className="text-sm text-emerald-700">{state.success}</p>}
           <button
             type="submit"
             disabled={pending}
-            className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+            className="rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
           >
             {pending ? "Saving…" : "Save targets"}
           </button>

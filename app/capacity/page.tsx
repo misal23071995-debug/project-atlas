@@ -23,7 +23,7 @@ export default async function CapacityPage({ searchParams }: { searchParams: Pro
   if (!settings) {
     return (
       <DashboardLayout>
-        <p className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Run supabase/migrations/009_capacity.sql in the Supabase SQL Editor to turn on capacity planning.
         </p>
       </DashboardLayout>

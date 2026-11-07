@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { PageHeader, buttonPrimary, buttonSecondary } from "@/app/components/ui/Panel";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ROLE_LABELS, type Role } from "@/app/lib/auth/roles";
@@ -26,7 +27,7 @@ type Member = { id: string; name: string; role: Role };
 type Cell = { member: Member; date: string; shift: Shift | null };
 
 const inputClass =
-  "w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none focus:border-indigo-500";
+  "w-full rounded-md border border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-900 outline-none placeholder:text-zinc-400 focus:border-indigo-400 focus:ring-2 focus:ring-indigo-500/15";
 
 export default function RosterGrid({
   monday,
@@ -77,50 +78,43 @@ export default function RosterGrid({
 
   return (
     <>
-      <div className="flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">Roster</h1>
-          <p className="mt-1 text-zinc-600">
-            Week of {formatDay(monday)} – {formatDay(addDays(monday, 6))}
-          </p>
-        </div>
+      <PageHeader
+        title="Roster"
+        description={`Week of ${formatDay(monday)} – ${formatDay(addDays(monday, 6))}${canManage ? " · click any day to add or change a shift" : ""}`}
+        actions={
+          <>
+            <div className="flex overflow-hidden rounded-md border border-zinc-200 bg-white text-sm shadow-sm">
+              <Link href={`/roster?week=${addDays(monday, -7)}`} className="px-3 py-1.5 text-zinc-700 hover:bg-zinc-50">
+                ← Previous
+              </Link>
+              <Link href="/roster" className="border-x border-zinc-200 px-3 py-1.5 font-medium text-zinc-900 hover:bg-zinc-50">
+                This week
+              </Link>
+              <Link href={`/roster?week=${addDays(monday, 7)}`} className="px-3 py-1.5 text-zinc-700 hover:bg-zinc-50">
+                Next →
+              </Link>
+            </div>
+            {canManage && (
+              <button type="button" onClick={copyLastWeek} disabled={isPending} className={buttonSecondary}>
+                {isPending ? "Copying…" : "Copy last week"}
+              </button>
+            )}
+            <Link href="/roster/leave" className={buttonPrimary}>
+              Leave
+            </Link>
+          </>
+        }
+      />
 
-        <div className="flex flex-wrap items-center gap-2">
-          <Link href={`/roster?week=${addDays(monday, -7)}`} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100">
-            ← Previous
-          </Link>
-          <Link href="/roster" className="rounded-lg border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100">
-            This week
-          </Link>
-          <Link href={`/roster?week=${addDays(monday, 7)}`} className="rounded-lg border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100">
-            Next →
-          </Link>
-          {canManage && (
-            <button
-              type="button"
-              onClick={copyLastWeek}
-              disabled={isPending}
-              className="rounded-lg border border-zinc-300 px-3 py-2 text-sm hover:bg-zinc-100 disabled:opacity-60"
-            >
-              {isPending ? "Copying…" : "Copy last week"}
-            </button>
-          )}
-          <Link href="/roster/leave" className="rounded-lg bg-indigo-600 px-3 py-2 text-sm font-medium text-white hover:bg-indigo-500">
-            Leave
-          </Link>
-        </div>
-      </div>
+      {notice && <p className="mb-4 rounded-lg border border-indigo-200 bg-indigo-50 px-4 py-2.5 text-sm text-indigo-800">{notice}</p>}
 
-      {notice && <p className="mt-4 text-sm text-zinc-700">{notice}</p>}
-      {canManage && <p className="mt-4 text-xs text-zinc-500">Click any day to add or change a shift.</p>}
-
-      <div className="mt-4 overflow-x-auto rounded-xl border border-zinc-200">
+      <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white shadow-sm">
         <table className="min-w-[900px] w-full table-fixed text-sm">
-          <thead className="bg-white text-left text-zinc-600">
+          <thead className="bg-zinc-50 text-left text-xs text-zinc-500">
             <tr>
-              <th className="w-48 px-3 py-3 font-medium">Person</th>
+              <th className="w-48 px-4 py-2.5 font-medium">Person</th>
               {days.map((date) => (
-                <th key={date} className={`px-2 py-3 font-medium ${date === today ? "text-indigo-700" : ""}`}>
+                <th key={date} className={`px-2 py-2.5 font-medium ${date === today ? "text-indigo-700" : ""}`}>
                   {formatDay(date)}
                 </th>
               ))}
@@ -134,8 +128,8 @@ export default function RosterGrid({
               }, 0);
 
               return (
-                <tr key={member.id} className={`border-t border-zinc-200 ${member.id === currentUserId ? "bg-indigo-500/5" : ""}`}>
-                  <td className="px-3 py-2 align-top">
+                <tr key={member.id} className={`border-t border-zinc-100 ${member.id === currentUserId ? "bg-indigo-50/30" : ""}`}>
+                  <td className="px-4 py-2.5 align-top">
                     <p className="truncate font-medium text-zinc-900">
                       {member.name}
                       {member.id === currentUserId && <span className="ml-1 text-xs text-zinc-500">(you)</span>}
@@ -153,7 +147,7 @@ export default function RosterGrid({
                     const content = (
                       <>
                         {shift && (
-                          <div className={`rounded-md px-2 py-1 ${clash ? "bg-red-500/15 ring-1 ring-red-500/50" : "bg-indigo-500/15"}`}>
+                          <div className={`rounded-md px-2 py-1 ${clash ? "bg-rose-50 ring-1 ring-inset ring-rose-300" : "bg-indigo-50 ring-1 ring-inset ring-indigo-100"}`}>
                             <p className="font-medium text-indigo-700">{shiftLabel(shift)}</p>
                             <p className="text-[11px] text-zinc-600">
                               {formatHours(paidMinutes(shift))}
@@ -167,26 +161,26 @@ export default function RosterGrid({
                           <div
                             className={`mt-1 rounded-md px-2 py-1 text-[11px] ${
                               away.status === "approved"
-                                ? "bg-amber-500/15 text-amber-700"
-                                : "border border-dashed border-amber-500/40 text-amber-600"
+                                ? "bg-amber-50 text-amber-800 ring-1 ring-inset ring-amber-600/20"
+                                : "border border-dashed border-amber-300 text-amber-700"
                             }`}
                           >
                             {LEAVE_LABELS[away.type]}
                             {away.status === "requested" && " (requested)"}
                           </div>
                         )}
-                        {clash && <p className="mt-1 text-[11px] text-red-600">On leave: remove shift?</p>}
+                        {clash && <p className="mt-1 text-[11px] text-rose-600">On leave: remove shift?</p>}
                       </>
                     );
 
                     return (
-                      <td key={date} className={`h-20 px-1.5 py-1.5 align-top ${date === today ? "bg-indigo-500/5" : ""}`}>
+                      <td key={date} className={`h-20 px-1.5 py-1.5 align-top ${date === today ? "bg-indigo-50/40" : ""}`}>
                         {canManage ? (
                           <button
                             type="button"
                             onClick={() => setEditing({ member, date, shift })}
                             aria-label={`${shift ? "Edit" : "Add"} shift for ${member.name} on ${formatDay(date)}`}
-                            className="h-full w-full rounded-md p-0.5 text-left hover:bg-zinc-100"
+                            className="h-full w-full rounded-md p-0.5 text-left hover:bg-zinc-50"
                           >
                             {content}
                             {!shift && !away && <span className="text-xs text-zinc-300">+</span>}
@@ -201,9 +195,9 @@ export default function RosterGrid({
               );
             })}
           </tbody>
-          <tfoot className="border-t border-zinc-300 bg-white text-xs text-zinc-600">
+          <tfoot className="border-t border-zinc-200 bg-zinc-50 text-xs text-zinc-600">
             <tr>
-              <td className="px-3 py-2 font-medium">On shift</td>
+              <td className="px-4 py-2.5 font-medium">On shift</td>
               {days.map((date) => {
                 const onShift = shifts.filter((s) => s.date === date);
                 const minutes = onShift.reduce((sum, s) => sum + paidMinutes(s), 0);
@@ -286,16 +280,16 @@ function ShiftEditor({ cell, onClose, onSaved }: { cell: Cell; onClose: () => vo
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end justify-center bg-white/90 p-4 sm:items-center" onClick={onClose}>
+    <div className="fixed inset-0 z-50 flex items-end justify-center bg-zinc-900/40 p-4 backdrop-blur-[1px] sm:items-center" onClick={onClose}>
       <div
         role="dialog"
         aria-modal="true"
         aria-label={`Shift for ${cell.member.name}`}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-md space-y-4 rounded-2xl border border-zinc-200 bg-white p-6"
+        className="w-full max-w-md space-y-4 rounded-xl border border-zinc-200 bg-white p-6 shadow-xl"
       >
         <div>
-          <h2 className="text-lg font-semibold">{cell.member.name}</h2>
+          <h2 className="text-sm font-semibold text-zinc-900">{cell.member.name}</h2>
           <p className="text-sm text-zinc-600">{formatDay(cell.date)}</p>
         </div>
 
@@ -305,7 +299,7 @@ function ShiftEditor({ cell, onClose, onSaved }: { cell: Cell; onClose: () => vo
               key={template.name}
               type="button"
               onClick={() => applyTemplate(template)}
-              className="rounded-full border border-zinc-300 px-3 py-1 text-xs text-zinc-700 hover:border-indigo-500 hover:text-white"
+              className="rounded-full border border-zinc-200 px-3 py-1 text-xs text-zinc-700 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-700"
             >
               {template.name} {formatMinutes(template.start)}–{formatMinutes(template.end)}
             </button>
@@ -313,11 +307,11 @@ function ShiftEditor({ cell, onClose, onSaved }: { cell: Cell; onClose: () => vo
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             Start
             <input type="time" value={start} onChange={(e) => setStart(e.target.value)} className={`mt-1 ${inputClass}`} />
           </label>
-          <label className="text-sm text-zinc-600">
+          <label className="text-sm font-medium text-zinc-700">
             End
             <input type="time" value={end} onChange={(e) => setEnd(e.target.value)} className={`mt-1 ${inputClass}`} />
           </label>
@@ -327,7 +321,7 @@ function ShiftEditor({ cell, onClose, onSaved }: { cell: Cell; onClose: () => vo
         )}
 
         <div className="space-y-2">
-          <p className="text-sm text-zinc-600">Breaks</p>
+          <p className="text-sm font-medium text-zinc-700">Breaks</p>
           {breaks.map((b, index) => (
             <div key={index} className="flex items-center gap-2">
               <input
@@ -355,7 +349,7 @@ function ShiftEditor({ cell, onClose, onSaved }: { cell: Cell; onClose: () => vo
                 type="button"
                 aria-label="Remove break"
                 onClick={() => setBreaks((current) => current.filter((_, i) => i !== index))}
-                className="px-2 text-zinc-500 hover:text-red-600"
+                className="px-2 text-zinc-500 hover:text-rose-600"
               >
                 ✕
               </button>
@@ -372,30 +366,30 @@ function ShiftEditor({ cell, onClose, onSaved }: { cell: Cell; onClose: () => vo
           )}
         </div>
 
-        <label className="block text-sm text-zinc-600">
+        <label className="block text-sm font-medium text-zinc-700">
           Note (optional)
           <input value={note} onChange={(e) => setNote(e.target.value)} maxLength={200} placeholder="e.g. Email queue, training at 3pm" className={`mt-1 ${inputClass}`} />
         </label>
 
-        {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+        {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
 
         <div className="flex items-center justify-between gap-2">
           {cell.shift ? (
-            <button type="button" onClick={remove} disabled={isPending} className="text-sm text-red-600 hover:text-red-700 disabled:opacity-50">
+            <button type="button" onClick={remove} disabled={isPending} className="text-sm text-rose-600 hover:text-rose-700 disabled:opacity-50">
               Remove shift
             </button>
           ) : (
             <span />
           )}
           <div className="flex gap-2">
-            <button type="button" onClick={onClose} className="rounded-lg px-4 py-2 text-sm text-zinc-600 hover:text-zinc-800">
+            <button type="button" onClick={onClose} className="rounded-md px-3.5 py-2 text-sm text-zinc-600 hover:bg-zinc-100 hover:text-zinc-800">
               Cancel
             </button>
             <button
               type="button"
               onClick={save}
               disabled={isPending}
-              className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-60"
+              className="rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-60"
             >
               {isPending ? "Saving…" : "Save shift"}
             </button>

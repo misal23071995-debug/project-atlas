@@ -25,7 +25,7 @@ export default async function EditCoursePage({ params }: { params: Promise<{ id:
 
   return (
     <DashboardLayout>
-      <Link href="/training" className="text-sm text-zinc-600 hover:text-zinc-800">
+      <Link href="/training" className="text-xs font-medium text-zinc-500 hover:text-zinc-800">
         ← Training
       </Link>
       {course ? (

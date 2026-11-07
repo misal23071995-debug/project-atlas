@@ -35,9 +35,9 @@ export default function TakeCourse({
   }
 
   return (
-    <section className="mt-8 space-y-5">
+    <section className="mt-6 space-y-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h2 className="text-xl font-semibold">Quiz</h2>
+        <h2 className="text-base font-semibold text-zinc-900">Quiz</h2>
         <p className="text-sm text-zinc-500">
           {questions.length} questions · pass at {passPercent}%
         </p>
@@ -47,10 +47,10 @@ export default function TakeCourse({
         <div
           role="status"
           className={`rounded-xl border p-5 ${
-            result.passed ? "border-emerald-500/40 bg-emerald-500/10" : "border-amber-500/40 bg-amber-500/10"
+            result.passed ? "border-emerald-200 bg-emerald-50" : "border-amber-200 bg-amber-50"
           }`}
         >
-          <p className={`text-2xl font-bold ${result.passed ? "text-emerald-600" : "text-amber-700"}`}>
+          <p className={`text-2xl font-semibold ${result.passed ? "text-emerald-600" : "text-amber-700"}`}>
             {result.score}% · {result.passed ? "Passed 🎉" : "Not passed yet"}
           </p>
           <p className="mt-1 text-sm text-zinc-700">
@@ -75,12 +75,12 @@ export default function TakeCourse({
                   const isRight = graded?.answer === optionIndex;
                   const style = graded
                     ? isRight
-                      ? "border-emerald-500 bg-emerald-500/10"
+                      ? "border-emerald-400 bg-emerald-50"
                       : isChosen
-                      ? "border-red-500 bg-red-500/10"
+                      ? "border-rose-400 bg-rose-50"
                       : "border-zinc-200"
                     : isChosen
-                    ? "border-indigo-500 bg-indigo-500/10"
+                    ? "border-indigo-400 bg-indigo-50"
                     : "border-zinc-200 hover:border-zinc-300";
 
                   return (
@@ -104,7 +104,7 @@ export default function TakeCourse({
         })}
       </ol>
 
-      {error && <p role="alert" className="text-sm text-red-600">{error}</p>}
+      {error && <p role="alert" className="text-sm text-rose-600">{error}</p>}
 
       {result ? (
         <button
@@ -113,7 +113,7 @@ export default function TakeCourse({
             setResult(null);
             setChosen({});
           }}
-          className="rounded-lg border border-zinc-300 px-5 py-2 text-sm text-zinc-800 hover:bg-zinc-100"
+          className="rounded-md border border-zinc-200 bg-white shadow-sm px-5 py-2 text-sm text-zinc-800 hover:bg-zinc-50"
         >
           Try again
         </button>
@@ -122,7 +122,7 @@ export default function TakeCourse({
           type="button"
           onClick={submit}
           disabled={!allAnswered || isPending}
-          className="rounded-lg bg-indigo-600 px-5 py-2 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+          className="rounded-md bg-indigo-600 px-3.5 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-500 disabled:opacity-50"
         >
           {isPending ? "Checking…" : allAnswered ? "Submit answers" : "Answer every question to submit"}
         </button>

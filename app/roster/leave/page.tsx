@@ -20,18 +20,18 @@ export default async function LeavePage() {
 
   return (
     <DashboardLayout>
-      <Link href="/roster" className="text-sm text-zinc-600 hover:text-zinc-800">
+      <Link href="/roster" className="text-xs font-medium text-zinc-500 hover:text-zinc-800">
         ← Roster
       </Link>
-      <h1 className="mt-2 text-2xl font-semibold tracking-tight text-zinc-900">Leave</h1>
-      <p className="mt-1 text-zinc-600">
+      <h1 className="mt-1.5 text-2xl font-semibold tracking-tight text-zinc-900">Leave</h1>
+      <p className="mt-0.5 max-w-3xl text-sm text-zinc-500">
         {canManage
           ? "Approve or reject requests. Approved leave shows on the roster, and any shift on those days is flagged."
           : "Ask for time off. Your team lead approves it, and it shows on the roster."}
       </p>
 
       {leave === null ? (
-        <p className="mt-8 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-sm text-amber-700">
+        <p className="mt-8 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
           Run supabase/migrations/008_roster.sql in the Supabase SQL Editor to turn on leave requests.
         </p>
       ) : (
