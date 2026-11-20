@@ -178,6 +178,9 @@ section { display: flex; flex-direction: column; gap: 1.25rem; }
 .msg { max-width: 86%; padding: 0.65rem 0.9rem; border-radius: 14px; font-size: 0.92rem; line-height: 1.5; }
 .msg.customer { align-self: flex-end; background: var(--accent); color: var(--sheet); border-bottom-right-radius: 4px; }
 .msg.bot { align-self: flex-start; background: var(--paper); border-bottom-left-radius: 4px; }
+.msg.agent { align-self: flex-start; background: var(--sheet); border: 1px solid var(--rule); border-bottom-left-radius: 4px; }
+.msg .who { display: block; font: 500 0.72rem/1.3 var(--mono); color: var(--ok); margin-bottom: 0.2rem; }
+.handover { align-self: stretch; text-align: center; font: 400 0.72rem/1 var(--mono); color: var(--faint); }
 .chip { align-self: flex-start; font: 500 0.72rem/1 var(--mono); padding: 0.4rem 0.6rem; border-radius: 999px; }
 .chip.ok { background: var(--ok-soft); color: var(--ok); }
 .chip.warn { background: var(--warn-soft); color: var(--warn); }
@@ -228,7 +231,7 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
     <div class="hero-copy">
       <p class="eyebrow">Case study · Customer experience operations</p>
       <h1>Running support as one system</h1>
-      <p class="lede">Project Atlas is a working, multi-company support platform. It brings together what a CX lead runs every day: an AI chatbot and email, SLAs, quality checks, training, rosters, capacity and reporting. Each part feeds the next.</p>
+      <p class="lede">Project Atlas is a working, multi-company support platform. It brings together what a CX lead runs every day: an AI chatbot with live agent chat, email, SLAs, quality checks, training, rosters, capacity and reporting. Each part feeds the next.</p>
       <div class="meta">
         <a href="https://project-atlas-pied.vercel.app/support/atlas-ring">Try the customer chat</a>
         <a href="https://github.com/misal23071995-debug/project-atlas">Source on GitHub</a>
@@ -263,13 +266,14 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
   <section>
     <div class="section-head">
       <p class="eyebrow">What I built</p>
-      <h2>Eleven modules, four jobs</h2>
+      <h2>Twelve modules, four jobs</h2>
     </div>
     <div class="groups">
       <div class="group">
         <p class="group-label"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v10H8l-4 4z"/></svg>Channels</p>
         <dl>
           <div><dt>AI chatbot</dt><dd>Answers only from help articles and cites them. When it can’t help, it hands over to a person with the transcript.</dd></div>
+          <div><dt>Live chat</dt><dd>After a handover the agent replies in the same chat window, sees whether the customer is still there, and closes it with a rating.</dd></div>
           <div><dt>Email</dt><dd>Incoming emails become tickets; replies thread back and reopen them. Automatic acknowledgement and survey emails.</dd></div>
           <div><dt>Workspaces and roles</dt><dd>A private space for each company, with Admin, Team Lead, Agent and QA roles.</dd></div>
         </dl>
@@ -407,10 +411,12 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
       <div class="example">
         <div class="chat" aria-label="Example chat handed to an agent">
           <div class="msg customer">Can I swim or shower with the Atlas Ring? Is it waterproof?</div>
-          <div class="msg bot">My help articles don’t cover whether the ring is waterproof. A support agent will follow up with you by email.</div>
+          <div class="msg bot">My help articles don’t cover whether the ring is waterproof, so I’m passing you to our team. An agent will reply here.</div>
+          <span class="handover">Passed to the Atlas Ring team</span>
+          <div class="msg agent"><span class="who">Kabir Singh</span>Yes, it’s rated for swimming and showers. Just avoid saunas and hot tubs.</div>
           <span class="chip warn">Handed over · no article covers it</span>
         </div>
-        <p class="caption">Not covered: no guessing. A ticket is created and the question goes onto the gaps report.</p>
+        <p class="caption">Not covered: no guessing. An agent answers in the same chat, with the transcript on the ticket, and the question goes onto the gaps report.</p>
       </div>
     </div>
   </section>
@@ -470,10 +476,10 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
       <p class="eyebrow">Next</p>
       <h2>What I’d build next</h2>
       <ul class="plain">
-        <li><strong>Social and voice channels:</strong> Meta, X and a calling tool, feeding the same queue, SLAs and reports.</li>
-        <li><strong>Order lookup inside the bot</strong>, to remove the most common handover.</li>
-        <li><strong>Business-hours SLAs</strong> and automatic escalation rules.</li>
-        <li><strong>Invite-only sign-up</strong> for company deployments.</li>
+        <li><strong>WhatsApp, Instagram and Facebook messages</strong>, feeding the same queue, SLAs and live replies.</li>
+        <li><strong>Voice:</strong> calls through a phone provider, logged on the ticket.</li>
+        <li><strong>Business-hours SLAs</strong>, so clocks stop outside working hours.</li>
+        <li><strong>A public help centre</strong> built from the articles the bot reads.</li>
       </ul>
     </section>
   </div>

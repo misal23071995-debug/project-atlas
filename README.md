@@ -2,7 +2,7 @@
 
 Atlas is a multi-company support desk built the way a CX lead would want one. It covers the whole operation, not just the inbox:
 
-- **Channels:** an AI chatbot, email, and tickets logged by hand.
+- **Channels:** an AI chatbot that hands over to live chat with an agent, email, and tickets logged by hand.
 - **Running the team:** SLA tracking, quality checks (QC), training, rostering and capacity planning.
 - **Reporting:** dashboards and reports that tie it all together.
 
@@ -20,7 +20,8 @@ I built it around one question every support team faces: **how do you handle mor
 
 | Module | What it does |
 |---|---|
-| **AI chatbot** | Answers customers only from published help articles and shows which article it used. Hands over to a person when it can't help, with the full transcript attached. Collects a star rating after each chat. |
+| **AI chatbot** | Answers customers only from published help articles and shows which article it used. Looks up the customer's order when they give an order number that matches their email. Hands over to a person when it can't help, with the full transcript attached. Collects a star rating after each chat. |
+| **Live chat** | After a handover the chat stays open: the agent replies from the ticket and the answer appears in the customer's chat window within seconds. The ticket shows whether the customer is still in the chat and updates as they type back. Replies to a customer who has left are also emailed, and reopening the support page picks the chat up again. Solving the ticket closes the chat with a rating. |
 | **Email** | Incoming emails become tickets, and the AI fills in summary, category and sentiment. Customer replies land on the same ticket, and reopen it if it was closed. Agent replies go out by email. Customers get an automatic acknowledgement with their ticket number, and a survey link when the ticket is resolved. |
 | **Ticket desk** | Queue with search and filters, priority, status and assignment. Internal notes and a full activity log. An AI copilot that drafts replies. Saved replies with placeholders such as the customer's name and the survey link. |
 | **SLA tracking** | First-reply and resolution targets for each priority. Each ticket shows a live countdown: on track, at risk, breached, or paused while waiting on the customer. Breaches and at-risk tickets appear on the dashboard. |
@@ -54,6 +55,7 @@ Reports pull from every one of these, so a lead can see the whole loop in one pl
 |---|---|
 | The bot answers only from articles | A confident wrong answer costs more trust than "let me get a person". |
 | Every handover carries the transcript | Making customers repeat themselves is one of the most common complaints in support. |
+| A handover keeps the customer in the same chat | Being told "we'll email you" after explaining the problem feels like starting again. The agent picks up where the bot stopped. |
 | SLA due times are fixed when a ticket is created | Changing the targets later shouldn't rewrite last month's results. |
 | The SLA clock pauses on "Waiting on Customer" | Agents shouldn't be penalised for time the customer takes to reply. |
 | The AI scores QC first, a person finalises it | It's fast enough to review more conversations, and a person remains accountable for each score. The report shows how far the AI's scores differ from the final ones. |
@@ -100,7 +102,7 @@ Reports pull from every one of these, so a lead can see the whole loop in one pl
 
 ## Run it locally
 
-1. Create a free [Supabase](https://supabase.com) project. In the **SQL Editor**, run `supabase/schema.sql`, then each file in `supabase/migrations/` in order, `001` to `013`.
+1. Create a free [Supabase](https://supabase.com) project. In the **SQL Editor**, run `supabase/schema.sql`, then each file in `supabase/migrations/` in order, `001` to `019`.
 2. Get a free Gemini API key from [Google AI Studio](https://aistudio.google.com).
 3. Copy `.env.example` to `.env.local` and fill in `GEMINI_API_KEY`, `SUPABASE_URL` and `SUPABASE_SECRET_KEY`. To send real email, also fill in `RESEND_API_KEY` and `EMAIL_FROM`.
 4. Run the app:
@@ -116,10 +118,10 @@ The customer chat for a workspace is at `/support/<workspace-slug>`.
 
 ## What I'd build next
 
-- **Social and voice channels:** Meta (Facebook, Instagram, WhatsApp), X, and a calling tool, feeding the same queue and SLAs.
-- **Order lookup in the bot**, to remove the most common "needs staff" handover.
-- **Business-hours SLAs** and automatic escalation rules.
-- **Invite-only sign-up** for company deployments.
+- **WhatsApp, Instagram and Facebook messages**, feeding the same queue, SLAs and live replies.
+- **Voice:** calls through a phone provider, logged on the ticket with the recording.
+- **Business-hours SLAs**, so clocks stop outside the team's working hours.
+- **A public help centre** built from the same articles the bot reads.
 
 ---
 
