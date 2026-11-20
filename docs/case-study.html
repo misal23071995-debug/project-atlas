@@ -231,7 +231,7 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
     <div class="hero-copy">
       <p class="eyebrow">Case study · Customer experience operations</p>
       <h1>Running support as one system</h1>
-      <p class="lede">Project Atlas is a working, multi-company support platform. It brings together what a CX lead runs every day: an AI chatbot with live agent chat, email, SLAs, quality checks, training, rosters, capacity and reporting. Each part feeds the next.</p>
+      <p class="lede">Project Atlas is a working, multi-company support platform. It brings together what a CX lead runs every day: an AI chatbot with live agent chat, email, a ticket desk with automation, SLAs, quality checks, training, rosters, capacity and reporting. Each part feeds the next.</p>
       <div class="meta">
         <a href="https://project-atlas-pied.vercel.app/support/atlas-ring">Try the customer chat</a>
         <a href="https://github.com/misal23071995-debug/project-atlas">Source on GitHub</a>
@@ -266,7 +266,7 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
   <section>
     <div class="section-head">
       <p class="eyebrow">What I built</p>
-      <h2>Twelve modules, four jobs</h2>
+      <h2>Thirteen modules, four jobs</h2>
     </div>
     <div class="groups">
       <div class="group">
@@ -275,13 +275,14 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
           <div><dt>AI chatbot</dt><dd>Answers only from help articles and cites them. When it can’t help, it hands over to a person with the transcript.</dd></div>
           <div><dt>Live chat</dt><dd>After a handover the agent replies in the same chat window, sees whether the customer is still there, and closes it with a rating.</dd></div>
           <div><dt>Email</dt><dd>Incoming emails become tickets; replies thread back and reopen them. Automatic acknowledgement and survey emails.</dd></div>
-          <div><dt>Workspaces and roles</dt><dd>A private space for each company, with Admin, Team Lead, Agent and QA roles.</dd></div>
         </dl>
       </div>
       <div class="group">
         <p class="group-label"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="7"/><path d="M12 9v4l2.5 2M9 3h6"/></svg>The desk</p>
         <dl>
-          <div><dt>Ticket desk</dt><dd>Queue, assignment, notes, an AI copilot and saved replies with the customer’s details filled in.</dd></div>
+          <div><dt>Ticket desk</dt><dd>An inbox with saved views, and a three-panel workspace: properties, one timeline of messages and notes, and the customer. An AI copilot and saved replies.</dd></div>
+          <div><dt>Automation</dt><dd>Rules on new tickets, customer replies, SLA breaches and long waits. Auto-assignment only to people on shift.</dd></div>
+          <div><dt>Customer profiles</dt><dd>Every ticket, chat and order for one customer, with their orders next to each ticket and in the bot’s answers.</dd></div>
           <div><dt>SLA tracking</dt><dd>Reply and resolve targets per priority, with a live countdown that pauses while waiting on the customer.</dd></div>
           <div><dt>CSAT</dt><dd>A private survey link on every ticket, plus ratings at the end of bot chats.</dd></div>
         </dl>
@@ -435,6 +436,8 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
       <div><dt>The AI scores QC, a person finalises it</dt><dd>The AI makes it fast enough to review more conversations, and a person stays accountable for each score. The report tracks how far the AI’s scores differ from the final ones.</dd></div>
       <div><dt>Erlang C, not tickets ÷ agents</dt><dd>Queues don’t scale linearly. The standard contact-centre model shows the real headcount.</dd></div>
       <div><dt>Only the ticket’s customer can reply onto it</dt><dd>A guessed ticket number in an email subject can’t post into someone else’s case.</dd></div>
+      <div><dt>A handover keeps the customer in the chat</dt><dd>“We’ll email you” after explaining the problem feels like starting again. The agent picks up where the bot stopped.</dd></div>
+      <div><dt>Auto-assignment checks the roster</dt><dd>A ticket given to someone who is off today is a ticket nobody is working.</dd></div>
     </dl>
   </section>
 
@@ -464,12 +467,17 @@ footer { border-top: 1px solid var(--rule); padding-top: 1.5rem; font-size: 0.85
   <div class="split">
     <section>
       <p class="eyebrow">Built to be adopted</p>
-      <h2>Free to run, upgraded by configuration</h2>
+      <h2>Free to run, safe to hand to a real team</h2>
       <ul class="plain">
         <li>The AI runs on Gemini’s free tier, and moving to a paid model is a small code change.</li>
         <li>Email works end to end in demo mode. Sending real mail needs two environment variables once the company’s domain is verified.</li>
         <li>Incoming mail arrives through a private webhook for each workspace. It accepts Postmark’s format or simple JSON from any other provider.</li>
         <li>A test inbox sends pretend customer emails through the same steps as real ones.</li>
+        <li>Each company gets a private workspace with Admin, Team Lead, Agent and QA roles. Admins invite people, and public sign-up can be switched off.</li>
+        <li>Two-step sign-in, password reset and an audit log of who changed the team, settings, rules and orders.</li>
+        <li>Files stay in private storage and open through links that expire.</li>
+        <li>Rate limits on every public form, server errors saved and emailed to the team, and a health check for uptime monitors.</li>
+        <li>43 automated tests, run with a type check, lint and full build on every push before it goes live.</li>
       </ul>
     </section>
     <section>
