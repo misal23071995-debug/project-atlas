@@ -4,6 +4,7 @@ import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { listSavedReplies } from "@/app/lib/db/replies";
 import { listCustomerOrders } from "@/app/lib/db/orders";
 import { getSupabase } from "@/app/lib/db/supabase";
+import { getTicketChat } from "@/app/lib/db/livechat";
 import TicketDetailView from "./TicketDetailView";
 
 // Always read the latest conversation from the database
@@ -38,7 +39,7 @@ export default async function TicketDetailsPage({
     );
   }
 
-  const [orders, others] = await Promise.all([
+  const [orders, others, chat] = await Promise.all([
     listCustomerOrders(org.id, ticket.customer.id),
     getSupabase()
       .from("tickets")
@@ -46,12 +47,14 @@ export default async function TicketDetailsPage({
       .eq("org_id", org.id)
       .eq("customer_id", ticket.customer.id)
       .neq("id", ticket.id),
+    getTicketChat(org.id, ticket.id),
   ]);
 
   return (
     <TicketDetailView
       orders={orders}
       otherTickets={others.count ?? 0}
+      chat={chat ? { online: chat.online, left: chat.left } : null}
       ticket={ticket}
       agentNames={members.filter((m) => m.role !== "qa").map((m) => m.name)}
       savedReplies={savedReplies ?? []}

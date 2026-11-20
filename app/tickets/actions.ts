@@ -21,6 +21,7 @@ import {
 } from "@/app/lib/tickets";
 import { listMembers, requireSession } from "@/app/lib/auth/session";
 import { analyzeWithAI } from "@/app/lib/ai/service";
+import { deliverChatReply } from "@/app/lib/db/livechat";
 import { emailAgentReply, emailSurveyIfDue } from "@/app/lib/db/email";
 import { siteOrigin } from "@/app/lib/auth/origin";
 import { onTicketCreated } from "@/app/lib/db/automation";
@@ -129,10 +130,16 @@ export async function sendReplyAction(ticketId: string, message: string, uploads
   const attached = await confirmUploads(org.id, ticketId, files, messageId, agent.name);
   // On email tickets the reply also goes to the customer's inbox, with the files attached
   const email = await emailAgentReply(org.id, org.name, ticketId, messageId, text, attached);
+  // On chat tickets it shows in the customer's chat window (and is emailed if they've left)
+  const chat = email ? null : await deliverChatReply(org.id, org.name, ticketId, messageId, text);
   await addActivity(
     org.id,
     ticketId,
-    email?.status === "sent" ? `Reply emailed by ${agent.name}` : `Reply sent by ${agent.name}`,
+    email?.status === "sent" || chat?.delivery === "sent"
+      ? `Reply emailed by ${agent.name}`
+      : chat
+      ? `Reply sent in chat by ${agent.name}`
+      : `Reply sent by ${agent.name}`,
     "bg-indigo-500"
   );
 

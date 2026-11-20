@@ -88,7 +88,7 @@ function buildPrompt(
 Rules:
 - Answer ONLY with information from the help articles below. Never invent policies, prices, dates or steps.
 - Keep replies short and friendly: at most about 120 words. Use numbered steps for instructions.
-- Set needs_human to true, and say a support agent will follow up by email, when:
+- Set needs_human to true, and say you are passing them to a support agent who will reply in this chat, when:
   * the articles don't cover the question,
   * the customer asks for a person, agent or human,
   * the customer needs something only staff can do (cancel an order, change a delivery address, start a return, approve a refund or warranty claim, change a payment),
@@ -193,7 +193,7 @@ export async function askBot(
     console.error("Support bot failed, handing over:", error);
     return {
       reply:
-        "Sorry, I'm having trouble answering right now. I've passed your question to our support team, and an agent will follow up with you by email.",
+        "Sorry, I'm having trouble answering right now. I've passed your question to our support team, and an agent will reply in this chat.",
       needsHuman: true,
       handoffReason: "The AI assistant was unavailable.",
       handoffType: "unavailable",

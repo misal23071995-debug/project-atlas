@@ -12,7 +12,7 @@ type Item =
   | { kind: "event"; at: string; activity: TicketActivity };
 
 // These repeat something the stream already shows
-const REDUNDANT = /^(Reply (sent|emailed) by|Note added by)/;
+const REDUNDANT = /^(Reply (sent|emailed)( in chat)? by|Note added by)/;
 
 function Avatar({ name, agent }: { name: string; agent: boolean }) {
   return (
@@ -29,6 +29,13 @@ function Avatar({ name, agent }: { name: string; agent: boolean }) {
 
 function Delivery({ message }: { message: ConversationMessage }) {
   if (message.delivery === "sent") return <span className="text-emerald-700">Emailed</span>;
+  if (message.delivery === "chat") {
+    return (
+      <span className={message.deliveryNote ? "text-amber-700" : "text-emerald-700"} title={message.deliveryNote ?? undefined}>
+        {message.deliveryNote ? "In chat · customer away" : "Sent in chat"}
+      </span>
+    );
+  }
   if (message.delivery === "failed") return <span className="text-rose-700">Email failed: {message.deliveryNote ?? "unknown error"}</span>;
   if (message.delivery === "not_sent") {
     return (

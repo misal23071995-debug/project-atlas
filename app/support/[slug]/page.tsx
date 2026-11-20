@@ -32,7 +32,7 @@ export default async function SupportPage({ params }: Props) {
     <main className="flex min-h-screen flex-col items-center bg-zinc-50 px-4 py-8 font-sans text-zinc-900">
       <div className="flex w-full max-w-xl flex-1 flex-col">
         <header className="mb-6 flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-lg font-semibold">
+          <div className="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-lg font-semibold text-white">
             {workspace.name[0]?.toUpperCase()}
           </div>
           <div>

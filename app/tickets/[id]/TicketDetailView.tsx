@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore, useTransition } from "react";
 import DashboardLayout from "@/app/components/dashboard-layout";
 import { useAgent, useCan } from "@/app/components/AgentProvider";
@@ -35,8 +36,11 @@ export default function TicketDetailView({
   savedReplies,
   orders,
   otherTickets,
+  chat,
 }: {
   ticket: TicketDetail;
+  // Set when the ticket came from the chat window: whether the customer still has it open
+  chat: { online: boolean; left: boolean } | null;
   agentNames: string[];
   savedReplies: SavedReply[];
   // Null until orders are set up
@@ -57,6 +61,17 @@ export default function TicketDetailView({
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
   const stream = useRef<HTMLDivElement>(null);
+
+  // A chat that's still going refreshes every few seconds, so the customer's messages appear as they type them
+  const router = useRouter();
+  const liveChat = !!chat && ticket.status !== "Resolved" && ticket.status !== "Closed";
+  useEffect(() => {
+    if (!liveChat) return;
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible") router.refresh();
+    }, 4000);
+    return () => window.clearInterval(timer);
+  }, [liveChat, router]);
 
   // Newest at the bottom, like an email thread: open scrolled to the latest
   const size = ticket.conversation.length + ticket.notes.length;
@@ -140,6 +155,16 @@ export default function TicketDetailView({
                 {ticket.customer.name} via {ticket.channel}
               </span>
               <span>· Opened {formatDateTime(ticket.createdAt)}</span>
+              {liveChat && chat && (
+                <span
+                  className={`inline-flex items-center gap-1.5 rounded-md px-2 py-0.5 font-medium ring-1 ring-inset ${
+                    chat.online ? "bg-emerald-50 text-emerald-700 ring-emerald-600/20" : "bg-zinc-50 text-zinc-600 ring-zinc-500/20"
+                  }`}
+                >
+                  <span className={`h-1.5 w-1.5 rounded-full ${chat.online ? "animate-pulse bg-emerald-500" : "bg-zinc-400"}`} aria-hidden />
+                  {chat.online ? "Customer is in the chat" : chat.left ? "Customer ended the chat" : "Customer has left the chat"}
+                </span>
+              )}
             </div>
           </div>
           {canReview && ticket.conversation.some((m) => m.role === "agent") && (
@@ -172,7 +197,15 @@ export default function TicketDetailView({
               value={mode === "note" ? note : reply}
               onChange={mode === "note" ? setNote : setReply}
               canReply={canWork}
-              replyTo={ticket.channel === "Email" ? `Email to ${ticket.customer.email}` : `Reply to ${ticket.customer.name}`}
+              replyTo={
+                ticket.channel === "Email"
+                  ? `Email to ${ticket.customer.email}`
+                  : liveChat && chat
+                  ? chat.online
+                    ? `Live chat with ${ticket.customer.name}`
+                    : `Chat with ${ticket.customer.name} · away right now`
+                  : `Reply to ${ticket.customer.name}`
+              }
               savedReplies={savedReplies}
               placeholders={{
                 customer_first_name: ticket.customer.name.split(" ")[0],

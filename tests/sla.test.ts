@@ -3,6 +3,7 @@ import {
   DEFAULT_SLA_TARGETS,
   clockLabel,
   currentClock,
+  formatMinutes,
   dueTimes,
   firstResponseClock,
   isAtRisk,
@@ -73,5 +74,14 @@ describe("SLA clocks", () => {
     expect(parseDuration("3d")).toBe(4320);
     expect(parseDuration("90")).toBe(90);
     expect(parseDuration("4 hours")).toBeNull();
+  });
+});
+
+describe("formatMinutes", () => {
+  it("rounds before splitting into hours, so it never shows 60m", () => {
+    expect(formatMinutes(239.6)).toBe("4h");
+    expect(formatMinutes(-59.7)).toBe("1h");
+    expect(formatMinutes(125)).toBe("2h 5m");
+    expect(formatMinutes(0.4)).toBe("< 1m");
   });
 });

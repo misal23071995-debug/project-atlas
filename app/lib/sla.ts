@@ -128,9 +128,11 @@ export function isAtRisk(ticket: TicketSla, now: number) {
 }
 
 export function formatMinutes(minutes: number) {
-  const m = Math.abs(minutes);
-  if (m < 1) return "< 1m";
-  if (m < 60) return `${Math.round(m)}m`;
+  const exact = Math.abs(minutes);
+  if (exact < 1) return "< 1m";
+  // Round first, so 239.6 minutes reads "4h", not "3h 60m"
+  const m = Math.round(exact);
+  if (m < 60) return `${m}m`;
   if (m < 24 * 60) {
     const rest = Math.round(m % 60);
     return rest ? `${Math.floor(m / 60)}h ${rest}m` : `${Math.floor(m / 60)}h`;

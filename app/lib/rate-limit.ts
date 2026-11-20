@@ -11,6 +11,9 @@ export const LIMITS = {
   // Customer chat: new chats per visitor per hour, and messages per visitor per 10 minutes
   chatStart: { limit: 10, windowSeconds: 3600 },
   chatMessage: { limit: 40, windowSeconds: 600 },
+  // Live chat with an agent: messages sent, and checks for new messages (every 3 seconds while open)
+  liveMessage: { limit: 120, windowSeconds: 600 },
+  livePoll: { limit: 500, windowSeconds: 600 },
   // Satisfaction survey submissions per visitor per hour
   survey: { limit: 30, windowSeconds: 3600 },
   // New workspaces per visitor per hour
